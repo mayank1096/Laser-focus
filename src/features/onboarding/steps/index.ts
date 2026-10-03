@@ -25,12 +25,12 @@ export interface StepDefinition {
 }
 
 const art = {
-  standing: require('../../../assets/images/warrior-standing.png'),
-  arrows: require('../../../assets/images/warrior-arrows.png'),
-  drawingBow: require('../../../assets/images/warrior-drawing-bow.png'),
-  kneeling: require('../../../assets/images/warrior-kneeling.png'),
-  bowShoulders: require('../../../assets/images/warrior-bow-shoulders.png'),
-  antiGoal: require('../../../assets/images/warrior-antigoal.png'),
+  standing: require('../../../assets/images/warrior-standing.jpg'),
+  arrows: require('../../../assets/images/warrior-arrows.jpg'),
+  drawingBow: require('../../../assets/images/warrior-drawing-bow.jpg'),
+  kneeling: require('../../../assets/images/warrior-kneeling.jpg'),
+  bowShoulders: require('../../../assets/images/warrior-bow-shoulders.jpg'),
+  antiGoal: require('../../../assets/images/warrior-antigoal.jpg'),
 };
 
 /** The goal-setup flow, in order. The progress bar has one segment per step. */

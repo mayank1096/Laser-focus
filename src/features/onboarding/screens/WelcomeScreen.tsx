@@ -8,7 +8,7 @@ import { colors, layout, motion, spacing, typography } from '../../../theme';
 import { rise } from '../components/QuestionHeader';
 
 const logo = require('../../../assets/images/logo.png');
-const hero = require('../../../assets/images/welcome-hero.png');
+const hero = require('../../../assets/images/welcome-hero.jpg');
 
 /** Figma geometry for the hero (402pt-wide frame). */
 const HERO = { height: 536, bottom: 92, fadeHeight: 299 };
