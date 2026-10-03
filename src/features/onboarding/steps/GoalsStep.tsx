@@ -29,6 +29,7 @@ export function GoalsStep() {
           items={goals}
           onChange={handleChange}
           max={LIMITS.goals.max}
+          min={LIMITS.goals.min}
           addLabel="Add a new Goal"
           placeholder="Clear CA Foundation"
           idPrefix="goal"

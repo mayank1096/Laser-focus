@@ -61,6 +61,12 @@ describe('goal setup flow', () => {
       'What do you want said about you when you die?',
     );
     await addLine(tree, 'values-list', 'I never wasted a single day');
+    await addLine(tree, 'values-list', 'I reached my full potential');
+    // Two of three lines: still locked, and the list says how many remain.
+    expect(textContent(tree)).toContain('1 more to go');
+    await press(tree, 'next-button');
+    expect(useGoalSetup.getState().stepId).toBe('values');
+    await addLine(tree, 'values-list', 'I leave with no regrets');
     await press(tree, 'next-button');
 
     // 2. Goals
@@ -91,8 +97,9 @@ describe('goal setup flow', () => {
     expect(textContent(tree)).toContain('How many full-length mock tests?');
     await press(tree, 'next-button');
 
-    // 7. Deadline
+    // 7. Deadline, with the pace it implies
     expect(textContent(tree)).toContain('1 year 4 months');
+    expect(textContent(tree)).toContain('full-length mock tests a month');
     await press(tree, 'next-button');
 
     // 8. Milestones are pre-filled from the count
@@ -102,14 +109,46 @@ describe('goal setup flow', () => {
     // 9. Anti-goal
     expect(textContent(tree)).toContain('Write the regrets');
     await addLine(tree, 'antigoals-list', 'Papa ki mehnat waste jaygi');
+    await addLine(tree, 'antigoals-list', 'Batch ke saare log aage nikal gaye');
+    await addLine(
+      tree,
+      'antigoals-list',
+      'Five minutes of scrolling became five years',
+    );
     await press(tree, 'next-button');
 
     expect(textContent(tree)).toContain('Your sheets are written');
+    expect(useGoalSetup.getState().completed).toBe(true);
     expect(useGoalSetup.getState().toPlan()).toMatchObject({
       action: 'Attempt a full-length mock test',
       workShape: 'repeated',
       targetCount: 24,
       deadlineMonths: 16,
     });
+  });
+
+  it('skips the Magic Circle for a single goal and steps back', async () => {
+    useGoalSetup.setState({
+      values: [
+        { id: 'v1', text: 'a' },
+        { id: 'v2', text: 'b' },
+        { id: 'v3', text: 'c' },
+      ],
+      stepId: 'goals',
+    });
+    let tree!: ReactTestRenderer;
+    await act(async () => {
+      tree = create(<App />);
+    });
+    // Resumes on the saved question.
+    expect(textContent(tree)).toContain('Write your long-term goals');
+    await addLine(tree, 'goals-list', 'Clear CA Foundation');
+    await press(tree, 'next-button');
+    expect(textContent(tree)).toContain('You cannot control the result');
+
+    await press(tree, 'back-button');
+    expect(textContent(tree)).toContain('Write your long-term goals');
+    await press(tree, 'back-button');
+    expect(textContent(tree)).toContain('What do you want said about you');
   });
 });

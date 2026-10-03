@@ -7,30 +7,32 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
+import Check from '../assets/icons/check.svg';
 import { colors, layout, motion, radii, spacing, typography } from '../theme';
 import { haptics } from '../utils/haptics';
+import { useSurface } from './Surface';
 
 export interface OptionCardProps {
   title: string;
   description?: string;
   selected: boolean;
   onPress: () => void;
-  /**
-   * - `fill`: selected card turns solid saffron (Magic Circle).
-   * - `outline`: selected card gets a saffron border, others dim (work shape).
-   */
-  variant?: 'fill' | 'outline';
   testID?: string;
 }
 
+/**
+ * A selectable card. The chosen card gets a saffron outline, a faint wash
+ * and a check — never a solid fill, so it can't be mistaken for a button.
+ * Unchosen cards with a description dim, so the choice reads at a glance.
+ */
 export function OptionCard({
   title,
   description,
   selected,
   onPress,
-  variant = 'fill',
   testID,
 }: OptionCardProps) {
+  const surface = useSurface();
   const active = useSharedValue(selected ? 1 : 0);
   const scale = useSharedValue(1);
 
@@ -45,14 +47,6 @@ export function OptionCard({
   }, [selected, active, scale]);
 
   const cardStyle = useAnimatedStyle(() => ({
-    backgroundColor:
-      variant === 'fill'
-        ? interpolateColor(
-            active.value,
-            [0, 1],
-            ['rgba(250,140,34,0)', colors.saffron],
-          )
-        : 'transparent',
     borderColor: interpolateColor(
       active.value,
       [0, 1],
@@ -60,18 +54,14 @@ export function OptionCard({
     ),
     transform: [{ scale: scale.value }],
   }));
-
-  const textStyle = useAnimatedStyle(() =>
-    variant === 'fill'
-      ? {
-          color: interpolateColor(
-            active.value,
-            [0, 1],
-            [colors.ink, colors.white],
-          ),
-        }
-      : { opacity: 0.5 + active.value * 0.5 },
-  );
+  const washStyle = useAnimatedStyle(() => ({ opacity: active.value }));
+  const checkStyle = useAnimatedStyle(() => ({
+    opacity: active.value,
+    transform: [{ scale: 0.6 + active.value * 0.4 }],
+  }));
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: description ? 0.5 + active.value * 0.5 : 1,
+  }));
 
   return (
     <Pressable
@@ -92,32 +82,35 @@ export function OptionCard({
       }}
     >
       <Animated.View
-        style={[
-          styles.card,
-          variant === 'outline' ? styles.outline : styles.fill,
-          cardStyle,
-        ]}
+        style={[styles.card, { backgroundColor: surface }, cardStyle]}
       >
-        {variant === 'fill' ? (
-          <Animated.Text
-            style={[
-              selected ? typography.bodyBold : typography.body,
-              styles.centered,
-              textStyle,
-            ]}
-          >
-            {title}
-          </Animated.Text>
-        ) : (
-          <Animated.View style={[styles.stack, textStyle]}>
-            <Animated.Text style={typography.cardTitle}>{title}</Animated.Text>
-            {description ? (
+        <Animated.View pointerEvents="none" style={[styles.wash, washStyle]} />
+        <Animated.View style={[styles.content, contentStyle]}>
+          {description ? (
+            <>
+              <Animated.Text style={typography.cardTitle}>
+                {title}
+              </Animated.Text>
               <Animated.Text style={typography.micro}>
                 {description}
               </Animated.Text>
-            ) : null}
-          </Animated.View>
-        )}
+            </>
+          ) : (
+            <Animated.Text
+              style={selected ? typography.bodyBold : typography.body}
+            >
+              {title}
+            </Animated.Text>
+          )}
+        </Animated.View>
+        <Animated.View style={[styles.check, checkStyle]}>
+          <Check
+            width={16}
+            height={16}
+            color={colors.saffron}
+            strokeWidth={2.25}
+          />
+        </Animated.View>
       </Animated.View>
     </Pressable>
   );
@@ -136,23 +129,25 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   card: {
+    minHeight: layout.fieldHeight,
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: radii.field,
     borderWidth: 1,
-    paddingHorizontal: 10,
+    paddingLeft: 14,
+    paddingRight: 12,
     paddingVertical: 14,
+    overflow: 'hidden',
   },
-  fill: {
-    minHeight: layout.fieldHeight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  wash: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(250, 140, 34, 0.08)',
   },
-  outline: {
-    justifyContent: 'center',
-  },
-  stack: {
+  content: {
+    flex: 1,
     gap: spacing.sm,
   },
-  centered: {
-    textAlign: 'center',
+  check: {
+    marginLeft: spacing.md,
   },
 });

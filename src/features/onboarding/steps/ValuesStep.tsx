@@ -20,6 +20,7 @@ export function ValuesStep() {
           items={values}
           onChange={setValues}
           max={LIMITS.values.max}
+          min={LIMITS.values.min}
           addLabel="Add a new Value"
           placeholder="I never wasted a single day"
           idPrefix="value"

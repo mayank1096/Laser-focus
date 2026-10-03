@@ -18,7 +18,6 @@ export function WorkShapeStep() {
         <OptionList>
           <OptionCard
             testID="shape-repeated"
-            variant="outline"
             title="Same thing, many times"
             description="Mock tests. Videos published. Gym sessions. Practice hours. Cold emails sent."
             selected={workShape === 'repeated'}
@@ -26,7 +25,6 @@ export function WorkShapeStep() {
           />
           <OptionCard
             testID="shape-stages"
-            variant="outline"
             title="Different work in stages"
             description="Launch a brand. Get a job. Finish a syllabus. Ship a product."
             selected={workShape === 'stages'}

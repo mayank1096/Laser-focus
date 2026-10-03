@@ -1,3 +1,4 @@
+import { paceFor } from '../src/utils/pace';
 import { countableNoun } from '../src/utils/text';
 import {
   distributeDueMonths,
@@ -52,5 +53,19 @@ describe('distributeDueMonths', () => {
 
   it('labels months', () => {
     expect(shortMonthLabel('2027-02')).toBe('Feb');
+  });
+});
+
+describe('paceFor', () => {
+  it('describes a comfortable pace', () => {
+    expect(paceFor(24, 16, 'mock tests')).toEqual({
+      label: 'About 1.5 mock tests a month',
+      warning: null,
+    });
+  });
+
+  it('warns when the pace is not believable', () => {
+    expect(paceFor(500, 1, 'mock tests').warning).toMatch(/two a day/);
+    expect(paceFor(3, 12, 'books').warning).toMatch(/Raise the bar/);
   });
 });

@@ -41,7 +41,11 @@ export function SetupCompleteScreen({
       >
         <PrimaryButton
           label="Review my sheets"
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            // Back into the questions; finishing them again completes setup.
+            useGoalSetup.setState({ completed: false });
+            navigation.navigate('GoalSetup');
+          }}
         />
       </View>
     </View>

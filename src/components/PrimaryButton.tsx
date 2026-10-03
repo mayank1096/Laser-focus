@@ -27,7 +27,7 @@ export interface PrimaryButtonProps {
 }
 
 const SHADOWS: Record<Exclude<ShadowTone, 'none'>, string> = {
-  ember: `0px 13px 17px ${colors.ember}`,
+  ember: `0px 13px 17px ${colors.buttonShadow}`,
   dark: '0px 13px 17px rgba(0, 0, 0, 0.4)',
 };
 

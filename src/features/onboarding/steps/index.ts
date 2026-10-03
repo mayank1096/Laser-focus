@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 import type { ImageSourcePropType } from 'react-native';
-import { useGoalSetup } from '../store';
+import { LIMITS, useGoalSetup } from '../store';
 import { ActionStep } from './ActionStep';
 import { AntiGoalStep } from './AntiGoalStep';
 import { CountStep } from './CountStep';
@@ -39,7 +39,7 @@ export const STEPS: StepDefinition[] = [
     id: 'values',
     Component: ValuesStep,
     art: art.standing,
-    canContinue: d => d.values.length > 0,
+    canContinue: d => d.values.length >= LIMITS.values.min,
   },
   {
     id: 'goals',
@@ -52,6 +52,8 @@ export const STEPS: StepDefinition[] = [
     Component: MagicCircleStep,
     art: art.drawingBow,
     canContinue: d => d.goals.some(g => g.isPrimary),
+    // With one goal there is nothing to choose.
+    skip: d => d.goals.length <= 1,
   },
   {
     id: 'action',
@@ -89,7 +91,7 @@ export const STEPS: StepDefinition[] = [
     id: 'antiGoal',
     Component: AntiGoalStep,
     art: art.antiGoal,
-    canContinue: d => d.antiGoals.length > 0,
+    canContinue: d => d.antiGoals.length >= LIMITS.antiGoals.min,
     tone: 'blush',
   },
 ];

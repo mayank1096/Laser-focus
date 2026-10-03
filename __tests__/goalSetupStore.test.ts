@@ -94,3 +94,22 @@ describe('suggestBatchMilestones', () => {
     ]);
   });
 });
+
+describe('milestone months', () => {
+  it('keeps a month the user picked when the deadline changes', () => {
+    store().setMilestones([
+      { id: 'm1', text: 'One' },
+      { id: 'm2', text: 'Two' },
+    ]);
+    store().cycleMilestoneMonth('m1');
+    const picked = store().milestones[0].dueMonth;
+    store().setDeadlineMonths(40);
+    expect(store().milestones[0].dueMonth).toBe(picked);
+    expect(store().milestones[0].monthPinned).toBe(true);
+  });
+});
+
+it('skips the Magic Circle when there is one goal', () => {
+  store().setGoals([{ id: 'g1', text: 'A', isPrimary: false }]);
+  expect(nextStepIndex(indexOf('goals'), store())).toBe(indexOf('action'));
+});

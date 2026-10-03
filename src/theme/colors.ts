@@ -6,7 +6,9 @@ export const colors = {
   saffron: '#FA8C22',
   saffronGlow: 'rgba(250, 140, 34, 0.75)',
   /** Warm shadow under primary buttons on light screens. */
-  ember: '#E2AE7A',
+  buttonShadow: '#E2AE7A',
+  /** Deep orange: the session hero glow and gentle warnings. */
+  ember: '#E25E00',
 
   ink: '#000000',
   charcoal: '#1A1A1A',

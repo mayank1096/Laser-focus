@@ -12,6 +12,7 @@ export function AntiGoalStep() {
       <QuestionHeader
         eyebrow="Anti-goal"
         title="Write the regrets. Be cruel. This is the sheet you read when you do not feel like working."
+        subtitle="At least three. The course asks for ten."
       />
       <QuestionBody>
         <ListField
@@ -19,6 +20,7 @@ export function AntiGoalStep() {
           items={antiGoals}
           onChange={setAntiGoals}
           max={LIMITS.antiGoals.max}
+          min={LIMITS.antiGoals.min}
           addLabel="Add a new Antigoal"
           placeholder="Batch ke saare log aage nikal gaye"
           idPrefix="antigoal"

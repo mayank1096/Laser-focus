@@ -36,6 +36,8 @@ export type WorkShape = 'repeated' | 'stages';
 export interface Milestone extends SheetLine {
   /** Target month as an ISO `YYYY-MM` string. */
   dueMonth: string;
+  /** True once the user picked the month; otherwise it follows the deadline. */
+  monthPinned?: boolean;
 }
 
 /** Everything collected by the goal-setup onboarding. */

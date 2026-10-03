@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { ListField } from '../../../components/ListField';
 import { colors, motion, radii, typography } from '../../../theme';
+import { haptics } from '../../../utils/haptics';
 import { countableNoun } from '../../../utils/text';
 import { shortMonthLabel } from '../../../utils/time';
 import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
@@ -14,6 +15,7 @@ export function MilestonesStep() {
   const workShape = useGoalSetup(s => s.workShape);
   const action = useGoalSetup(s => s.action);
   const targetCount = useGoalSetup(s => s.targetCount);
+  const cycleMonth = useGoalSetup(s => s.cycleMilestoneMonth);
 
   // For repeated work, start with the count split into batches; the user can
   // edit or delete them like any other line.
@@ -38,11 +40,15 @@ export function MilestonesStep() {
           items={milestones}
           onChange={setMilestones}
           max={LIMITS.milestones.max}
+          min={LIMITS.milestones.min}
           addLabel="Add a new Milestone"
           placeholder="Finish the first 10 mock tests"
           idPrefix="milestone"
-          renderTrailing={(_, index) => (
-            <MonthChip month={milestones[index]?.dueMonth} />
+          renderTrailing={(item, index) => (
+            <MonthChip
+              month={milestones[index]?.dueMonth}
+              onPress={() => cycleMonth(item.id)}
+            />
           )}
         />
       </QuestionBody>
@@ -50,10 +56,26 @@ export function MilestonesStep() {
   );
 }
 
-function MonthChip({ month }: { month?: string }) {
+/** Shows the milestone's month; tapping moves it on by one month. */
+function MonthChip({
+  month,
+  onPress,
+}: {
+  month?: string;
+  onPress: () => void;
+}) {
   const label = month ? shortMonthLabel(month) : '';
   return (
-    <View style={styles.chip}>
+    <Pressable
+      style={styles.chip}
+      onPress={() => {
+        haptics.selection();
+        onPress();
+      }}
+      accessibilityRole="button"
+      accessibilityLabel={`Due ${label}. Tap to change the month.`}
+      hitSlop={4}
+    >
       <Animated.Text
         key={label}
         entering={FadeIn.duration(motion.base)}
@@ -62,7 +84,7 @@ function MonthChip({ month }: { month?: string }) {
       >
         {label}
       </Animated.Text>
-    </View>
+    </Pressable>
   );
 }
 

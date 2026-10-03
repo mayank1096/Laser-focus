@@ -17,7 +17,11 @@ export function CountStep() {
       <QuestionHeader
         minHeight={spacing.pickerHeader}
         eyebrow="How many"
-        title={`How many ${noun}?`}
+        title={
+          noun === 'times'
+            ? 'How many times will you do it?'
+            : `How many ${noun}?`
+        }
         subtitle="Enough that you cannot fail."
       />
       <QuestionBody>
