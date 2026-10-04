@@ -1,6 +1,9 @@
 import React from 'react';
 import { ListField } from '../../../components/ListField';
-import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
+import {
+  QuestionBody,
+  QuestionHeader,
+} from '../../../components/QuestionHeader';
 import { LIMITS, useGoalSetup } from '../store';
 
 export function ValuesStep() {

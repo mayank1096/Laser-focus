@@ -127,9 +127,53 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.hairline,
   },
+  outline: {
+    backgroundColor: colors.white,
+    borderColor: colors.border,
+  },
+  outlineLabel: {
+    color: colors.ink,
+  },
   shadow: {
     ...StyleSheet.absoluteFill,
     borderRadius: radii.button,
     backgroundColor: colors.charcoal,
   },
 });
+
+/** The quieter choice beside a primary button: outlined, no shadow. */
+export function OutlineButton({
+  label,
+  onPress,
+  style,
+  testID,
+}: Omit<PrimaryButtonProps, 'disabled' | 'shadow'>) {
+  const scale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Pressable
+      testID={testID}
+      style={style}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      onPress={() => {
+        haptics.tap();
+        onPress();
+      }}
+      onPressIn={() => {
+        scale.value = withSpring(0.97, motion.pressSpring);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, motion.pressSpring);
+      }}
+    >
+      <Animated.View style={[styles.button, styles.outline, pressStyle]}>
+        <Animated.Text style={[typography.button, styles.outlineLabel]}>
+          {label}
+        </Animated.Text>
+      </Animated.View>
+    </Pressable>
+  );
+}

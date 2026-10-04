@@ -16,6 +16,15 @@ export const colors = {
 
   /** Background of the Anti-goal sheet. */
   blush: '#FFE8E8',
+  /** Lines and tags on a blush screen. */
+  blushDeep: '#FFDBDB',
+  /** Warm off-white behind sheets and the Tasks tab. */
+  parchment: '#FFF7F1',
+  /** Quiet grey fill for tags and secondary cards. */
+  stone: '#F7F5F4',
+  /** Selected chips and nudges: saffron at a whisper. */
+  saffronWash: '#FFF6ED',
+  saffronLine: 'rgba(250, 140, 34, 0.2)',
   /** Transparent start of the welcome hero fade. */
   sandClear: 'rgba(247, 244, 242, 0)',
 
@@ -25,9 +34,11 @@ export const colors = {
 
   border: 'rgba(0, 0, 0, 0.2)',
   hairline: 'rgba(0, 0, 0, 0.1)',
+  divider: 'rgba(0, 0, 0, 0.06)',
   track: 'rgba(0, 0, 0, 0.1)',
   tick: 'rgba(0, 0, 0, 0.3)',
   chip: 'rgba(0, 0, 0, 0.04)',
+  scrim: 'rgba(18, 13, 10, 0.4)',
 
   /** Solid so a locked button still reads on top of the illustrations. */
   buttonDisabled: '#D9D5D2',

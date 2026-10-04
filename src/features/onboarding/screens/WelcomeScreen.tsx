@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../../../components/PrimaryButton';
 import type { RootScreenProps } from '../../../navigation/types';
 import { colors, layout, motion, spacing, typography } from '../../../theme';
-import { rise } from '../components/QuestionHeader';
+import { rise } from '../../../components/QuestionHeader';
 
 const logo = require('../../../assets/images/logo.png');
 const hero = require('../../../assets/images/welcome-hero.jpg');

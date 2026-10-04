@@ -6,7 +6,10 @@ import { colors, motion, radii, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { countableNoun } from '../../../utils/text';
 import { shortMonthLabel } from '../../../utils/time';
-import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
+import {
+  QuestionBody,
+  QuestionHeader,
+} from '../../../components/QuestionHeader';
 import { LIMITS, suggestBatchMilestones, useGoalSetup } from '../store';
 
 export function MilestonesStep() {

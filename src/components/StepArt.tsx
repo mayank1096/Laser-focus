@@ -11,7 +11,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { layout, motion } from '../../../theme';
+import { layout, motion } from '../theme';
 
 /** Size of the illustration in the 402pt-wide Figma frames. */
 const DESIGN_SIZE = 557;

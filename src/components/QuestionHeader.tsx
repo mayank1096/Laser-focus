@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { motion, spacing, typography } from '../../../theme';
+import { motion, spacing, typography } from '../theme';
 
 /** Each line of a question rises in slightly after the one above it. */
 export const rise = (order: number) =>

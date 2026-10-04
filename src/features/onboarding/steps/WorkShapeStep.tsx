@@ -1,6 +1,9 @@
 import React from 'react';
 import { OptionCard, OptionList } from '../../../components/OptionCard';
-import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
+import {
+  QuestionBody,
+  QuestionHeader,
+} from '../../../components/QuestionHeader';
 import { useGoalSetup } from '../store';
 
 export function WorkShapeStep() {

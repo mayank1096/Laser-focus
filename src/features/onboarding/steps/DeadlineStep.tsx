@@ -7,7 +7,10 @@ import { colors, motion, spacing } from '../../../theme';
 import { paceFor } from '../../../utils/pace';
 import { countableNoun } from '../../../utils/text';
 import { formatDuration } from '../../../utils/time';
-import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
+import {
+  QuestionBody,
+  QuestionHeader,
+} from '../../../components/QuestionHeader';
 import { LIMITS, useGoalSetup } from '../store';
 
 export function DeadlineStep() {

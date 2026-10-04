@@ -13,7 +13,7 @@ import {
   QuestionBody,
   QuestionHeader,
   rise,
-} from '../components/QuestionHeader';
+} from '../../../components/QuestionHeader';
 import { useGoalSetup } from '../store';
 
 const EXAMPLES: { text: string; good: boolean }[] = [

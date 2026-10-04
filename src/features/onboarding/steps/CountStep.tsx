@@ -3,7 +3,10 @@ import { StyleSheet, View } from 'react-native';
 import { RulerPicker } from '../../../components/RulerPicker';
 import { spacing } from '../../../theme';
 import { countableNoun } from '../../../utils/text';
-import { QuestionBody, QuestionHeader } from '../components/QuestionHeader';
+import {
+  QuestionBody,
+  QuestionHeader,
+} from '../../../components/QuestionHeader';
 import { LIMITS, useGoalSetup } from '../store';
 
 export function CountStep() {

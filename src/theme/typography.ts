@@ -40,6 +40,13 @@ export const typography = {
     letterSpacing: tight(20),
     color: colors.saffron,
   }),
+  heading: style({
+    fontFamily: fonts.serif,
+    fontSize: 20,
+    lineHeight: 20 * 1.2,
+    letterSpacing: tight(20),
+    color: colors.ink,
+  }),
   button: style({
     fontFamily: fonts.serif,
     fontSize: 16,
@@ -81,6 +88,13 @@ export const typography = {
     fontSize: 14,
     lineHeight: 14 * 1.3,
     letterSpacing: tight(14),
+    color: colors.ink,
+  }),
+  label: style({
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    lineHeight: 12 * 1.3,
+    letterSpacing: tight(12),
     color: colors.ink,
   }),
   caption: style({
