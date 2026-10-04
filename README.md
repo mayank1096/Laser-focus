@@ -14,9 +14,11 @@ plugged in behind typed interfaces, so they can be built without touching the UI
 | Welcome screen | Done |
 | Goal setup — 9 questions (Values → Anti-goal) | Done |
 | Planning — week setup, Tasks tab, plan tomorrow, session sheet, seal, Sacrifice, morning gate (Figma row 6) | Done |
-| Account & goal switching (Figma row 5) | Designed, not built |
-| Path & Pratigya onboarding (Figma 3.01–3.07) | Designed, not built |
-| Session itself, Home, Action Book, Account (Figma rows 2 and 4) | Designed, not built — simple stand-ins for now |
+| Language, name, sign-in (phone code / Google / Apple, mocked in `src/services/auth.ts`) | Done |
+| Path & Pratigya — path, vow, asks, permissions, clear the field, take the vow, Day 1, lockout | Done (app detection mocked) |
+| Home — Lakshya "Today" sun-path dial, goal flight | Done |
+| Action Book — Values, Goals (queue + switch), Milestones, Anti-goals, Account | Done |
+| Session — ritual (clear, breathe, pray, values, tratak, 5…1), in session aperture, end early, done, problem finder, fix, streak mark, rest | Done, with vibration |
 | Reminders (nightly / weekly) | Interface only — see `src/services/reminders.ts` |
 | Persistence | On device (`zustand` + AsyncStorage) |
 | API | Not started |
@@ -159,9 +161,10 @@ comes from `src/utils/clock.ts` so tests can move time.
   to schedule and when to cancel them (we suggest `@notifee/react-native`).
 - **Stand-ins:** search for `TODO(devs)` — each one names the Figma frames
   that replace it.
-- **Native features** (app blocking, permissions, reinstall detection) are not
-  in this part yet. They will be added as a typed interface with a mock
-  implementation, which you can then implement natively.
+- **Native features** (app blocking, permissions, reinstall detection) are
+  mocked: `MOCK_DISTRACTING_APPS` and `grant()` in
+  `src/features/account/store.ts`, `breakVow()` for reinstalls. Sign-in is
+  mocked in `src/services/auth.ts` (any 6 digits pass).
 - **iOS caveat:** iOS does not let apps list other installed apps. App blocking
   there has to go through the Screen Time APIs (FamilyControls /
   ManagedSettings / DeviceActivity), which need an Apple entitlement.

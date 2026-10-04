@@ -11,6 +11,8 @@ export const colors = {
   ember: '#E25E00',
 
   ink: '#000000',
+  /** Warm black for focus and sessions: the dark the one light sits in. */
+  night: '#0E0A08',
   charcoal: '#1A1A1A',
   white: '#FFFFFF',
 

@@ -18,6 +18,8 @@ export interface HoldButtonProps {
   onComplete: () => void;
   /** How long a full hold takes, in ms. */
   duration?: number;
+  /** On a dark screen: outline the button so it doesn't vanish. */
+  onDark?: boolean;
   testID?: string;
 }
 
@@ -36,6 +38,7 @@ export function HoldButton({
   label,
   onComplete,
   duration = 1600,
+  onDark = false,
   testID,
 }: HoldButtonProps) {
   const progress = useSharedValue(0);
@@ -110,7 +113,9 @@ export function HoldButton({
       onPressIn={start}
       onPressOut={release}
     >
-      <Animated.View style={[styles.button, pressStyle]}>
+      <Animated.View
+        style={[styles.button, onDark && styles.onDark, pressStyle]}
+      >
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Animated.View style={[styles.fill, fillStyle]} />
         </View>
@@ -130,6 +135,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.charcoal,
     overflow: 'hidden',
     boxShadow: '0px 13px 17px rgba(0, 0, 0, 0.3)',
+  },
+  onDark: {
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.22)',
+    boxShadow: 'none',
   },
   fill: {
     ...StyleSheet.absoluteFill,

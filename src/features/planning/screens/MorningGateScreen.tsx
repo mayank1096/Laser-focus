@@ -84,7 +84,7 @@ export function MorningGateScreen({
       failureModes: failures,
     });
     haptics.success();
-    navigation.replace('SessionStart', { date, slotId });
+    navigation.replace('Ritual', { date, slotId });
   };
 
   const lengths = Array.from(

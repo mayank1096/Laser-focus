@@ -1,6 +1,7 @@
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
+import { useProfile } from '../src/features/account/store';
 import { useGoalSetup } from '../src/features/onboarding/store';
 import { planFor, usePlanning } from '../src/features/planning/store';
 
@@ -12,17 +13,21 @@ const TOMORROW = '2026-10-05';
 const textContent = (tree: ReactTestRenderer) => JSON.stringify(tree.toJSON());
 
 const host = (tree: ReactTestRenderer, id: string) =>
-  tree.root.find(n => n.props.testID === id && typeof n.type === 'string');
+  tree.root
+    .findAll(n => n.props.testID === id && typeof n.type === 'string')
+    .at(-1)!;
 
 async function press(tree: ReactTestRenderer, id: string) {
   await act(async () => {
     tree.root
-      .find(
+      // Screens below in the stack stay mounted; the last match is the top.
+      .findAll(
         n =>
           n.props.testID === id &&
           typeof n.props.onPress === 'function' &&
           n.props.accessibilityRole !== undefined,
       )
+      .at(-1)!
       .props.onPress();
     jest.runOnlyPendingTimers();
   });
@@ -51,6 +56,14 @@ describe('planning flow', () => {
       goals: [{ id: 'g1', text: 'Clear CA Foundation', isPrimary: true }],
       completed: true,
     });
+    // Signed in and vowed: the next thing is shaping the week.
+    useProfile.getState().reset();
+    useProfile.setState({
+      name: 'Aarav',
+      account: { method: 'phone', phone: '919876543210', signedInAt: 'x' },
+      pratigya: 'arjun',
+      vowTakenAt: '2026-10-04T10:00:00.000Z',
+    });
   });
 
   it('sets up the week, plans tomorrow, writes a sheet and seals it', async () => {
@@ -59,9 +72,7 @@ describe('planning flow', () => {
       tree = create(<App />);
     });
 
-    // Goal setup done: the next step is shaping the week.
-    expect(textContent(tree)).toContain('Your sheets are written');
-    await press(tree, 'setup-week');
+    // Goals, account and vow done: the next step is shaping the week.
     expect(textContent(tree)).toContain('When do you go deep?');
     await press(tree, 'next-button');
     expect(textContent(tree)).toContain('When do the small things get done?');
@@ -75,6 +86,11 @@ describe('planning flow', () => {
       startedOn: '2026-10-04',
       rhythm: { weeklyDay: 0 },
     });
+    // Day 1, then home.
+    expect(textContent(tree)).toContain('The bow is in your hands now.');
+    await press(tree, 'next-button');
+    expect(textContent(tree)).toContain('An open day.');
+    await press(tree, 'tab-tasks');
     expect(textContent(tree)).toContain('This week');
     expect(textContent(tree)).toContain('Tomorrow isn’t sealed yet');
 
@@ -162,26 +178,30 @@ describe('planning flow', () => {
         { text: 'Mock 25', kind: 'deep', priority: 2, sessionsNeeded: 1 },
         '2026-10-04',
       );
+    // Planned, but no sheet was written last night.
+    usePlanning.getState().assignTask('2026-10-04', 'slot_morning', id);
     let tree!: ReactTestRenderer;
     await act(async () => {
       tree = create(<App />);
     });
 
-    expect(textContent(tree)).toContain('Today');
-    await press(tree, 'today-slot_morning');
+    expect(textContent(tree)).toContain('One arrow today.');
+    expect(textContent(tree)).toContain('No sheet yet');
+    await press(tree, 'today-begin-slot_morning');
     expect(textContent(tree)).toContain('No sheet, no session.');
 
     await press(tree, 'gate-begin');
-    expect(textContent(tree)).toContain('Choose what this session is for');
+    expect(textContent(tree)).toContain('No sheet, no session.');
+    expect(textContent(tree)).toContain('Write what will be finished');
 
-    await press(tree, `gate-task-${id}`);
     await type(tree, 'gate-outcome', 'Paper 3 attempted');
     await type(tree, 'gate-challenge', 'No calculator for Part A');
     expect(textContent(tree)).toContain('Pick one way you could fail');
     await press(tree, 'gate-failure-Hunger');
     await press(tree, 'gate-begin');
 
-    expect(textContent(tree)).toContain('Watch for');
+    // The sheet exists now; the ritual begins.
+    expect(textContent(tree)).toContain('Pranam & enter.');
     expect(textContent(tree)).toContain('Paper 3 attempted');
     const today = planFor(usePlanning.getState(), '2026-10-04').sessions[0];
     expect(today.task?.id).toBe(id);

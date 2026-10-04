@@ -1,14 +1,15 @@
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
+import { useProfile } from '../src/features/account/store';
 import { useGoalSetup } from '../src/features/onboarding/store';
 
 jest.useFakeTimers();
 
 const findByTestId = (tree: ReactTestRenderer, id: string) =>
-  tree.root.find(
-    node => node.props.testID === id && typeof node.type === 'string',
-  );
+  tree.root
+    .findAll(node => node.props.testID === id && typeof node.type === 'string')
+    .at(-1)!;
 
 const textContent = (tree: ReactTestRenderer) => JSON.stringify(tree.toJSON());
 
@@ -16,13 +17,15 @@ async function press(tree: ReactTestRenderer, id: string) {
   await act(async () => {
     tree.root
       // The pressable itself (it carries the accessibility role), not the
-      // wrapping component — so disabled states are respected.
-      .find(
+      // wrapping component — so disabled states are respected. Screens
+      // below in the stack stay mounted; the last match is the top one.
+      .findAll(
         n =>
           n.props.testID === id &&
           typeof n.props.onPress === 'function' &&
           n.props.accessibilityRole !== undefined,
       )
+      .at(-1)!
       .props.onPress();
     jest.runOnlyPendingTimers();
   });
@@ -41,7 +44,10 @@ async function addLine(tree: ReactTestRenderer, list: string, text: string) {
 }
 
 describe('goal setup flow', () => {
-  beforeEach(() => useGoalSetup.getState().reset());
+  beforeEach(() => {
+    useGoalSetup.getState().reset();
+    useProfile.getState().reset();
+  });
 
   it('walks from the welcome screen through every question', async () => {
     let tree!: ReactTestRenderer;
@@ -51,6 +57,16 @@ describe('goal setup flow', () => {
 
     expect(textContent(tree)).toContain('Laser Focus');
     await press(tree, 'welcome-start');
+
+    // Language, then name.
+    expect(textContent(tree)).toContain('Which language do you think in?');
+    await press(tree, 'next-button');
+    expect(textContent(tree)).toContain('What should we call you?');
+    await act(async () => {
+      findByTestId(tree, 'name-input').props.onChangeText('Aarav');
+    });
+    expect(textContent(tree)).toContain('How it will look on your vow');
+    await press(tree, 'next-button');
 
     // 1. Values — Next stays locked until a line exists.
     expect(textContent(tree)).toContain(
@@ -117,7 +133,8 @@ describe('goal setup flow', () => {
     );
     await press(tree, 'next-button');
 
-    expect(textContent(tree)).toContain('Your sheets are written');
+    // Written: now they're worth keeping safe.
+    expect(textContent(tree)).toContain('Your sheets live only on this phone.');
     expect(useGoalSetup.getState().completed).toBe(true);
     expect(useGoalSetup.getState().toPlan()).toMatchObject({
       action: 'Attempt a full-length mock test',

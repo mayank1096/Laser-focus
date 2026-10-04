@@ -41,6 +41,13 @@ export interface ListFieldProps {
   /** Optional element shown to the right of each saved row (e.g. a month). */
   renderTrailing?: (item: SheetLine, index: number) => ReactNode;
   idPrefix?: string;
+  /**
+   * `field`: outlined rows, as in the setup questions.
+   * `card`: soft cards with serif lines, as on the Action Book sheets.
+   */
+  appearance?: 'field' | 'card';
+  /** Card colour for the `card` appearance. */
+  cardColor?: string;
   testID?: string;
 }
 
@@ -66,8 +73,11 @@ export function ListField({
   placeholder,
   renderTrailing,
   idPrefix = 'line',
+  appearance = 'field',
+  cardColor = colors.white,
   testID,
 }: ListFieldProps) {
+  const card = appearance === 'card';
   const surface = useSurface();
   const [editingId, setEditingId] = useState<string | null>(null);
   // Bumped to give a fresh input when typing several new lines in a row.
@@ -195,14 +205,17 @@ export function ListField({
               <Pressable
                 style={[
                   styles.field,
-                  styles.saved,
-                  { backgroundColor: surface },
+                  card ? styles.card : styles.saved,
+                  { backgroundColor: card ? cardColor : surface },
                 ]}
                 onPress={() => setEditingId(item.id)}
                 accessibilityRole="button"
                 accessibilityHint="Edit, move or remove this line"
               >
-                <AppText variant="body" style={styles.centered}>
+                <AppText
+                  variant={card ? 'cardTitle' : 'body'}
+                  style={[styles.centered, card && styles.cardText]}
+                >
                   {item.text}
                 </AppText>
               </Pressable>
@@ -368,6 +381,15 @@ const styles = StyleSheet.create({
   },
   saved: {
     borderColor: colors.border,
+  },
+  card: {
+    borderColor: 'transparent',
+    borderRadius: 12,
+    paddingVertical: 16,
+    boxShadow: '0px 6px 18px rgba(0, 0, 0, 0.04)',
+  },
+  cardText: {
+    fontSize: 15,
   },
   add: {
     borderColor: colors.border,

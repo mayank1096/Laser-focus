@@ -17,6 +17,10 @@ export interface OptionCardProps {
   description?: string;
   selected: boolean;
   onPress: () => void;
+  /** A small label at the top right, e.g. "Serious" or "Soon". */
+  tag?: string;
+  /** Shown but not choosable yet. */
+  disabled?: boolean;
   testID?: string;
 }
 
@@ -30,6 +34,8 @@ export function OptionCard({
   description,
   selected,
   onPress,
+  tag,
+  disabled = false,
   testID,
 }: OptionCardProps) {
   const surface = useSurface();
@@ -67,7 +73,9 @@ export function OptionCard({
     <Pressable
       testID={testID}
       accessibilityRole="radio"
-      accessibilityState={{ selected }}
+      accessibilityState={{ selected, disabled }}
+      disabled={disabled}
+      style={disabled && styles.disabled}
       onPress={() => {
         if (!selected) {
           haptics.selection();
@@ -88,9 +96,21 @@ export function OptionCard({
         <Animated.View style={[styles.content, contentStyle]}>
           {description ? (
             <>
-              <Animated.Text style={typography.cardTitle}>
-                {title}
-              </Animated.Text>
+              <View style={styles.titleRow}>
+                <Animated.Text style={[typography.cardTitle, styles.flex]}>
+                  {title}
+                </Animated.Text>
+                {tag ? (
+                  <Animated.Text
+                    style={[
+                      typography.eyebrow,
+                      selected ? styles.tagOn : styles.tagOff,
+                    ]}
+                  >
+                    {tag}
+                  </Animated.Text>
+                ) : null}
+              </View>
               <Animated.Text style={typography.micro}>
                 {description}
               </Animated.Text>
@@ -103,7 +123,9 @@ export function OptionCard({
             </Animated.Text>
           )}
         </Animated.View>
-        <Animated.View style={[styles.check, checkStyle]}>
+        <Animated.View
+          style={[styles.check, tag ? styles.hidden : null, checkStyle]}
+        >
           <Check
             width={16}
             height={16}
@@ -149,5 +171,25 @@ const styles = StyleSheet.create({
   },
   check: {
     marginLeft: spacing.md,
+  },
+  hidden: {
+    display: 'none',
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  flex: {
+    flex: 1,
+  },
+  tagOn: {
+    color: colors.saffron,
+  },
+  tagOff: {
+    color: colors.textFaint,
+  },
+  disabled: {
+    opacity: 0.5,
   },
 });

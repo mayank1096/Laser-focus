@@ -85,6 +85,8 @@ interface PlanningActions {
   removeTask: (id: Id) => void;
   /** Ticks a shallow task on or off. */
   toggleShallow: (id: Id) => void;
+  /** A focused session on this task ran its full length. */
+  recordSession: (taskId: Id) => void;
 
   /** Gives a session one task. Changing the task discards its sheet. */
   assignTask: (date: ISODate, slotId: Id, taskId: Id | null) => void;
@@ -250,6 +252,13 @@ export const usePlanning = create<PlanningState>()(
             t.id === id && t.kind === 'shallow'
               ? { ...t, sessionsDone: t.sessionsDone ? 0 : 1 }
               : t,
+          ),
+        })),
+
+      recordSession: taskId =>
+        set(state => ({
+          tasks: state.tasks.map(t =>
+            t.id === taskId ? { ...t, sessionsDone: t.sessionsDone + 1 } : t,
           ),
         })),
 

@@ -37,6 +37,27 @@ interface GoalSetupDraft {
   /** The question the user was on, so a closed app resumes in place. */
   stepId: string | null;
   completed: boolean;
+  /** When goal setup was first finished; goals wait in line since then. */
+  completedAt: string | null;
+  /** Plans of goals that were switched away from, kept for their return. */
+  paused: Record<Id, PausedPlan>;
+  switches: GoalSwitch[];
+}
+
+export interface PausedPlan {
+  action: string;
+  workShape: WorkShape | null;
+  targetCount: number;
+  deadlineMonths: number;
+  milestones: Milestone[];
+  pausedAt: string;
+}
+
+export interface GoalSwitch {
+  from: Id;
+  to: Id;
+  reason: string;
+  at: string;
 }
 
 interface GoalSetupActions {
@@ -52,7 +73,12 @@ interface GoalSetupActions {
   cycleMilestoneMonth: (id: Id) => void;
   setAntiGoals: (antiGoals: AntiGoal[]) => void;
   setStep: (stepId: string) => void;
-  complete: () => void;
+  complete: (at?: string) => void;
+  /**
+   * Makes another goal the Magic Circle. The current goal's plan is kept;
+   * returns true when the new goal still needs planning.
+   */
+  switchGoal: (to: Id, reason: string, at: string) => boolean;
   /** Validated, finished plan — `null` while anything is missing. */
   toPlan: () => GoalPlan | null;
   reset: () => void;
@@ -69,6 +95,9 @@ const initialDraft: GoalSetupDraft = {
   antiGoals: [],
   stepId: null,
   completed: false,
+  completedAt: null,
+  paused: {},
+  switches: [],
 };
 
 /**
@@ -159,7 +188,47 @@ export const useGoalSetup = create<GoalSetupDraft & GoalSetupActions>()(
 
       setStep: stepId => set({ stepId }),
 
-      complete: () => set({ completed: true }),
+      complete: at =>
+        set(state => ({
+          completed: true,
+          completedAt: state.completedAt ?? at ?? new Date().toISOString(),
+        })),
+
+      switchGoal: (to, reason, at) => {
+        const s = get();
+        const from = s.goals.find(g => g.isPrimary);
+        if (!from || from.id === to) {
+          return false;
+        }
+        const resumed = s.paused[to];
+        const rest = { ...s.paused };
+        delete rest[to];
+        set({
+          goals: s.goals.map(g => ({ ...g, isPrimary: g.id === to })),
+          paused: {
+            ...rest,
+            [from.id]: {
+              action: s.action,
+              workShape: s.workShape,
+              targetCount: s.targetCount,
+              deadlineMonths: s.deadlineMonths,
+              milestones: s.milestones,
+              pausedAt: at,
+            },
+          },
+          switches: [...s.switches, { from: from.id, to, reason, at }],
+          action: resumed?.action ?? '',
+          workShape: resumed?.workShape ?? null,
+          targetCount: resumed?.targetCount ?? LIMITS.targetCount.initial,
+          deadlineMonths:
+            resumed?.deadlineMonths ?? LIMITS.deadlineMonths.initial,
+          milestones: resumed?.milestones ?? [],
+          // A goal coming back resumes; a new one is planned from the action.
+          completed: Boolean(resumed),
+          stepId: resumed ? s.stepId : 'action',
+        });
+        return !resumed;
+      },
 
       toPlan: () => {
         const s = get();
@@ -196,6 +265,9 @@ export const useGoalSetup = create<GoalSetupDraft & GoalSetupActions>()(
         antiGoals,
         stepId,
         completed,
+        completedAt,
+        paused,
+        switches,
       }) => ({
         values,
         goals,
@@ -207,6 +279,9 @@ export const useGoalSetup = create<GoalSetupDraft & GoalSetupActions>()(
         antiGoals,
         stepId,
         completed,
+        completedAt,
+        paused,
+        switches,
       }),
     },
   ),

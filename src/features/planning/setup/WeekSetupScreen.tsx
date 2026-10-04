@@ -51,10 +51,7 @@ export function WeekSetupScreen({ navigation }: RootScreenProps<'WeekSetup'>) {
     planning.completeSetup(today());
     reminders.schedule(planning.rhythm);
     haptics.success();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main', params: { tab: 'tasks' } }],
-    });
+    navigation.reset({ index: 0, routes: [{ name: 'DayOne' }] });
   };
 
   const { Component } = step;

@@ -128,6 +128,8 @@ const styles = StyleSheet.create({
     borderColor: colors.hairline,
   },
   outline: {
+    flexDirection: 'row',
+    gap: 10,
     backgroundColor: colors.white,
     borderColor: colors.border,
   },
@@ -147,7 +149,11 @@ export function OutlineButton({
   onPress,
   style,
   testID,
-}: Omit<PrimaryButtonProps, 'disabled' | 'shadow'>) {
+  icon,
+}: Omit<PrimaryButtonProps, 'disabled' | 'shadow'> & {
+  /** Shown before the label, e.g. a Google or Apple mark. */
+  icon?: React.ReactNode;
+}) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -170,6 +176,7 @@ export function OutlineButton({
       }}
     >
       <Animated.View style={[styles.button, styles.outline, pressStyle]}>
+        {icon}
         <Animated.Text style={[typography.button, styles.outlineLabel]}>
           {label}
         </Animated.Text>

@@ -40,8 +40,10 @@ export interface FlowFrameProps {
     filled: number;
     onSegmentPress?: (index: number) => void;
   };
-  /** Back arrow and Android back. Return false to let navigation handle it. */
+  /** Back arrow and Android back. */
   onBack: () => void;
+  /** No way back, e.g. while locked out. */
+  hideBack?: boolean;
   art?: ImageSourcePropType;
   tone?: FlowTone;
   /** The button(s) pinned to the bottom. */
@@ -71,6 +73,7 @@ export function FlowFrame({
   direction,
   progress,
   onBack,
+  hideBack = false,
   art,
   tone = 'light',
   footer,
@@ -165,13 +168,15 @@ export function FlowFrame({
               { paddingTop: insets.top + layout.progressOffset - 16 },
             ]}
           >
-            <IconButton
-              Icon={ChevronLeft}
-              size={20}
-              testID="back-button"
-              accessibilityLabel="Back"
-              onPress={onBack}
-            />
+            {hideBack ? null : (
+              <IconButton
+                Icon={ChevronLeft}
+                size={20}
+                testID="back-button"
+                accessibilityLabel="Back"
+                onPress={onBack}
+              />
+            )}
             {progress ? (
               <View style={styles.progress}>
                 <ProgressSegments {...progress} />

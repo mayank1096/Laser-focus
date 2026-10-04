@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FlowFrame, type FlowDirection } from '../../../components/FlowFrame';
 import { PrimaryButton } from '../../../components/PrimaryButton';
 import type { RootScreenProps } from '../../../navigation/types';
+import { resumeRoute } from '../../../navigation/resume';
 import { haptics } from '../../../utils/haptics';
 import { nextStepIndex, previousStepIndex, STEPS } from '../steps';
 import { useGoalSetup } from '../store';
@@ -44,7 +45,7 @@ export function GoalSetupScreen({ navigation }: RootScreenProps<'GoalSetup'>) {
     if (next === -1) {
       haptics.success();
       useGoalSetup.getState().complete();
-      navigation.navigate('SetupComplete');
+      navigation.reset({ index: 0, routes: [{ name: resumeRoute() }] });
       return;
     }
     goTo(next, 'forward');

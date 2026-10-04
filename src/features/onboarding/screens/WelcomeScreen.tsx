@@ -1,5 +1,12 @@
 import React from 'react';
-import { Image, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../../../components/PrimaryButton';
@@ -92,8 +99,19 @@ export function WelcomeScreen({ navigation }: RootScreenProps<'Welcome'>) {
           testID="welcome-start"
           label="Let’s conquer the world"
           shadow="dark"
-          onPress={() => navigation.navigate('GoalSetup')}
+          onPress={() => navigation.navigate('Language')}
         />
+        <Pressable
+          testID="welcome-signin"
+          accessibilityRole="button"
+          hitSlop={10}
+          onPress={() => navigation.navigate('Phone', { mode: 'signin' })}
+          style={styles.signin}
+        >
+          <Text style={[typography.label, styles.signinText]}>
+            I already have an account
+          </Text>
+        </Pressable>
       </Animated.View>
     </View>
   );
@@ -149,5 +167,13 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 'auto',
     paddingHorizontal: spacing.gutter,
+    gap: spacing.xl,
+  },
+  signin: {
+    alignSelf: 'center',
+  },
+  signinText: {
+    color: colors.textMuted,
+    textDecorationLine: 'underline',
   },
 });
