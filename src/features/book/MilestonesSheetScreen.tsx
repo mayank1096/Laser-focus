@@ -50,51 +50,53 @@ export function MilestonesSheetScreen({
       subtitle="Practical, precise, trackable."
       onBack={() => navigation.goBack()}
     >
-      <View style={styles.card}>
-        <View style={styles.head}>
-          <AppText variant="heading" style={styles.flex}>
-            {progress.goal}
-          </AppText>
-          <Pressable
-            testID="milestones-edit"
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => setEditing(e => !e)}
-          >
-            <AppText variant="label" style={styles.saffron}>
-              {editing ? 'Done' : 'Edit'}
+      <View style={styles.head}>
+        <View style={styles.flex}>
+          <AppText variant="heading">{progress.goal}</AppText>
+          {g.action ? (
+            <AppText variant="caption" style={styles.action}>
+              {g.action}
             </AppText>
-          </Pressable>
+          ) : null}
         </View>
-        {g.action ? (
-          <AppText variant="micro" style={styles.muted}>
-            {g.action}
+        <Pressable
+          testID="milestones-edit"
+          accessibilityRole="button"
+          hitSlop={10}
+          onPress={() => setEditing(e => !e)}
+          style={styles.editPill}
+        >
+          <AppText variant="label" style={styles.saffron}>
+            {editing ? 'Done' : 'Edit'}
           </AppText>
-        ) : null}
+        </Pressable>
+      </View>
 
-        {editing ? (
-          <Animated.View
-            entering={FadeIn.duration(motion.base)}
-            style={styles.edit}
-          >
-            <ListField
-              testID="milestones-sheet-list"
-              items={g.milestones}
-              onChange={g.setMilestones}
-              max={LIMITS.milestones.max}
-              addLabel="Add a milestone"
-              idPrefix="milestone"
-            />
-          </Animated.View>
-        ) : (
-          rows.map(({ m, size, done }, i) => {
+      {editing ? (
+        <Animated.View
+          entering={FadeIn.duration(motion.base)}
+          style={styles.card}
+        >
+          <ListField
+            testID="milestones-sheet-list"
+            items={g.milestones}
+            onChange={g.setMilestones}
+            max={LIMITS.milestones.max}
+            addLabel="Add a milestone"
+            idPrefix="milestone"
+          />
+        </Animated.View>
+      ) : (
+        <View style={styles.list}>
+          {rows.map(({ m, size, done }, i) => {
             const expanded = i === open;
             const finished = done >= size;
+            const now = i === current;
             return (
               <Animated.View
                 key={m.id}
                 layout={LinearTransition.duration(motion.base)}
-                style={styles.milestone}
+                style={[styles.card, now && styles.cardNow]}
               >
                 <Pressable
                   accessibilityRole="button"
@@ -105,27 +107,29 @@ export function MilestonesSheetScreen({
                   }}
                   style={styles.row}
                 >
-                  <ChevronDown
-                    width={14}
-                    height={14}
-                    color={colors.textMuted}
-                    strokeWidth={2}
-                    style={{
-                      transform: [{ rotate: expanded ? '0deg' : '-90deg' }],
-                    }}
-                  />
                   <AppText
-                    variant={i === current ? 'bodyBold' : 'body'}
+                    variant={now ? 'bodyBold' : 'body'}
                     style={[styles.flex, finished && styles.muted]}
                   >
                     {m.text}
                   </AppText>
                   <AppText
                     variant="bodyBold"
-                    style={i === current ? styles.saffron : null}
+                    style={
+                      now ? styles.saffron : finished ? styles.muted : null
+                    }
                   >
                     {repeated ? `${done}/${size}` : shortMonthLabel(m.dueMonth)}
                   </AppText>
+                  <ChevronDown
+                    width={18}
+                    height={18}
+                    color={colors.textMuted}
+                    strokeWidth={1.8}
+                    style={{
+                      transform: [{ rotate: expanded ? '180deg' : '0deg' }],
+                    }}
+                  />
                 </Pressable>
                 <View style={styles.track}>
                   <View
@@ -133,13 +137,12 @@ export function MilestonesSheetScreen({
                       styles.fill,
                       {
                         width: `${(done / size) * 100}%`,
-                        backgroundColor:
-                          i === current ? colors.saffron : colors.charcoal,
+                        backgroundColor: now ? colors.saffron : colors.charcoal,
                       },
                     ]}
                   />
                 </View>
-                {expanded && i === current ? (
+                {expanded && now ? (
                   <Animated.View
                     entering={FadeIn.duration(motion.base)}
                     style={styles.week}
@@ -155,8 +158,11 @@ export function MilestonesSheetScreen({
                             ]}
                           />
                           <AppText
-                            variant="label"
-                            style={isTaskDone(t) ? styles.muted : null}
+                            variant="body"
+                            style={[
+                              styles.flex,
+                              isTaskDone(t) ? styles.muted : null,
+                            ]}
                           >
                             {t.text}
                           </AppText>
@@ -171,25 +177,30 @@ export function MilestonesSheetScreen({
                 ) : null}
               </Animated.View>
             );
-          })
-        )}
-      </View>
+          })}
+        </View>
+      )}
     </SheetPage>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    gap: spacing.md,
-    padding: spacing.xl,
-    borderRadius: 14,
-    backgroundColor: colors.white,
-    boxShadow: '0px 10px 24px rgba(0, 0, 0, 0.06)',
-  },
   head: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.lg,
+    paddingTop: spacing.xs,
+    marginBottom: spacing.lg,
+  },
+  action: {
+    marginTop: spacing.sm,
+    color: colors.textMuted,
+  },
+  editPill: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: colors.white,
   },
   flex: {
     flex: 1,
@@ -200,47 +211,53 @@ const styles = StyleSheet.create({
   muted: {
     color: colors.textMuted,
   },
-  edit: {
-    marginTop: spacing.md,
+  list: {
+    gap: 14,
   },
-  milestone: {
-    marginTop: spacing.sm,
-    gap: spacing.sm,
+  card: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 22,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    boxShadow: '0px 8px 20px rgba(60, 30, 10, 0.05)',
+  },
+  cardNow: {
+    boxShadow: '0px 12px 28px rgba(196, 120, 50, 0.12)',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.sm,
   },
   track: {
-    height: 2,
-    borderRadius: 1,
+    marginTop: 16,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: colors.divider,
     overflow: 'hidden',
   },
   fill: {
-    height: 2,
+    height: 4,
+    borderRadius: 2,
   },
   week: {
-    gap: spacing.md,
-    paddingTop: spacing.md,
-    paddingLeft: spacing.xl,
-    borderLeftWidth: 1,
-    borderStyle: 'dashed',
-    borderLeftColor: colors.border,
-    marginLeft: spacing.xs,
+    marginTop: 22,
+    paddingTop: 20,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.divider,
+    gap: 16,
   },
   task: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
+    gap: 14,
   },
   ring: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 1.2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1.4,
     borderColor: colors.saffron,
   },
   ringDone: {

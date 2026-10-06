@@ -55,12 +55,12 @@ export function AllowButton({
     backgroundColor: interpolateColor(
       done.value,
       [0, 1],
-      [colors.white, colors.successDeep],
+      [colors.white, colors.ink],
     ),
     borderColor: interpolateColor(
       done.value,
       [0, 1],
-      [colors.saffron, colors.successDeep],
+      [colors.saffron, colors.ink],
     ),
   }));
   const labelStyle = useAnimatedStyle(() => ({
