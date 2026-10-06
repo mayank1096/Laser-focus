@@ -74,7 +74,7 @@ export function ActionStep() {
           {EXAMPLES.map(example => (
             <View key={example.text} style={styles.exampleRow}>
               {example.good ? (
-                <CheckIcon width={16} height={16} />
+                <CheckIcon width={16} height={16} color={colors.success} />
               ) : (
                 <CrossIcon width={16} height={16} />
               )}

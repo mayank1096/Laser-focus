@@ -32,7 +32,6 @@ async function press(tree: ReactTestRenderer, id: string) {
 }
 
 async function addLine(tree: ReactTestRenderer, list: string, text: string) {
-  await press(tree, `${list}-add`);
   const input = findByTestId(tree, `${list}-input`);
   await act(async () => {
     input.props.onChangeText(text);

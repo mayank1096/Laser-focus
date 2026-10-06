@@ -58,8 +58,9 @@ const layoutTransition = LinearTransition.springify()
 /**
  * An editable list of short lines, used by every "sheet" question.
  *
- * - Tap the dashed row to add a line. Pressing return saves it and opens the
- *   next empty line, so several lines can be typed in one go.
+ * - The dashed row is itself a text field, so one tap opens the keyboard
+ *   (a field focused later from code can't raise it in a mobile browser).
+ *   Pressing return saves the line and clears the field for the next one.
  * - Tap a saved line to edit it. While editing, it can be moved up or down
  *   or removed; clearing the text removes it too.
  * - The add row disappears once `max` lines exist.
@@ -80,8 +81,6 @@ export function ListField({
   const card = appearance === 'card';
   const surface = useSurface();
   const [editingId, setEditingId] = useState<string | null>(null);
-  // Bumped to give a fresh input when typing several new lines in a row.
-  const [newSession, setNewSession] = useState(0);
   // Commits can arrive from a blur after the parent re-rendered; always work
   // from the latest list.
   const itemsRef = useRef(items);
@@ -116,12 +115,7 @@ export function ListField({
   };
 
   const handleCommit = (id: string, text: string, via: CommitReason) => {
-    const next = commitLine(id, text);
-    if (via === 'submit' && id === NEW && text.trim() && next.length < max) {
-      // Keep the keyboard up for the next line.
-      setNewSession(n => n + 1);
-      return;
-    }
+    commitLine(id, text);
     // Only close if the user has not already moved on to another line.
     setEditingId(current => (current === id ? null : current));
     if (via === 'submit') {
@@ -150,7 +144,7 @@ export function ListField({
     Keyboard.dismiss();
   };
 
-  const canAdd = items.length < max && editingId !== NEW;
+  const canAdd = items.length < max;
   const remaining = Math.max(0, min - items.length);
 
   return (
@@ -225,43 +219,21 @@ export function ListField({
         </Animated.View>
       ))}
 
-      {editingId === NEW && (
-        <Animated.View
-          key={`${NEW}${newSession}`}
-          style={styles.row}
-          layout={layoutTransition}
-          entering={FadeIn.duration(motion.fast)}
-          exiting={FadeOut.duration(motion.fast)}
-        >
-          <LineInput
-            initialValue=""
-            placeholder={placeholder}
-            surface={surface}
-            onCommit={(text, via) => handleCommit(NEW, text, via)}
-            testID={testID ? `${testID}-input` : undefined}
-          />
-        </Animated.View>
-      )}
-
       {canAdd && (
         <Animated.View
+          style={styles.row}
           layout={layoutTransition}
           entering={FadeIn.duration(motion.base)}
           exiting={FadeOut.duration(motion.fast)}
         >
-          <Pressable
-            style={[styles.field, styles.add, { backgroundColor: surface }]}
-            onPress={() => {
-              haptics.tap();
-              setEditingId(NEW);
-            }}
-            accessibilityRole="button"
-            testID={testID ? `${testID}-add` : undefined}
-          >
-            <AppText variant="body" style={[styles.centered, styles.addLabel]}>
-              {addLabel}
-            </AppText>
-          </Pressable>
+          <AddLine
+            label={addLabel}
+            placeholder={placeholder}
+            surface={surface}
+            onFocus={() => setEditingId(null)}
+            onAdd={text => commitLine(NEW, text)}
+            testID={testID ? `${testID}-input` : undefined}
+          />
         </Animated.View>
       )}
 
@@ -285,6 +257,75 @@ type CommitReason = 'submit' | 'blur';
 interface LineInputHandle {
   /** Returns the current text and stops this input from committing itself. */
   take: () => string;
+}
+
+/** The dashed "add" row: a real text field, so a single tap types. */
+function AddLine({
+  label,
+  placeholder,
+  surface,
+  onFocus,
+  onAdd,
+  testID,
+}: {
+  label: string;
+  placeholder?: string;
+  surface: string;
+  onFocus: () => void;
+  /** Saves a line; returns the list after saving. */
+  onAdd: (text: string) => SheetLine[];
+  testID?: string;
+}) {
+  const [value, setValue] = useState('');
+  const [focused, setFocused] = useState(false);
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const save = () => {
+    if (valueRef.current.trim()) {
+      onAdd(valueRef.current);
+    }
+    valueRef.current = '';
+    setValue('');
+  };
+
+  return (
+    <TextInput
+      testID={testID}
+      accessibilityLabel={label}
+      value={value}
+      onChangeText={setValue}
+      onFocus={() => {
+        haptics.tap();
+        setFocused(true);
+        onFocus();
+      }}
+      // Return saves the line and keeps the keyboard up for the next one.
+      onSubmitEditing={save}
+      onBlur={() =>
+        setTimeout(() => {
+          save();
+          setFocused(false);
+        }, BLUR_GRACE)
+      }
+      submitBehavior="submit"
+      // Web ignores submitBehavior; this keeps the field focused there too.
+      blurOnSubmit={false}
+      returnKeyType="done"
+      maxLength={90}
+      placeholder={focused ? placeholder : label}
+      placeholderTextColor={colors.textGhost}
+      selectionColor={colors.saffron}
+      cursorColor={colors.saffron}
+      style={[
+        typography.body,
+        styles.field,
+        focused ? styles.editing : styles.add,
+        styles.addInput,
+        { backgroundColor: surface },
+      ]}
+    />
+  );
 }
 
 /**
@@ -404,8 +445,9 @@ const styles = StyleSheet.create({
   centered: {
     textAlign: 'center',
   },
-  addLabel: {
-    color: colors.textGhost,
+  addInput: {
+    textAlign: 'center',
+    paddingVertical: 0,
   },
   helper: {
     marginTop: spacing.xs,

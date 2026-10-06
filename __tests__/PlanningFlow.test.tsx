@@ -40,7 +40,6 @@ async function type(tree: ReactTestRenderer, id: string, text: string) {
 }
 
 async function addLine(tree: ReactTestRenderer, list: string, text: string) {
-  await press(tree, `${list}-add`);
   await type(tree, `${list}-input`, text);
   await act(async () => {
     host(tree, `${list}-input`).props.onBlur();
