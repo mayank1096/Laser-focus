@@ -43,7 +43,7 @@ export const colors = {
   scrim: 'rgba(18, 13, 10, 0.4)',
 
   /** Solid so a locked button still reads on top of the illustrations. */
-  buttonDisabled: '#D9D5D2',
+  buttonDisabled: '#8A8480',
   textOnDisabled: '#FFFFFF',
 
   success: '#07DE11',
