@@ -65,7 +65,7 @@ describe('goal setup flow', () => {
     await act(async () => {
       findByTestId(tree, 'name-input').props.onChangeText('Aarav');
     });
-    expect(textContent(tree)).toContain('How it will look on your vow');
+    expect(textContent(tree)).not.toContain('How it will look on your vow');
     await press(tree, 'next-button');
 
     // 1. Values — Next stays locked until a line exists.
