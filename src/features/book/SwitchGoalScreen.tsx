@@ -1,3 +1,4 @@
+import Target from '../../assets/icons/target.svg';
 import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
@@ -118,6 +119,7 @@ export function SwitchGoalScreen({
                 <OptionCard
                   key={g.id}
                   testID={`switch-to-${g.id}`}
+                  icon={Target}
                   title={g.text}
                   description={
                     completedAt

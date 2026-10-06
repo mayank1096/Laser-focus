@@ -1,3 +1,4 @@
+import Languages from '../../../assets/icons/languages.svg';
 import React from 'react';
 import { art } from '../../../assets/art';
 import { OptionCard, OptionList } from '../../../components/OptionCard';
@@ -35,6 +36,7 @@ export function LanguageScreen({ navigation }: RootScreenProps<'Language'>) {
         <OptionList>
           <OptionCard
             testID="language-en"
+            icon={Languages}
             title="English"
             description="The whole app, in English."
             selected={language === 'en'}
@@ -42,6 +44,7 @@ export function LanguageScreen({ navigation }: RootScreenProps<'Language'>) {
           />
           <OptionCard
             testID="language-hi"
+            icon={Languages}
             title="हिंदी"
             description="जल्द आ रहा है · Coming soon"
             tag="Soon"

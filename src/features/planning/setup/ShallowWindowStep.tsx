@@ -1,3 +1,6 @@
+import Moon from '../../../assets/icons/moon.svg';
+import Hourglass from '../../../assets/icons/hourglass.svg';
+import Compass from '../../../assets/icons/compass.svg';
 import React, { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -36,6 +39,7 @@ export function ShallowWindowStep() {
         <OptionList>
           <OptionCard
             testID="shallow-evening"
+            icon={Moon}
             title={`Evening · ${formatWindow(
               SHALLOW_PRESETS.evening.start,
               SHALLOW_PRESETS.evening.end,
@@ -46,6 +50,7 @@ export function ShallowWindowStep() {
           />
           <OptionCard
             testID="shallow-lunch"
+            icon={Hourglass}
             title={`Lunch · ${formatWindow(
               SHALLOW_PRESETS.lunch.start,
               SHALLOW_PRESETS.lunch.end,
@@ -56,6 +61,7 @@ export function ShallowWindowStep() {
           />
           <OptionCard
             testID="shallow-custom"
+            icon={Compass}
             title={
               custom
                 ? formatWindow(window.start, window.end)

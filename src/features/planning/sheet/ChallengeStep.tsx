@@ -1,3 +1,4 @@
+import Flame from '../../../assets/icons/flame.svg';
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -66,6 +67,7 @@ export function ChallengeStep() {
             <OptionCard
               key={k.id}
               testID={`challenge-${k.id}`}
+              icon={Flame}
               title={k.title}
               description={k.description}
               selected={draft.challengeKind === k.id}

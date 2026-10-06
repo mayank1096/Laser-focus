@@ -51,6 +51,8 @@ export const colors = {
 
   success: '#07DE11',
   danger: '#DE0707',
+  /** A calm, readable green for granted and done states. */
+  successDeep: '#1E9E4A',
 } as const;
 
 export type ColorToken = keyof typeof colors;

@@ -1,3 +1,4 @@
+import Crown from '../../../assets/icons/crown.svg';
 import React from 'react';
 import { OptionCard, OptionList } from '../../../components/OptionCard';
 import {
@@ -41,6 +42,7 @@ export function MagicCircleStep() {
             <OptionCard
               key={goal.id}
               testID={`goal-option-${goal.id}`}
+              icon={Crown}
               title={goal.text}
               selected={goal.isPrimary}
               onPress={() => setPrimaryGoal(goal.id)}

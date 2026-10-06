@@ -1,4 +1,6 @@
 import React from 'react';
+import Compass from '../../assets/icons/compass.svg';
+import Trophy from '../../assets/icons/trophy.svg';
 import { art } from '../../assets/art';
 import { OptionCard, OptionList } from '../../components/OptionCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -36,6 +38,7 @@ export function PathScreen({ navigation }: RootScreenProps<'Path'>) {
         <OptionList>
           <OptionCard
             testID="path-challenge"
+            icon={Trophy}
             title="Challenge mode"
             tag="Levels"
             description="A focus task every day. Finish it and climb a level. Miss it and fall back to your last one."
@@ -44,6 +47,7 @@ export function PathScreen({ navigation }: RootScreenProps<'Path'>) {
           />
           <OptionCard
             testID="path-self"
+            icon={Compass}
             title="Self Focus"
             tag="Free"
             description="No daily test. Start a session whenever you decide to sit."

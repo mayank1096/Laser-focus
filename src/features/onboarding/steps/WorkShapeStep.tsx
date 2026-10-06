@@ -1,3 +1,5 @@
+import ListChecks from '../../../assets/icons/list-checks.svg';
+import Flag from '../../../assets/icons/flag.svg';
 import React from 'react';
 import { OptionCard, OptionList } from '../../../components/OptionCard';
 import {
@@ -21,6 +23,7 @@ export function WorkShapeStep() {
         <OptionList>
           <OptionCard
             testID="shape-repeated"
+            icon={ListChecks}
             title="Same thing, many times"
             description="Mock tests. Videos published. Gym sessions. Practice hours. Cold emails sent."
             selected={workShape === 'repeated'}
@@ -28,6 +31,7 @@ export function WorkShapeStep() {
           />
           <OptionCard
             testID="shape-stages"
+            icon={Flag}
             title="Different work in stages"
             description="Launch a brand. Get a job. Finish a syllabus. Ship a product."
             selected={workShape === 'stages'}

@@ -76,7 +76,7 @@ export function ActionStep() {
               {example.good ? (
                 <CheckIcon width={16} height={16} color={colors.success} />
               ) : (
-                <CrossIcon width={16} height={16} />
+                <CrossIcon width={16} height={16} color={colors.danger} />
               )}
               <AppText variant="caption">{example.text}</AppText>
             </View>

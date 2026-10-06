@@ -12,6 +12,7 @@ import { colors, layout, motion, radii, spacing, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 import { useSurface } from './Surface';
 import { sansDigits } from './Numerals';
+import { OptionIcon, type IconComponent } from './OptionIcon';
 
 export interface OptionCardProps {
   title: string;
@@ -22,6 +23,8 @@ export interface OptionCardProps {
   tag?: string;
   /** Shown but not choosable yet. */
   disabled?: boolean;
+  /** An icon on the left that comes alive when the card is chosen. */
+  icon?: IconComponent;
   testID?: string;
 }
 
@@ -37,6 +40,7 @@ export function OptionCard({
   onPress,
   tag,
   disabled = false,
+  icon,
   testID,
 }: OptionCardProps) {
   const surface = useSurface();
@@ -94,6 +98,11 @@ export function OptionCard({
         style={[styles.card, { backgroundColor: surface }, cardStyle]}
       >
         <Animated.View pointerEvents="none" style={[styles.wash, washStyle]} />
+        {icon ? (
+          <View style={styles.icon}>
+            <OptionIcon Icon={icon} active={selected} />
+          </View>
+        ) : null}
         <Animated.View style={[styles.content, contentStyle]}>
           {description ? (
             <>
@@ -172,6 +181,9 @@ const styles = StyleSheet.create({
   },
   check: {
     marginLeft: spacing.md,
+  },
+  icon: {
+    marginRight: spacing.md,
   },
   hidden: {
     display: 'none',

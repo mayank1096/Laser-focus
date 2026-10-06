@@ -1,31 +1,43 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { art } from '../../assets/art';
+import BellOn from '../../assets/icons/bell-on.svg';
+import Hourglass from '../../assets/icons/hourglass.svg';
+import Moon from '../../assets/icons/moon.svg';
+import { AllowButton } from '../../components/AllowButton';
+import { OptionIcon, type IconComponent } from '../../components/OptionIcon';
 import { AppText } from '../../components/AppText';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, radii, spacing } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import { colors, spacing } from '../../theme';
 import { useProfile, type Permission } from '../account/store';
 import { VOW_STEPS } from './PathScreen';
 
-const ROWS: { id: Permission; label: string; why: string }[] = [
+const ROWS: {
+  id: Permission;
+  label: string;
+  why: string;
+  Icon: IconComponent;
+}[] = [
   {
     id: 'screenTime',
     label: 'Screen Time',
     why: 'To see if a removed app returns',
+    Icon: Hourglass,
   },
   {
     id: 'focus',
     label: 'Focus & Do Not Disturb',
     why: 'To silence the phone in session',
+    Icon: Moon,
   },
   {
     id: 'notifications',
     label: 'Notifications',
     why: 'For the nightly reminder only',
+    Icon: BellOn,
   },
 ];
 
@@ -73,31 +85,18 @@ export function PermissionsScreen({
             const on = permissions[r.id];
             return (
               <View key={r.id} style={styles.row}>
+                <OptionIcon Icon={r.Icon} active={on} size={36} />
                 <View style={styles.flex}>
                   <AppText variant="body">{r.label}</AppText>
                   <AppText variant="micro" style={styles.muted}>
                     {r.why}
                   </AppText>
                 </View>
-                <Pressable
+                <AllowButton
                   testID={`allow-${r.id}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ checked: on }}
-                  disabled={on}
-                  hitSlop={6}
-                  onPress={() => {
-                    haptics.success();
-                    grant(r.id);
-                  }}
-                  style={[styles.pill, on ? styles.pillOn : styles.pillOff]}
-                >
-                  <AppText
-                    variant="label"
-                    style={{ color: on ? colors.white : colors.saffron }}
-                  >
-                    {on ? 'Allowed' : 'Allow'}
-                  </AppText>
-                </Pressable>
+                  granted={on}
+                  onAllow={() => grant(r.id)}
+                />
               </View>
             );
           })}
@@ -114,9 +113,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.lg,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.hairline,
@@ -128,18 +128,5 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.textMuted,
-  },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.saffron,
-  },
-  pillOn: {
-    backgroundColor: colors.saffron,
-  },
-  pillOff: {
-    backgroundColor: colors.white,
   },
 });
