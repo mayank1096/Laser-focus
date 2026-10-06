@@ -40,6 +40,13 @@ export interface ListFieldProps {
   placeholder?: string;
   /** Optional element shown to the right of each saved row (e.g. a month). */
   renderTrailing?: (item: SheetLine, index: number) => ReactNode;
+  /** Shows the trailing element inside the saved line, text left-aligned. */
+  inlineTrailing?: boolean;
+  /**
+   * Optional element to the left of each row. `index` is the line's place,
+   * or `items.length` for the add row.
+   */
+  renderLeading?: (index: number, adding: boolean) => ReactNode;
   idPrefix?: string;
   /**
    * `field`: outlined rows, as in the setup questions.
@@ -73,6 +80,8 @@ export function ListField({
   addLabel,
   placeholder,
   renderTrailing,
+  inlineTrailing = false,
+  renderLeading,
   idPrefix = 'line',
   appearance = 'field',
   cardColor = colors.white,
@@ -157,6 +166,7 @@ export function ListField({
           entering={FadeInDown.duration(motion.base).easing(motion.easeOut)}
           exiting={FadeOut.duration(motion.fast)}
         >
+          {renderLeading?.(index, false)}
           {editingId === item.id ? (
             <>
               <LineInput
@@ -200,6 +210,7 @@ export function ListField({
                 style={[
                   styles.field,
                   card ? styles.card : styles.saved,
+                  inlineTrailing && styles.inline,
                   { backgroundColor: card ? cardColor : surface },
                 ]}
                 onPress={() => setEditingId(item.id)}
@@ -208,12 +219,16 @@ export function ListField({
               >
                 <AppText
                   variant={card ? 'cardTitle' : 'body'}
-                  style={[styles.centered, card && styles.cardText]}
+                  style={[
+                    inlineTrailing ? styles.inlineText : styles.centered,
+                    card && styles.cardText,
+                  ]}
                 >
                   {item.text}
                 </AppText>
+                {inlineTrailing ? renderTrailing?.(item, index) : null}
               </Pressable>
-              {renderTrailing?.(item, index)}
+              {inlineTrailing ? null : renderTrailing?.(item, index)}
             </>
           )}
         </Animated.View>
@@ -226,6 +241,7 @@ export function ListField({
           entering={FadeIn.duration(motion.base)}
           exiting={FadeOut.duration(motion.fast)}
         >
+          {renderLeading?.(items.length, true)}
           <AddLine
             label={addLabel}
             placeholder={placeholder}
@@ -444,6 +460,18 @@ const styles = StyleSheet.create({
   },
   centered: {
     textAlign: 'center',
+  },
+  inline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: spacing.md,
+    paddingLeft: 16,
+    paddingRight: 8,
+    paddingVertical: 8,
+  },
+  inlineText: {
+    flex: 1,
   },
   addInput: {
     textAlign: 'center',

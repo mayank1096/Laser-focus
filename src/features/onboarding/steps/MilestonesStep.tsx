@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { AppText } from '../../../components/AppText';
 import { ListField } from '../../../components/ListField';
-import { colors, motion, radii } from '../../../theme';
+import { colors, motion, radii, spacing } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { countableNoun } from '../../../utils/text';
 import { shortMonthLabel } from '../../../utils/time';
@@ -52,6 +52,18 @@ export function MilestonesStep() {
           addLabel="Add a new Milestone"
           placeholder="Finish the first 10 mock tests"
           idPrefix="milestone"
+          inlineTrailing
+          renderLeading={(index, adding) => (
+            <StepNode
+              index={index}
+              adding={adding}
+              last={
+                adding ||
+                (index === milestones.length - 1 &&
+                  milestones.length >= LIMITS.milestones.max)
+              }
+            />
+          )}
           renderTrailing={(item, index) => (
             <MonthChip
               month={milestones[index]?.dueMonth}
@@ -72,6 +84,40 @@ export function MilestonesStep() {
         onPick={month => picking && setMonth(picking, month)}
       />
     </>
+  );
+}
+
+/**
+ * The thread down the left: a numbered node per step, joined by a dashed
+ * line, ending in an open node beside the add row.
+ */
+function StepNode({
+  index,
+  adding,
+  last,
+}: {
+  index: number;
+  adding: boolean;
+  last: boolean;
+}) {
+  return (
+    <View style={styles.node} pointerEvents="none">
+      <View
+        style={[
+          styles.thread,
+          index === 0 && styles.threadFirst,
+          last && styles.threadLast,
+          index === 0 && last && styles.hidden,
+        ]}
+      />
+      <View style={[styles.dot, adding && styles.dotOpen]}>
+        {adding ? null : (
+          <AppText variant="micro" style={styles.number}>
+            {index + 1}
+          </AppText>
+        )}
+      </View>
+    </View>
   );
 }
 
@@ -101,8 +147,8 @@ function MonthChip({
         exiting={FadeOut.duration(motion.fast)}
         style={styles.chipInner}
       >
-        <AppText variant="bodyMedium">{label}</AppText>
-        <AppText variant="micro" style={styles.year}>
+        <AppText variant="label">{label}</AppText>
+        <AppText variant="label" style={styles.year}>
           {month ? month.slice(0, 4) : ''}
         </AppText>
       </Animated.View>
@@ -110,18 +156,68 @@ function MonthChip({
   );
 }
 
+const NODE = 24;
+
 const styles = StyleSheet.create({
-  chipInner: {
+  node: {
+    width: NODE,
+    marginRight: spacing.xs,
     alignItems: 'center',
+    justifyContent: 'center',
+  },
+  thread: {
+    position: 'absolute',
+    top: -spacing.md,
+    bottom: 0,
+    left: NODE / 2 - 0.5,
+    borderLeftWidth: 1,
+    borderStyle: 'dashed',
+    borderLeftColor: colors.saffron,
+    opacity: 0.5,
+  },
+  threadFirst: {
+    top: '50%',
+  },
+  threadLast: {
+    bottom: '50%',
+  },
+  hidden: {
+    opacity: 0,
+  },
+  dot: {
+    width: NODE,
+    height: NODE,
+    borderRadius: NODE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+    borderWidth: 1.2,
+    borderColor: colors.saffron,
+  },
+  dotOpen: {
+    width: 12,
+    height: 12,
+    borderStyle: 'dashed',
+    borderColor: colors.border,
+  },
+  number: {
+    color: colors.saffron,
+    lineHeight: 14,
+  },
+  chipInner: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
   },
   year: {
     color: colors.textMuted,
   },
   chip: {
-    width: 60,
+    paddingHorizontal: 12,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radii.field,
+    borderRadius: radii.pill,
     backgroundColor: colors.chip,
   },
 });
