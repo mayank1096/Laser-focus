@@ -132,7 +132,9 @@ describe('goal setup flow', () => {
     await press(tree, 'next-button');
 
     // Written: now they're worth keeping safe.
-    expect(textContent(tree)).toContain('A warrior never leaves his bow behind.');
+    expect(textContent(tree)).toContain(
+      'A warrior never leaves his bow behind.',
+    );
     expect(useGoalSetup.getState().completed).toBe(true);
     expect(useGoalSetup.getState().toPlan()).toMatchObject({
       action: 'Attempt a full-length mock test',

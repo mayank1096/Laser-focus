@@ -84,9 +84,15 @@ describe('planning flow', () => {
       startedOn: '2026-10-04',
       rhythm: { weeklyDay: 0 },
     });
-    // Day 1, then home.
-    expect(textContent(tree)).toContain('The bow is in your hands now.');
-    await press(tree, 'next-button');
+    // The Day 1 greeting, tapped through, then home.
+    expect(textContent(tree)).toContain('Hey, Aarav');
+    for (
+      let i = 0;
+      i < 6 && textContent(tree).includes('Tap to continue');
+      i++
+    ) {
+      await press(tree, 'next-button');
+    }
     expect(textContent(tree)).toContain('An open day.');
     await press(tree, 'tab-tasks');
     expect(textContent(tree)).toContain('This week');
