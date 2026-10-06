@@ -120,7 +120,7 @@ export function RootNavigator() {
         <Stack.Screen
           name="DayOne"
           component={DayOneScreen}
-          options={noSwipe}
+          options={{ ...noSwipe, animation: 'fade' }}
         />
         <Stack.Screen
           name="Lockout"

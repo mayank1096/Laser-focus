@@ -1,22 +1,20 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, {
   Easing,
-  FadeIn,
-  FadeInDown,
-  FadeOutUp,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
-import { AppText } from '../../components/AppText';
 import { sansDigits } from '../../components/Numerals';
 import { ThinkingOrb } from '../../components/orb';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, spacing, typography } from '../../theme';
+import { colors, spacing, typography } from '../../theme';
 import { today } from '../../utils/clock';
 import { addDays, formatClock } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
@@ -24,25 +22,31 @@ import { firstName, useProfile } from '../account/store';
 import { planFor, usePlanning } from '../planning/store';
 import { useGoalProgress } from '../progress';
 
-/** How long each line stays before it rises away. */
-const HOLD = 1900;
-/** The gradient is drawn taller than the screen so it can drift. */
-const OVERSCAN = 1.4;
-const DRIFT = 60;
+/** The pace of one line: arrive, stay, leave. Slow on purpose. */
+const IN = 1100;
+const HOLD = 2600;
+const OUT = 800;
+/** A breath before the first line, while the colour settles. */
+const FIRST_DELAY = 900;
+/** The light at the bottom rises and sinks over this long. */
+const TIDE = 5200;
+
+const DEEP = '#DD5800';
+const LIGHT = '#F9E0CB';
 
 /**
- * The first moment after the vow: a warm, drifting saffron field, a
- * thought-orb turning at the top, and a few lines that rise in and float
- * away one after another — a greeting, then why it matters, then the first
- * session — before the app opens. Tap anywhere to skip ahead.
+ * The first moment after the vow. A deep saffron field whose light rises
+ * and sinks from the bottom like a slow tide, a thought-orb turning above,
+ * and a few lines that arrive and leave one at a time — a greeting, the
+ * vow, the count, the first session — before the app opens.
  */
 export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const name = firstName(useProfile(s => s.name));
   const progress = useGoalProgress();
   const planning = usePlanning();
   const first = planFor(planning, addDays(today(), 1)).sessions[0];
-  const [height, setHeight] = useState(0);
   const [index, setIndex] = useState(0);
   const finished = useRef(false);
 
@@ -50,10 +54,10 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
     () => [
       name ? `Hey, ${name}` : 'Hey, warrior',
       'The vow is taken.',
-      `Day 1 of ${progress.days}.`,
+      `This is day 1 of ${progress.days}.`,
       'The bow is in your hands now.',
       first
-        ? `First arrow: tomorrow, ${formatClock(first.slot.start)}.`
+        ? `Your first arrow leaves tomorrow, ${formatClock(first.slot.start)}.`
         : 'Your first arrow leaves tomorrow.',
     ],
     [name, progress.days, first],
@@ -64,79 +68,128 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
       return;
     }
     finished.current = true;
-    haptics.confirm();
     navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
+  const next = () => {
+    if (index < lines.length - 1) {
+      setIndex(i => i + 1);
+    } else {
+      enter();
+    }
+  };
+
+  // One line at a time: rise softly into place, stay, drift up and away.
+  const shown = useSharedValue(0);
+  const lift = useSharedValue(0);
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (index < lines.length - 1) {
-        haptics.selection();
-        setIndex(i => i + 1);
-      } else {
-        enter();
-      }
-    }, HOLD);
-    return () => clearTimeout(t);
-    // `enter` only navigates once; re-arming on it would restart the beat.
+    shown.value = 0;
+    lift.value = 0;
+    const delay = index === 0 ? FIRST_DELAY : 120;
+    shown.value = withDelay(
+      delay,
+      withTiming(1, { duration: IN, easing: Easing.bezier(0.16, 1, 0.3, 1) }),
+    );
+    if (index > 0) {
+      haptics.selection();
+    }
+    const leave = setTimeout(() => {
+      lift.value = withTiming(1, {
+        duration: OUT,
+        easing: Easing.bezier(0.55, 0, 0.75, 0.3),
+      });
+      shown.value = withTiming(
+        0,
+        { duration: OUT, easing: Easing.in(Easing.quad) },
+        done => {
+          if (done) {
+            scheduleOnRN(next);
+          }
+        },
+      );
+    }, delay + IN + HOLD);
+    return () => clearTimeout(leave);
+    // `next` closes over `index`, which is already a dependency.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, lines.length]);
 
-  // The colour field breathes slowly up and down.
-  const drift = useSharedValue(0);
+  const lineStyle = useAnimatedStyle(() => ({
+    opacity: shown.value,
+    transform: [
+      // Arrives from 18 below; leaves 26 above.
+      {
+        translateY: (1 - shown.value) * 18 * (1 - lift.value) - lift.value * 26,
+      },
+      { scale: 0.985 + shown.value * 0.015 },
+    ],
+  }));
+
+  // The tide: the light at the bottom slowly rises and sinks.
+  const tide = useSharedValue(0);
+  const arrive = useSharedValue(0);
   useEffect(() => {
-    drift.value = withRepeat(
-      withTiming(1, { duration: 4200, easing: Easing.inOut(Easing.sin) }),
+    arrive.value = withTiming(1, { duration: 700 });
+    tide.value = withRepeat(
+      withTiming(1, { duration: TIDE, easing: Easing.inOut(Easing.sin) }),
       -1,
       true,
     );
-  }, [drift]);
-  const fieldStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: -DRIFT + drift.value * DRIFT }],
+  }, [tide, arrive]);
+  const glowHeight = height * 0.92;
+  const tideStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: (1 - tide.value) * height * 0.16 }],
+  }));
+  const orbStyle = useAnimatedStyle(() => ({
+    opacity: arrive.value,
+    transform: [{ scale: 0.92 + arrive.value * 0.08 }],
   }));
 
   return (
     <Pressable
       testID="next-button"
       accessibilityRole="button"
-      accessibilityLabel="Continue"
-      accessibilityHint="Skips to the app"
-      onPress={() => {
-        if (index < lines.length - 1) {
-          setIndex(i => i + 1);
-        } else {
-          enter();
-        }
-      }}
+      accessibilityLabel={lines[index]}
+      onPress={next}
       style={styles.screen}
-      onLayout={e => setHeight(e.nativeEvent.layout.height)}
     >
-      {height ? (
-        <Animated.View style={[styles.field, fieldStyle]} pointerEvents="none">
-          <Svg width="100%" height={height * OVERSCAN}>
-            <Defs>
-              <LinearGradient id="greet" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor="#E05A00" />
-                <Stop offset="0.26" stopColor="#E05E00" />
-                <Stop offset="0.48" stopColor="#EA8B4C" />
-                <Stop offset="0.72" stopColor="#F8DCC4" />
-                <Stop offset="1" stopColor="#F8DCC4" />
-              </LinearGradient>
-            </Defs>
-            <Rect width="100%" height={height * OVERSCAN} fill="url(#greet)" />
-          </Svg>
-        </Animated.View>
-      ) : null}
+      {/* Deep saffron above, warming toward the light below. */}
+      <Svg style={StyleSheet.absoluteFill} width={width} height={height}>
+        <Defs>
+          <LinearGradient id="greet-base" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={DEEP} />
+            <Stop offset="0.5" stopColor="#E06A12" />
+            <Stop offset="1" stopColor="#EB9050" />
+          </LinearGradient>
+        </Defs>
+        <Rect width={width} height={height} fill="url(#greet-base)" />
+      </Svg>
 
       <Animated.View
-        entering={FadeIn.delay(200).duration(motion.slow)}
-        style={[styles.orb, { top: insets.top + 72 }]}
         pointerEvents="none"
+        style={[styles.glow, { height: glowHeight }, tideStyle]}
+      >
+        <Svg width={width} height={glowHeight}>
+          <Defs>
+            <LinearGradient id="greet-tide" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={LIGHT} stopOpacity="0" />
+              <Stop offset="0.45" stopColor="#F2B183" stopOpacity="0.5" />
+              <Stop offset="0.8" stopColor={LIGHT} stopOpacity="0.95" />
+              <Stop offset="1" stopColor={LIGHT} stopOpacity="1" />
+            </LinearGradient>
+          </Defs>
+          <Rect width={width} height={glowHeight} fill="url(#greet-tide)" />
+        </Svg>
+      </Animated.View>
+
+      <Animated.View
+        pointerEvents="none"
+        style={[styles.orb, { top: insets.top + 64 }, orbStyle]}
       >
         <ThinkingOrb
-          state="searching"
+          state="composing"
           size={64}
-          displaySize={88}
+          displaySize={120}
+          speed={0.8}
           theme="light"
           tint={colors.white}
           accessibilityLabel="Laser Focus"
@@ -145,28 +198,11 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
 
       <View style={styles.stage} pointerEvents="none">
         <Animated.Text
-          key={index}
-          entering={FadeInDown.duration(motion.slow).easing(motion.easeOut)}
-          exiting={FadeOutUp.duration(motion.base).easing(
-            Easing.in(Easing.quad),
-          )}
-          style={styles.line}
+          style={[styles.line, lineStyle]}
           accessibilityLiveRegion="polite"
         >
           {sansDigits(lines[index])}
         </Animated.Text>
-      </View>
-
-      <View
-        style={[styles.dots, { bottom: insets.bottom + 40 }]}
-        pointerEvents="none"
-      >
-        {lines.map((_, i) => (
-          <View key={i} style={[styles.dot, i <= index && styles.dotOn]} />
-        ))}
-        <AppText variant="micro" style={styles.skip}>
-          Tap to continue
-        </AppText>
       </View>
     </Pressable>
   );
@@ -175,12 +211,14 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#E05A00',
+    backgroundColor: DEEP,
     overflow: 'hidden',
   },
-  field: {
-    ...StyleSheet.absoluteFill,
-    bottom: undefined,
+  glow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: -60,
   },
   orb: {
     position: 'absolute',
@@ -190,33 +228,12 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: spacing.gutter + spacing.lg,
+    paddingHorizontal: spacing.gutter + spacing.xl,
   },
   line: {
-    ...typography.display,
-    fontSize: 38,
-    lineHeight: 44,
+    ...typography.title,
+    lineHeight: 34,
     color: colors.white,
     textAlign: 'center',
-  },
-  dots: {
-    position: 'absolute',
-    alignSelf: 'center',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(150, 60, 10, 0.25)',
-  },
-  dotOn: {
-    backgroundColor: '#B4501A',
-  },
-  skip: {
-    marginLeft: spacing.sm,
-    color: '#8F4214',
   },
 });
