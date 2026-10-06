@@ -15,8 +15,8 @@ import { colors, motion, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
-const PILL_WIDTH = 76;
-const DONE_SIZE = 34;
+const PILL_WIDTH = 70;
+const DONE_SIZE = 30;
 /** Length of the tick stroke below, so it can be drawn in. */
 const TICK_LENGTH = 16;
 
@@ -95,7 +95,7 @@ export function AllowButton({
           {label}
         </Animated.Text>
         <Animated.View style={[styles.tick, tickStyle]} pointerEvents="none">
-          <Svg width={18} height={18} viewBox="0 0 18 18">
+          <Svg width={16} height={16} viewBox="0 0 18 18">
             <AnimatedPath
               d="M4 9.5 L7.5 13 L14 5.5"
               stroke={colors.white}

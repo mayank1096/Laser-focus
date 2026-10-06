@@ -81,13 +81,15 @@ export function PermissionsScreen({
       />
       <QuestionBody gap={26}>
         <View style={styles.list}>
-          {ROWS.map(r => {
+          {ROWS.map((r, i) => {
             const on = permissions[r.id];
             return (
-              <View key={r.id} style={styles.row}>
-                <OptionIcon Icon={r.Icon} active={on} size={36} />
+              <View key={r.id} style={[styles.row, i > 0 && styles.divided]}>
+                <View style={styles.iconSlot}>
+                  <OptionIcon Icon={r.Icon} active={on} />
+                </View>
                 <View style={styles.flex}>
-                  <AppText variant="body">{r.label}</AppText>
+                  <AppText variant="bodyMedium">{r.label}</AppText>
                   <AppText variant="micro" style={styles.muted}>
                     {r.why}
                   </AppText>
@@ -108,19 +110,27 @@ export function PermissionsScreen({
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.md,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    backgroundColor: colors.white,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.md,
-    paddingLeft: spacing.md,
-    paddingRight: spacing.lg,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
+    paddingVertical: 14,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.md,
+  },
+  divided: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.divider,
+  },
+  iconSlot: {
+    alignSelf: 'flex-start',
+    paddingTop: 1,
   },
   flex: {
     flex: 1,

@@ -1,13 +1,13 @@
+import { DeleteButton } from '../../components/DeleteButton';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { art } from '../../assets/art';
 import { AppText } from '../../components/AppText';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, radii, spacing } from '../../theme';
-import { haptics } from '../../utils/haptics';
+import { colors, spacing } from '../../theme';
 import { useProfile } from '../account/store';
 import { VOW_STEPS } from './PathScreen';
 
@@ -53,34 +53,19 @@ export function ClearFieldScreen({
       />
       <QuestionBody gap={26}>
         <View style={styles.list}>
-          {apps.map(a => (
-            <View key={a.name} style={[styles.row, a.deleted && styles.gone]}>
+          {apps.map((a, i) => (
+            <View key={a.name} style={[styles.row, i > 0 && styles.divided]}>
               <AppText
                 variant="body"
                 style={[styles.flex, a.deleted && styles.muted]}
               >
                 {a.name}
               </AppText>
-              {a.deleted ? (
-                <AppText variant="label" style={styles.muted}>
-                  Deleted
-                </AppText>
-              ) : (
-                <Pressable
-                  testID={`delete-${a.name}`}
-                  accessibilityRole="button"
-                  hitSlop={6}
-                  style={styles.pill}
-                  onPress={() => {
-                    haptics.confirm();
-                    markAppDeleted(a.name);
-                  }}
-                >
-                  <AppText variant="label" style={styles.saffron}>
-                    Delete
-                  </AppText>
-                </Pressable>
-              )}
+              <DeleteButton
+                testID={`delete-${a.name}`}
+                deleted={a.deleted}
+                onDelete={() => markAppDeleted(a.name)}
+              />
             </View>
           ))}
         </View>
@@ -91,35 +76,29 @@ export function ClearFieldScreen({
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.md,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    backgroundColor: colors.white,
+    overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
+    gap: spacing.md,
+    paddingVertical: 12,
+    paddingLeft: spacing.lg,
+    paddingRight: spacing.md,
   },
-  gone: {
-    borderColor: colors.divider,
+  divided: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.divider,
   },
   flex: {
     flex: 1,
   },
   muted: {
     color: colors.textFaint,
-  },
-  pill: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.saffron,
-  },
-  saffron: {
-    color: colors.saffron,
+    textDecorationLine: 'line-through',
   },
 });

@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
 import Animated, {
-  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -14,13 +12,14 @@ import { colors, motion } from '../theme';
 export type IconComponent = React.FC<SvgProps>;
 
 /**
- * The icon beside an option. When the option becomes active the tile warms
- * to saffron and the icon gives one small hop and tilt, like a nod.
+ * The icon beside an option: a plain line icon, no tile. When the option
+ * becomes active it turns saffron and gives one small hop and tilt, like a
+ * nod.
  */
 export function OptionIcon({
   Icon,
   active,
-  size = 40,
+  size = 20,
 }: {
   Icon: IconComponent;
   active: boolean;
@@ -45,44 +44,22 @@ export function OptionIcon({
     }
   }, [active, on, hop, tilt]);
 
-  const tileStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      on.value,
-      [0, 1],
-      ['rgba(0, 0, 0, 0.04)', 'rgba(250, 140, 34, 0.14)'],
-    ),
-  }));
   const iconStyle = useAnimatedStyle(() => ({
     transform: [
       { translateY: hop.value },
       { rotate: `${tilt.value}deg` },
-      { scale: 1 + on.value * 0.06 },
+      { scale: 1 + on.value * 0.08 },
     ],
   }));
 
   return (
-    <Animated.View
-      style={[
-        styles.tile,
-        { width: size, height: size, borderRadius: size * 0.3 },
-        tileStyle,
-      ]}
-    >
-      <Animated.View style={iconStyle}>
-        <Icon
-          width={size * 0.5}
-          height={size * 0.5}
-          color={active ? colors.saffron : 'rgba(0, 0, 0, 0.55)'}
-          strokeWidth={1.5}
-        />
-      </Animated.View>
+    <Animated.View style={iconStyle}>
+      <Icon
+        width={size}
+        height={size}
+        color={active ? colors.saffron : 'rgba(0, 0, 0, 0.45)'}
+        strokeWidth={1.6}
+      />
     </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  tile: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

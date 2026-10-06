@@ -71,6 +71,8 @@ interface GoalSetupActions {
   setMilestones: (lines: SheetLine[]) => void;
   /** Moves a milestone's month on by one, wrapping back after the deadline. */
   cycleMilestoneMonth: (id: Id) => void;
+  /** Pins a milestone to a chosen `YYYY-MM`. */
+  setMilestoneMonth: (id: Id, month: string) => void;
   setAntiGoals: (antiGoals: AntiGoal[]) => void;
   setStep: (stepId: string) => void;
   complete: (at?: string) => void;
@@ -183,6 +185,13 @@ export const useGoalSetup = create<GoalSetupDraft & GoalSetupActions>()(
             }),
           };
         }),
+
+      setMilestoneMonth: (id, month) =>
+        set(state => ({
+          milestones: state.milestones.map(m =>
+            m.id === id ? { ...m, dueMonth: month, monthPinned: true } : m,
+          ),
+        })),
 
       setAntiGoals: antiGoals => set({ antiGoals }),
 

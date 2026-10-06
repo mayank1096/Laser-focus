@@ -1,7 +1,4 @@
 import React from 'react';
-import Crown from '../../assets/icons/crown.svg';
-import Target from '../../assets/icons/target.svg';
-import Shield from '../../assets/icons/shield.svg';
 import { art } from '../../assets/art';
 import { OptionCard, OptionList } from '../../components/OptionCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -12,9 +9,6 @@ import { PRATIGYAS, useProfile, type Pratigya } from '../account/store';
 import { VOW_STEPS } from './PathScreen';
 
 const ORDER: Pratigya[] = ['abhimanyu', 'arjun', 'bhishma'];
-
-/** Abhimanyu guards, Arjun aims, Bhishma rules for life. */
-const VOW_ICONS = { abhimanyu: Shield, arjun: Target, bhishma: Crown };
 
 export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
   const pratigya = useProfile(s => s.pratigya);
@@ -44,7 +38,6 @@ export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
             <OptionCard
               key={p}
               testID={`pratigya-${p}`}
-              icon={VOW_ICONS[p]}
               title={PRATIGYAS[p].name}
               tag={PRATIGYAS[p].tag}
               description={PRATIGYAS[p].short}

@@ -183,6 +183,8 @@ const styles = StyleSheet.create({
     marginLeft: spacing.md,
   },
   icon: {
+    alignSelf: 'flex-start',
+    marginTop: 1,
     marginRight: spacing.md,
   },
   hidden: {

@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { AppText } from '../../../components/AppText';
 import { ListField } from '../../../components/ListField';
-import { colors, motion, radii, typography } from '../../../theme';
+import { colors, motion, radii } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { countableNoun } from '../../../utils/text';
 import { shortMonthLabel } from '../../../utils/time';
@@ -11,6 +12,7 @@ import {
   QuestionHeader,
 } from '../../../components/QuestionHeader';
 import { LIMITS, suggestBatchMilestones, useGoalSetup } from '../store';
+import { MonthPickerSheet } from '../components/MonthPickerSheet';
 
 export function MilestonesStep() {
   const milestones = useGoalSetup(s => s.milestones);
@@ -18,7 +20,10 @@ export function MilestonesStep() {
   const workShape = useGoalSetup(s => s.workShape);
   const action = useGoalSetup(s => s.action);
   const targetCount = useGoalSetup(s => s.targetCount);
-  const cycleMonth = useGoalSetup(s => s.cycleMilestoneMonth);
+  const setMonth = useGoalSetup(s => s.setMilestoneMonth);
+  const deadlineMonths = useGoalSetup(s => s.deadlineMonths);
+  const [picking, setPicking] = useState<string | null>(null);
+  const picked = milestones.find(m => m.id === picking);
 
   // For repeated work, start with the count split into batches; the user can
   // edit or delete them like any other line.
@@ -50,16 +55,27 @@ export function MilestonesStep() {
           renderTrailing={(item, index) => (
             <MonthChip
               month={milestones[index]?.dueMonth}
-              onPress={() => cycleMonth(item.id)}
+              onPress={() => setPicking(item.id)}
             />
           )}
         />
       </QuestionBody>
+      <MonthPickerSheet
+        visible={picked != null}
+        onClose={() => setPicking(null)}
+        title={picked?.text ?? ''}
+        value={picked?.dueMonth}
+        runMonths={deadlineMonths}
+        taken={milestones
+          .filter(m => m.id !== picking && m.dueMonth)
+          .map(m => m.dueMonth as string)}
+        onPick={month => picking && setMonth(picking, month)}
+      />
     </>
   );
 }
 
-/** Shows the milestone's month; tapping moves it on by one month. */
+/** Shows the milestone's month; tapping opens the month picker. */
 function MonthChip({
   month,
   onPress,
@@ -76,22 +92,31 @@ function MonthChip({
         onPress();
       }}
       accessibilityRole="button"
-      accessibilityLabel={`Due ${label}. Tap to change the month.`}
+      accessibilityLabel={`Due ${label}. Choose a month.`}
       hitSlop={4}
     >
-      <Animated.Text
-        key={label}
+      <Animated.View
+        key={month}
         entering={FadeIn.duration(motion.base)}
         exiting={FadeOut.duration(motion.fast)}
-        style={typography.body}
+        style={styles.chipInner}
       >
-        {label}
-      </Animated.Text>
+        <AppText variant="bodyMedium">{label}</AppText>
+        <AppText variant="micro" style={styles.year}>
+          {month ? month.slice(0, 4) : ''}
+        </AppText>
+      </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
+  chipInner: {
+    alignItems: 'center',
+  },
+  year: {
+    color: colors.textMuted,
+  },
   chip: {
     width: 60,
     alignItems: 'center',
