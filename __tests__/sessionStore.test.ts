@@ -17,17 +17,15 @@ function plan(day: number) {
 }
 
 function sit(day: number, minutes: number, planned = 90) {
-  useSessions
-    .getState()
-    .start(
-      {
-        date: iso(day),
-        slotId: 'slot_morning',
-        taskId: null,
-        minutes: planned,
-      },
-      at(day, 6),
-    );
+  useSessions.getState().start(
+    {
+      date: iso(day),
+      slotId: 'slot_morning',
+      taskId: null,
+      minutes: planned,
+    },
+    at(day, 6),
+  );
   const done = minutes >= planned;
   return useSessions
     .getState()

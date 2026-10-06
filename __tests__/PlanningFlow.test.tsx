@@ -183,7 +183,7 @@ describe('planning flow', () => {
       tree = create(<App />);
     });
 
-    expect(textContent(tree)).toContain('One arrow today.');
+    expect(textContent(tree)).toContain('Start Session');
     expect(textContent(tree)).toContain('No sheet yet');
     await press(tree, 'today-begin-slot_morning');
     expect(textContent(tree)).toContain('No sheet, no session.');

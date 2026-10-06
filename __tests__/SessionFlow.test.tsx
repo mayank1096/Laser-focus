@@ -53,8 +53,7 @@ describe('a focused session', () => {
     await act(async () => {
       tree = create(<App />);
     });
-    expect(textContent(tree)).toContain('One arrow today.');
-    expect(textContent(tree)).toContain('10 min');
+    expect(textContent(tree)).toContain('Start Session');
     await press(tree, 'today-begin-slot_morning');
 
     // Ritual

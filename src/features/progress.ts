@@ -84,3 +84,35 @@ export function useStreak(): number {
   const planning = usePlanning();
   return streak(sessions, planning, todayISO());
 }
+
+/** How many units each milestone covers when the work is repeated. */
+export function milestoneSizes(total: number, count: number): number[] {
+  const size = Math.ceil(total / Math.max(1, count));
+  return Array.from({ length: count }, (_, i) =>
+    Math.max(0, Math.min(size, total - i * size)),
+  );
+}
+
+export interface MilestoneRow {
+  id: string;
+  text: string;
+  dueMonth?: string;
+  size: number;
+  done: number;
+}
+
+/** Each milestone with its share of the work done; `current` is the open one. */
+export function useMilestoneRows(): { rows: MilestoneRow[]; current: number } {
+  const g = useGoalSetup();
+  const progress = useGoalProgress();
+  const repeated = g.workShape === 'repeated';
+  const sizes = milestoneSizes(g.targetCount, g.milestones.length);
+  let before = 0;
+  const rows = g.milestones.map((m, i) => {
+    const size = repeated ? sizes[i] : 1;
+    const done = Math.max(0, Math.min(size, progress.done - before));
+    before += size;
+    return { id: m.id, text: m.text, dueMonth: m.dueMonth, size, done };
+  });
+  return { rows, current: rows.findIndex(r => r.done < r.size) };
+}
