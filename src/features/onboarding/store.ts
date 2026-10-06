@@ -19,8 +19,8 @@ export const LIMITS = {
   values: { min: 3, max: 3 },
   goals: { min: 1, max: 3 },
   milestones: { min: 1, max: 10 },
-  // The course asks for ten regrets; three is the floor to move on.
-  antiGoals: { min: 3, max: 10 },
+  // Three regrets to move on, four at most.
+  antiGoals: { min: 3, max: 4 },
   targetCount: { min: 1, max: 500, initial: 24 },
   deadlineMonths: { min: 1, max: 120, initial: 16 },
 } as const;
