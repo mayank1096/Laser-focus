@@ -2,20 +2,20 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "src/assets/fonts/Satoshi-Bold.otf",
-      "sha1": "57a9e1c24984708865f7d0c31a03773912fb975f"
+      "path": "src/assets/fonts/GoogleSans-Bold.ttf",
+      "sha1": "988406971a8d34d2afb0f02919b35fa3e23e7539"
     },
     {
-      "path": "src/assets/fonts/Satoshi-Italic.otf",
-      "sha1": "1ee38a9969b628781bc30ed690f6571aca189451"
+      "path": "src/assets/fonts/GoogleSans-Italic.ttf",
+      "sha1": "28d018667be7cbaf1730f26209c5f7c05606f7ad"
     },
     {
-      "path": "src/assets/fonts/Satoshi-Medium.otf",
-      "sha1": "704faccb5fff19f25c0b914d42d135ab75794a24"
+      "path": "src/assets/fonts/GoogleSans-Medium.ttf",
+      "sha1": "ac4a20838cbac4f5a163feab8aa958e84354f36f"
     },
     {
-      "path": "src/assets/fonts/Satoshi-Regular.otf",
-      "sha1": "7dcb59994f2bee1a4ef1f6c079ba0e99b409878b"
+      "path": "src/assets/fonts/GoogleSans-Regular.ttf",
+      "sha1": "e5da47b6746a7a84435aa1caca51d368927f65ca"
     },
     {
       "path": "src/assets/fonts/YoungSerif-Regular.ttf",

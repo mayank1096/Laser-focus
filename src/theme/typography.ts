@@ -7,10 +7,10 @@ import { colors } from './colors';
  */
 export const fonts = {
   serif: 'YoungSerif-Regular',
-  sans: 'Satoshi-Regular',
-  sansMedium: 'Satoshi-Medium',
-  sansBold: 'Satoshi-Bold',
-  sansItalic: 'Satoshi-Italic',
+  sans: 'GoogleSans-Regular',
+  sansMedium: 'GoogleSans-Medium',
+  sansBold: 'GoogleSans-Bold',
+  sansItalic: 'GoogleSans-Italic',
 } as const;
 
 /** Figma letter-spacing is -2% on most styles. */

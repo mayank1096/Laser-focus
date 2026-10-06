@@ -168,7 +168,5 @@ comes from `src/utils/clock.ts` so tests can move time.
 - **iOS caveat:** iOS does not let apps list other installed apps. App blocking
   there has to go through the Screen Time APIs (FamilyControls /
   ManagedSettings / DeviceActivity), which need an Apple entitlement.
-- **Satoshi font licence:** Satoshi is under the ITF Free Font License, which
-  allows embedding in apps but not handing the font files to third parties.
-  Whoever owns the app should download their own copy from fontshare.com.
-  Young Serif is under the OFL.
+- **Fonts:** Google Sans (UI) and Young Serif (display), both under the SIL
+  Open Font License.

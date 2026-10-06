@@ -56,11 +56,11 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Satoshi-Bold.otf</string>
-		<string>Satoshi-Medium.otf</string>
-		<string>Satoshi-Italic.otf</string>
-		<string>Satoshi-Regular.otf</string>
 		<string>YoungSerif-Regular.ttf</string>
+		<string>GoogleSans-Regular.ttf</string>
+		<string>GoogleSans-Medium.ttf</string>
+		<string>GoogleSans-Italic.ttf</string>
+		<string>GoogleSans-Bold.ttf</string>
 	</array>
 </dict>
 </plist>
