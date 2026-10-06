@@ -21,7 +21,7 @@ const DONE_SIZE = 30;
 const TICK_LENGTH = 16;
 
 /**
- * "Allow" that, once granted, folds into a green circle and draws a tick.
+ * "Allow" that, once granted, folds into a black circle and draws a tick.
  */
 export function AllowButton({
   granted,
