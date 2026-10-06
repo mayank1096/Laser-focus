@@ -7,4 +7,6 @@ export const art = {
   bowShoulders: require('./images/warrior-bow-shoulders.jpg'),
   antiGoal: require('./images/warrior-antigoal.jpg'),
   ridge: require('./images/warrior-ridge.jpg'),
+  /** Figma 2.01 Home's blurred saffron glow, exported 1:1 (402 × 801). */
+  homeGlow: require('./images/home-glow.jpg'),
 };

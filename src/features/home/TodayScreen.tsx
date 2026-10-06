@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, {
-  Circle,
-  Defs,
-  Ellipse,
-  Line,
-  RadialGradient,
-  Stop,
-} from 'react-native-svg';
+import Svg, { Circle, Line } from 'react-native-svg';
+import { art } from '../../assets/art';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
 import { AppText } from '../../components/AppText';
 import { rise } from '../../components/QuestionHeader';
@@ -32,7 +33,10 @@ import { dayMark, useSessions, type DayMark } from '../session/store';
 /** Squares in the journey grid: three rows of nineteen. */
 const PER_ROW = 19;
 const ROWS = 3;
+/** Where Figma's stone panel cuts the glow, and the glow art's height. */
 const GLOW_HEIGHT = 445;
+const GLOW_ART_HEIGHT = 801;
+const DESIGN_WIDTH = 402;
 
 const WHITE_80 = 'rgba(255, 255, 255, 0.8)';
 const WHITE_22 = 'rgba(255, 255, 255, 0.22)';
@@ -65,6 +69,8 @@ function timeLeft(days: number): string {
  */
 export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const scale = width / DESIGN_WIDTH;
   const date = todayISO();
   const g = useGoalSetup();
   const planning = usePlanning();
@@ -103,31 +109,25 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.glow} pointerEvents="none">
-          <Svg width="100%" height={GLOW_HEIGHT}>
-            <Defs>
-              <RadialGradient id="home-glow" cx="50%" cy="20%" r="75%">
-                <Stop offset="0" stopColor="#E25E00" stopOpacity="0.78" />
-                <Stop offset="0.55" stopColor="#E9782F" stopOpacity="0.62" />
-                <Stop offset="1" stopColor="#EE9A62" stopOpacity="0.55" />
-              </RadialGradient>
-            </Defs>
-            <Ellipse
-              cx="50%"
-              cy={GLOW_HEIGHT * 0.2}
-              rx="120%"
-              ry={GLOW_HEIGHT * 1.1}
-              fill="url(#home-glow)"
-            />
-          </Svg>
+        {/* Figma's blurred saffron ellipse, exported 1:1; the stone panel
+            cuts it at y 445 just as the frame does. */}
+        <View
+          style={[styles.glow, { height: GLOW_HEIGHT * scale }]}
+          pointerEvents="none"
+        >
+          <Image
+            source={art.homeGlow}
+            style={{ width, height: GLOW_ART_HEIGHT * scale }}
+            resizeMode="cover"
+          />
         </View>
 
-        <View style={[styles.hero, { paddingTop: insets.top + 12 }]}>
+        <View style={[styles.hero, { paddingTop: insets.top + 6 }]}>
           {/* The reminder hangs from two dashed strings. */}
           <Svg
             style={styles.strings}
             width="100%"
-            height={insets.top + 12}
+            height={insets.top + 6}
             pointerEvents="none"
           >
             {['9.5%', '90.5%'].map(x => (
@@ -136,7 +136,7 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
                 x1={x}
                 x2={x}
                 y1={0}
-                y2={insets.top + 12}
+                y2={insets.top + 6}
                 stroke={colors.white}
                 strokeDasharray="3 3"
               />
@@ -415,7 +415,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: GLOW_HEIGHT,
     overflow: 'hidden',
   },
   hero: {
