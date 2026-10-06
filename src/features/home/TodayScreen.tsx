@@ -13,6 +13,7 @@ import Svg, { Circle, Line } from 'react-native-svg';
 import { art } from '../../assets/art';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
 import { AppText } from '../../components/AppText';
+import { GradientPill } from '../../components/GradientPill';
 import { rise } from '../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
 import type { Id, Priority } from '../../types/models';
@@ -144,9 +145,11 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
           </Svg>
           {value ? (
             <Animated.View entering={rise(0)} style={styles.reminder}>
-              <AppText style={styles.reminderText} numberOfLines={2}>
-                {`Remember you said: “${value}”`}
-              </AppText>
+              <GradientPill radius={10}>
+                <AppText style={styles.reminderText} numberOfLines={2}>
+                  {`Remember you said: “${value}”`}
+                </AppText>
+              </GradientPill>
             </Animated.View>
           ) : null}
 
@@ -428,11 +431,6 @@ const styles = StyleSheet.create({
   },
   reminder: {
     alignSelf: 'stretch',
-    alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 9,
-    backgroundColor: colors.white,
   },
   reminderText: {
     ...sans(13, 'medium'),
