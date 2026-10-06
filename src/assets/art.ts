@@ -6,4 +6,5 @@ export const art = {
   kneeling: require('./images/warrior-kneeling.jpg'),
   bowShoulders: require('./images/warrior-bow-shoulders.jpg'),
   antiGoal: require('./images/warrior-antigoal.jpg'),
+  ridge: require('./images/warrior-ridge.jpg'),
 };
