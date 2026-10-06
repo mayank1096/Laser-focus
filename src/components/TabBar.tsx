@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
+  interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -17,7 +18,7 @@ import BookOpen from '../assets/icons/book-open.svg';
 import ListChecks from '../assets/icons/list-checks.svg';
 import Target from '../assets/icons/target.svg';
 import User from '../assets/icons/user.svg';
-import { colors, motion, radii, spacing, typography } from '../theme';
+import { colors, radii, springs, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 
 export type TabId = 'today' | 'book' | 'tasks' | 'account';
@@ -30,16 +31,16 @@ export const TABS: { id: TabId; label: string; Icon: React.FC<SvgProps> }[] = [
 ];
 
 /** Height the floating bar takes from the bottom of the screen. */
-export const TAB_BAR_CLEARANCE = 110;
+export const TAB_BAR_CLEARANCE = 104;
 
-interface Box {
-  x: number;
-  width: number;
-}
+const CAPSULE = '#16110E';
+const ICON_IDLE = 'rgba(244, 238, 230, 0.55)';
 
 /**
- * The floating navigation pill. The saffron marker slides to the chosen
- * tab rather than jumping.
+ * The menu: a small dark capsule floating above the content. Only the tab
+ * you're on says its name — it opens into a saffron pill on a morph spring
+ * while the others stay quiet icons — so the bar reads "you are here"
+ * instead of a row of four labels competing for attention.
  */
 export function TabBar({
   active,
@@ -47,90 +48,117 @@ export function TabBar({
 }: {
   active: TabId;
   onChange: (tab: TabId) => void;
-  /** Kept for callers; the floating pill is the same on every tab. */
+  /** Kept for callers; the capsule is the same on every tab. */
   surface?: string;
 }) {
   const insets = useSafeAreaInsets();
-  const [boxes, setBoxes] = useState<Partial<Record<TabId, Box>>>({});
-  const x = useSharedValue(0);
-  const width = useSharedValue(0);
-  const target = boxes[active];
-
-  useEffect(() => {
-    if (!target) {
-      return;
-    }
-    // First placement is instant; later moves glide.
-    if (width.value === 0) {
-      x.value = target.x;
-      width.value = target.width;
-    } else {
-      x.value = withSpring(target.x, motion.spring);
-      width.value = withSpring(target.width, motion.spring);
-    }
-  }, [target, x, width]);
-
-  const markerStyle = useAnimatedStyle(() => ({
-    width: width.value,
-    transform: [{ translateX: x.value }],
-    opacity: width.value > 0 ? 1 : 0,
-  }));
-
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 12) + 6 }]}
+      style={[styles.dock, { paddingBottom: Math.max(insets.bottom, 14) + 4 }]}
     >
-      {/* Content fades to white behind the floating bar. */}
-      <Svg style={styles.fade} width="100%" height={177} pointerEvents="none">
+      {/* Content fades out behind the capsule. */}
+      <Svg style={styles.fade} width="100%" height={150} pointerEvents="none">
         <Defs>
           <LinearGradient id="tab-fade" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0.14" stopColor="#F7F4F2" stopOpacity="0" />
-            <Stop offset="0.42" stopColor={colors.white} stopOpacity="1" />
+            <Stop offset="0" stopColor="#F7F4F2" stopOpacity="0" />
+            <Stop offset="0.55" stopColor="#F7F4F2" stopOpacity="0.92" />
+            <Stop offset="1" stopColor="#F7F4F2" stopOpacity="1" />
           </LinearGradient>
         </Defs>
-        <Rect width="100%" height={177} fill="url(#tab-fade)" />
+        <Rect width="100%" height={150} fill="url(#tab-fade)" />
       </Svg>
-      <View style={styles.bar} accessibilityRole="tablist">
-        <Animated.View style={[styles.marker, markerStyle]} />
-        {TABS.map(({ id, label, Icon }) => {
-          const selected = id === active;
-          const tint = selected ? colors.ink : colors.textFaint;
-          return (
-            <Pressable
-              key={id}
-              testID={`tab-${id}`}
-              accessibilityRole="tab"
-              accessibilityState={{ selected }}
-              accessibilityLabel={label}
-              onLayout={e => {
-                const { x: bx, width: bw } = e.nativeEvent.layout;
-                setBoxes(prev =>
-                  prev[id]?.x === bx && prev[id]?.width === bw
-                    ? prev
-                    : { ...prev, [id]: { x: bx, width: bw } },
-                );
-              }}
-              onPress={() => {
-                if (!selected) {
-                  haptics.selection();
-                  onChange(id);
-                }
-              }}
-              style={styles.tab}
-            >
-              <Icon width={18} height={18} color={tint} strokeWidth={1.8} />
-              <Animated.Text
-                style={[typography.label, styles.label, { color: tint }]}
-                numberOfLines={1}
-              >
-                {label}
-              </Animated.Text>
-            </Pressable>
-          );
-        })}
+      <View style={styles.capsule} accessibilityRole="tablist">
+        {TABS.map(tab => (
+          <Tab
+            key={tab.id}
+            {...tab}
+            selected={tab.id === active}
+            onPress={() => {
+              if (tab.id !== active) {
+                haptics.selection();
+                onChange(tab.id);
+              }
+            }}
+          />
+        ))}
       </View>
     </View>
+  );
+}
+
+function Tab({
+  id,
+  label,
+  Icon,
+  selected,
+  onPress,
+}: {
+  id: TabId;
+  label: string;
+  Icon: React.FC<SvgProps>;
+  selected: boolean;
+  onPress: () => void;
+}) {
+  const [labelWidth, setLabelWidth] = useState(0);
+  const on = useSharedValue(selected ? 1 : 0);
+  const press = useSharedValue(1);
+
+  useEffect(() => {
+    on.value = withSpring(selected ? 1 : 0, springs.morph);
+  }, [selected, on]);
+
+  const pillStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      on.value,
+      [0, 1],
+      ['rgba(250, 140, 34, 0)', colors.saffron],
+    ),
+    transform: [{ scale: press.value }],
+  }));
+  const labelStyle = useAnimatedStyle(() => ({
+    width: Math.max(0, on.value) * (labelWidth + 8),
+    opacity: on.value,
+  }));
+
+  return (
+    <Pressable
+      testID={`tab-${id}`}
+      accessibilityRole="tab"
+      accessibilityState={{ selected }}
+      accessibilityLabel={label}
+      hitSlop={6}
+      onPress={onPress}
+      onPressIn={() => {
+        press.value = withSpring(0.92, springs.snappy);
+      }}
+      onPressOut={() => {
+        press.value = withSpring(1, springs.snappy);
+      }}
+    >
+      <Animated.View style={[styles.tab, pillStyle]}>
+        <Icon
+          width={20}
+          height={20}
+          color={selected ? CAPSULE : ICON_IDLE}
+          strokeWidth={1.8}
+        />
+        <Animated.View style={[styles.labelSlot, labelStyle]}>
+          <Text numberOfLines={1} style={[typography.label, styles.label]}>
+            {label}
+          </Text>
+        </Animated.View>
+      </Animated.View>
+      {/* Measures the label once, so the pill knows how far to open. */}
+      <Text
+        style={[typography.label, styles.measure]}
+        onLayout={e => setLabelWidth(e.nativeEvent.layout.width)}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -142,40 +170,42 @@ const styles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
   },
-  bar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    padding: spacing.sm,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    backgroundColor: colors.white,
-    boxShadow: '0px 14px 27px rgba(0, 0, 0, 0.06)',
-  },
-  marker: {
-    position: 'absolute',
-    top: spacing.sm,
-    bottom: spacing.sm,
-    left: 0,
-    borderRadius: radii.pill,
-    backgroundColor: colors.saffron,
-  },
-  tab: {
-    alignItems: 'center',
-    gap: 2,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-  },
-  label: {
-    fontSize: 12,
-  },
   fade: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    height: 177,
+  },
+  capsule: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 6,
+    borderRadius: radii.pill,
+    backgroundColor: CAPSULE,
+    boxShadow: '0px 16px 32px rgba(40, 20, 8, 0.28)',
+  },
+  tab: {
+    height: 46,
+    minWidth: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 15,
+    borderRadius: radii.pill,
+  },
+  labelSlot: {
+    overflow: 'hidden',
+    alignItems: 'flex-start',
+  },
+  label: {
+    paddingLeft: 8,
+    color: CAPSULE,
+    fontFamily: typography.bodyBold.fontFamily,
+  },
+  measure: {
+    position: 'absolute',
+    opacity: 0,
+    fontFamily: typography.bodyBold.fontFamily,
   },
 });
