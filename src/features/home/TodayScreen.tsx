@@ -35,7 +35,7 @@ import { dayMark, useSessions, type DayMark } from '../session/store';
 const PER_ROW = 19;
 const ROWS = 3;
 /** Where Figma's stone panel cuts the glow, and the glow art's height. */
-const GLOW_HEIGHT = 445;
+const GLOW_HEIGHT = 482;
 const GLOW_ART_HEIGHT = 801;
 const DESIGN_WIDTH = 402;
 
@@ -438,9 +438,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   goalBlock: {
-    marginTop: 23,
+    marginTop: 34,
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   eyebrow: {
     ...sans(11, 'medium'),
@@ -458,8 +458,8 @@ const styles = StyleSheet.create({
   },
   stats: {
     alignSelf: 'stretch',
-    marginTop: 14,
-    gap: 8,
+    marginTop: 26,
+    gap: 12,
   },
   statsRow: {
     flexDirection: 'row',
@@ -515,7 +515,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   card: {
-    marginTop: 24,
+    marginTop: 36,
     marginHorizontal: 22,
     padding: 16,
     gap: 20,
@@ -583,9 +583,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.5)',
   },
   milestones: {
-    marginTop: 25,
+    marginTop: 36,
     marginHorizontal: 22,
-    gap: 24,
+    gap: 28,
   },
   milestone: {
     gap: 10,
