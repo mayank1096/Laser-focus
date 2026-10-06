@@ -1,3 +1,4 @@
+import { OrbSplash } from '../components/OrbOverlay';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -86,8 +87,9 @@ const noSwipe = { gestureEnabled: false };
 export function RootNavigator() {
   const hydrated = useHydrated();
   if (!hydrated) {
-    // Reading saved progress takes a few milliseconds; the splash covers it.
-    return null;
+    // Reading saved progress usually takes milliseconds; a slow phone sees
+    // the orb rather than a blank screen.
+    return <OrbSplash />;
   }
 
   return (

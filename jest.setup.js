@@ -21,3 +21,11 @@ jest.mock('react-native-haptic-feedback', () => ({
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest'),
 );
+
+// The thought-orb draws with Skia, which has no native side under Jest.
+jest.mock('./src/components/orb', () => {
+  const { View } = require('react-native');
+  return {
+    ThinkingOrb: props => require('react').createElement(View, props),
+  };
+});

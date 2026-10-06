@@ -86,7 +86,7 @@ export function RulerPicker({
     const target = Math.round(position.value / SPACING) * SPACING;
     position.value = withSpring(
       Math.min(maxPosition, Math.max(0, target)),
-      motion.spring,
+      motion.pressSpring,
     );
   };
 

@@ -1,3 +1,4 @@
+import { SegmentedControl } from '../../components/SegmentedControl';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
@@ -21,7 +22,7 @@ import Svg, {
 } from 'react-native-svg';
 import { AppText } from '../../components/AppText';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, radii, spacing, typography } from '../../theme';
+import { colors, motion, spacing, typography } from '../../theme';
 import { formatMinutes } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { planFor, usePlanning } from '../planning/store';
@@ -203,31 +204,12 @@ export function SessionDoneScreen({
         <AppText variant="heading" style={styles.outcome}>
           {view?.sheet?.outcome ?? view?.task?.text ?? ''}
         </AppText>
-        <View style={styles.segment} accessibilityRole="radiogroup">
-          {CHOICES.map(c => {
-            const on = finished === c.id;
-            return (
-              <Pressable
-                key={c.id}
-                testID={`finished-${c.id}`}
-                accessibilityRole="radio"
-                accessibilityState={{ selected: on }}
-                onPress={() => {
-                  haptics.selection();
-                  setFinished(c.id);
-                }}
-                style={[styles.segItem, on && styles.segOn]}
-              >
-                <AppText
-                  variant="bodyMedium"
-                  style={{ color: on ? colors.white : colors.textMuted }}
-                >
-                  {c.label}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
+        <SegmentedControl
+          segments={CHOICES}
+          value={finished}
+          onChange={setFinished}
+          testIDPrefix="finished"
+        />
         <AppText variant="eyebrow" style={styles.gap}>
           The result, in one line
         </AppText>
@@ -314,23 +296,6 @@ const styles = StyleSheet.create({
   },
   outcome: {
     fontSize: 16,
-  },
-  segment: {
-    flexDirection: 'row',
-    padding: 4,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    backgroundColor: colors.white,
-  },
-  segItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 11,
-    borderRadius: radii.pill,
-  },
-  segOn: {
-    backgroundColor: colors.night,
   },
   gap: {
     marginTop: spacing.sm,

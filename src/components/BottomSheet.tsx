@@ -22,7 +22,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
-import { colors, motion, spacing } from '../theme';
+import { colors, motion, spacing, springs } from '../theme';
 import { SurfaceContext } from './Surface';
 
 export interface BottomSheetProps {
@@ -59,7 +59,7 @@ export function BottomSheet({
     if (visible) {
       setMounted(true);
       drag.value = 0;
-      offset.value = withSpring(0, { damping: 22, stiffness: 220, mass: 0.9 });
+      offset.value = withSpring(0, springs.smooth);
     } else if (mounted) {
       offset.value = withTiming(
         OFFSCREEN,

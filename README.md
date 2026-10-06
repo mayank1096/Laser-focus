@@ -168,5 +168,12 @@ comes from `src/utils/clock.ts` so tests can move time.
 - **iOS caveat:** iOS does not let apps list other installed apps. App blocking
   there has to go through the Screen Time APIs (FamilyControls /
   ManagedSettings / DeviceActivity), which need an Apple entitlement.
+- **Loading orbs:** `src/components/orb` is the React Native port of
+  [thinking-orbs](https://libraries.dev/orbs) (MIT), vendored because the
+  port isn't on npm yet. It draws with `@shopify/react-native-skia`, so run
+  `pod install` after pulling.
+- **Motion:** spring and timing tokens follow Arc UI's motion system — see
+  `src/theme/motion.ts` (`springs.snappy`, `smooth`, `morph`, `responsive`,
+  `gentle`).
 - **Fonts:** Google Sans (UI) and Young Serif (display), both under the SIL
   Open Font License.

@@ -1,3 +1,4 @@
+import { OrbOverlay } from '../../../components/OrbOverlay';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Animated, {
@@ -75,86 +76,96 @@ export function CodeScreen({ navigation, route }: RootScreenProps<'Code'>) {
   }));
 
   return (
-    <SimpleScreen
-      testID="code"
-      onBack={() => navigation.goBack()}
-      footer={
-        <PrimaryButton
-          testID="verify"
-          label={checking ? 'Checking…' : 'Verify'}
-          disabled={code.length < LENGTH || checking}
-          onPress={() => verify(code)}
+    <>
+      <SimpleScreen
+        testID="code"
+        onBack={() => navigation.goBack()}
+        footer={
+          <PrimaryButton
+            testID="verify"
+            label={checking ? 'Checking…' : 'Verify'}
+            disabled={code.length < LENGTH || checking}
+            onPress={() => verify(code)}
+          />
+        }
+      >
+        <QuestionHeader
+          eyebrow="Sign in"
+          title="Enter the code"
+          subtitle={`Sent to +91 ${formatIndianNumber(phone)}`}
         />
-      }
-    >
-      <QuestionHeader
-        eyebrow="Sign in"
-        title="Enter the code"
-        subtitle={`Sent to +91 ${formatIndianNumber(phone)}`}
-      />
-      <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
-        <AppText variant="label" style={styles.change}>
-          Change number
-        </AppText>
-      </Pressable>
-      <QuestionBody gap={24}>
-        <Pressable onPress={() => input.current?.focus()} accessible={false}>
-          <Animated.View style={[styles.boxes, rowStyle]}>
-            {Array.from({ length: LENGTH }, (_, i) => {
-              const filled = i < code.length;
-              const current = i === code.length;
-              return (
-                <View
-                  key={i}
-                  style={[
-                    styles.box,
-                    current && styles.current,
-                    wrong && styles.wrong,
-                  ]}
-                >
-                  <AppText variant="heading">{filled ? code[i] : ''}</AppText>
-                </View>
-              );
-            })}
-          </Animated.View>
-        </Pressable>
-        <TextInput
-          ref={input}
-          testID="code-input"
-          accessibilityLabel="6-digit code"
-          value={code}
-          onChangeText={onChange}
-          keyboardType="number-pad"
-          textContentType="oneTimeCode"
-          autoComplete="sms-otp"
-          autoFocus
-          maxLength={LENGTH}
-          caretHidden
-          style={styles.hidden}
-        />
-        <View style={styles.meta}>
-          <AppText variant="caption">
-            {wrong
-              ? 'That code didn’t match. Try again.'
-              : 'Reading your messages…'}
+        <Pressable onPress={() => navigation.goBack()} hitSlop={8}>
+          <AppText variant="label" style={styles.change}>
+            Change number
           </AppText>
-          <Pressable
-            testID="resend"
-            disabled={wait > 0}
-            onPress={() => {
-              auth.sendCode(`91${phone}`);
-              setWait(RESEND_AFTER);
-            }}
-          >
-            <AppText variant="caption" style={wait > 0 ? null : styles.resend}>
-              {wait > 0
-                ? `Resend in 0:${String(wait).padStart(2, '0')}`
-                : 'Resend code'}
-            </AppText>
+        </Pressable>
+        <QuestionBody gap={24}>
+          <Pressable onPress={() => input.current?.focus()} accessible={false}>
+            <Animated.View style={[styles.boxes, rowStyle]}>
+              {Array.from({ length: LENGTH }, (_, i) => {
+                const filled = i < code.length;
+                const current = i === code.length;
+                return (
+                  <View
+                    key={i}
+                    style={[
+                      styles.box,
+                      current && styles.current,
+                      wrong && styles.wrong,
+                    ]}
+                  >
+                    <AppText variant="heading">{filled ? code[i] : ''}</AppText>
+                  </View>
+                );
+              })}
+            </Animated.View>
           </Pressable>
-        </View>
-      </QuestionBody>
-    </SimpleScreen>
+          <TextInput
+            ref={input}
+            testID="code-input"
+            accessibilityLabel="6-digit code"
+            value={code}
+            onChangeText={onChange}
+            keyboardType="number-pad"
+            textContentType="oneTimeCode"
+            autoComplete="sms-otp"
+            autoFocus
+            maxLength={LENGTH}
+            caretHidden
+            style={styles.hidden}
+          />
+          <View style={styles.meta}>
+            <AppText variant="caption">
+              {wrong
+                ? 'That code didn’t match. Try again.'
+                : 'Reading your messages…'}
+            </AppText>
+            <Pressable
+              testID="resend"
+              disabled={wait > 0}
+              onPress={() => {
+                auth.sendCode(`91${phone}`);
+                setWait(RESEND_AFTER);
+              }}
+            >
+              <AppText
+                variant="caption"
+                style={wait > 0 ? null : styles.resend}
+              >
+                {wait > 0
+                  ? `Resend in 0:${String(wait).padStart(2, '0')}`
+                  : 'Resend code'}
+              </AppText>
+            </Pressable>
+          </View>
+        </QuestionBody>
+      </SimpleScreen>
+      <OrbOverlay
+        visible={checking}
+        label="Checking the code…"
+        state="searching"
+      />
+    </>
   );
 }
 

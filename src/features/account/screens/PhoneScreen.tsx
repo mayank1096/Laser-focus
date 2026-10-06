@@ -1,3 +1,4 @@
+import { OrbOverlay } from '../../../components/OrbOverlay';
 import React, { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { AppText } from '../../../components/AppText';
@@ -36,52 +37,59 @@ export function PhoneScreen({ navigation, route }: RootScreenProps<'Phone'>) {
   };
 
   return (
-    <SimpleScreen
-      testID="phone"
-      onBack={() => navigation.goBack()}
-      footer={
-        <PrimaryButton
-          testID="send-code"
-          label={sending ? 'Sending…' : 'Send code'}
-          disabled={!ready || sending}
-          onPress={send}
+    <>
+      <SimpleScreen
+        testID="phone"
+        onBack={() => navigation.goBack()}
+        footer={
+          <PrimaryButton
+            testID="send-code"
+            label={sending ? 'Sending…' : 'Send code'}
+            disabled={!ready || sending}
+            onPress={send}
+          />
+        }
+      >
+        <QuestionHeader
+          eyebrow={mode === 'signin' ? 'Welcome back' : 'Sign in'}
+          title="Your phone number"
+          subtitle="We’ll text you a 6-digit code. No calls, no spam."
         />
-      }
-    >
-      <QuestionHeader
-        eyebrow={mode === 'signin' ? 'Welcome back' : 'Sign in'}
-        title="Your phone number"
-        subtitle="We’ll text you a 6-digit code. No calls, no spam."
+        <QuestionBody gap={28}>
+          <View style={styles.row}>
+            <View style={styles.code}>
+              <AppText variant="body">+91</AppText>
+            </View>
+            <View style={[styles.field, digits ? styles.active : null]}>
+              <TextInput
+                testID="phone-input"
+                accessibilityLabel="Phone number"
+                value={formatIndianNumber(digits)}
+                onChangeText={t => setDigits(t.replace(/\D/g, '').slice(0, 10))}
+                keyboardType="number-pad"
+                textContentType="telephoneNumber"
+                autoComplete="tel"
+                autoFocus
+                placeholder="98765 43210"
+                placeholderTextColor={colors.textGhost}
+                selectionColor={colors.saffron}
+                cursorColor={colors.saffron}
+                style={[typography.heading, styles.input, styles.digits]}
+                onSubmitEditing={() => ready && send()}
+              />
+            </View>
+          </View>
+          <AppText variant="caption" style={styles.hint}>
+            Use the number on this phone so the code fills in by itself.
+          </AppText>
+        </QuestionBody>
+      </SimpleScreen>
+      <OrbOverlay
+        visible={sending}
+        label="Sending your code…"
+        state="connecting"
       />
-      <QuestionBody gap={28}>
-        <View style={styles.row}>
-          <View style={styles.code}>
-            <AppText variant="body">+91</AppText>
-          </View>
-          <View style={[styles.field, digits ? styles.active : null]}>
-            <TextInput
-              testID="phone-input"
-              accessibilityLabel="Phone number"
-              value={formatIndianNumber(digits)}
-              onChangeText={t => setDigits(t.replace(/\D/g, '').slice(0, 10))}
-              keyboardType="number-pad"
-              textContentType="telephoneNumber"
-              autoComplete="tel"
-              autoFocus
-              placeholder="98765 43210"
-              placeholderTextColor={colors.textGhost}
-              selectionColor={colors.saffron}
-              cursorColor={colors.saffron}
-              style={[typography.heading, styles.input, styles.digits]}
-              onSubmitEditing={() => ready && send()}
-            />
-          </View>
-        </View>
-        <AppText variant="caption" style={styles.hint}>
-          Use the number on this phone so the code fills in by itself.
-        </AppText>
-      </QuestionBody>
-    </SimpleScreen>
+    </>
   );
 }
 

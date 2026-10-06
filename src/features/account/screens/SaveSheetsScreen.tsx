@@ -1,3 +1,4 @@
+import { OrbOverlay } from '../../../components/OrbOverlay';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
@@ -119,6 +120,11 @@ export function SaveSheetsScreen({
           Sign in to keep your sheets safe. We never post anything.
         </AppText>
       </Animated.View>
+      <OrbOverlay
+        visible={busy !== null}
+        label={`Connecting to ${busy === 'apple' ? 'Apple' : 'Google'}…`}
+        state="connecting"
+      />
     </View>
   );
 }
