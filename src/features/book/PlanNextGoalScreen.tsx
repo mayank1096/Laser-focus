@@ -6,7 +6,7 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography } from '../../theme';
 import { useGoalSetup } from '../onboarding/store';
 
 const STEPS = [
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   },
   n: {
     ...typography.button,
+    fontFamily: fonts.sansMedium,
     color: colors.saffron,
   },
 });

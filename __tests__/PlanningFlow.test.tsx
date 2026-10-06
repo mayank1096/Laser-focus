@@ -1,3 +1,4 @@
+import { textContent } from '../test/flowHelpers';
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
@@ -9,8 +10,6 @@ jest.useFakeTimers();
 // Sunday evening, planning Monday.
 jest.setSystemTime(new Date(2026, 9, 4, 21, 30));
 const TOMORROW = '2026-10-05';
-
-const textContent = (tree: ReactTestRenderer) => JSON.stringify(tree.toJSON());
 
 const host = (tree: ReactTestRenderer, id: string) =>
   tree.root

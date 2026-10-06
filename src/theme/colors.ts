@@ -6,7 +6,8 @@ export const colors = {
   saffron: '#FA8C22',
   saffronGlow: 'rgba(250, 140, 34, 0.75)',
   /** Warm shadow under primary buttons on light screens. */
-  buttonShadow: '#E2AE7A',
+  /** Kept soft: a warm lift under the button, not an orange halo. */
+  buttonShadow: 'rgba(196, 120, 50, 0.16)',
   /** Deep orange: the session hero glow and gentle warnings. */
   ember: '#E25E00',
 
@@ -14,6 +15,8 @@ export const colors = {
   /** Warm black for focus and sessions: the dark the one light sits in. */
   night: '#0E0A08',
   charcoal: '#1A1A1A',
+  /** Warm off-white for text and buttons on night screens. */
+  cream: '#F4EEE6',
   white: '#FFFFFF',
 
   /** Background of the Anti-goal sheet. */

@@ -11,6 +11,7 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 import { colors, motion, radii, typography } from '../theme';
 import { haptics } from '../utils/haptics';
+import { sansDigits } from './Numerals';
 
 export interface HoldButtonProps {
   label: string;
@@ -119,7 +120,9 @@ export function HoldButton({
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <Animated.View style={[styles.fill, fillStyle]} />
         </View>
-        <Animated.Text style={typography.button}>{label}</Animated.Text>
+        <Animated.Text style={typography.button}>
+          {sansDigits(label)}
+        </Animated.Text>
       </Animated.View>
     </Pressable>
   );

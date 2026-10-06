@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, motion, radii, typography } from '../theme';
 import { haptics } from '../utils/haptics';
+import { sansDigits } from './Numerals';
 
 type ShadowTone = 'ember' | 'dark' | 'none';
 
@@ -22,12 +23,14 @@ export interface PrimaryButtonProps {
    */
   disabled?: boolean;
   shadow?: ShadowTone;
+  /** `light`: a cream button for night screens, where charcoal would vanish. */
+  tone?: 'dark' | 'light';
   style?: ViewStyle;
   testID?: string;
 }
 
 const SHADOWS: Record<Exclude<ShadowTone, 'none'>, string> = {
-  ember: `0px 13px 17px ${colors.buttonShadow}`,
+  ember: `0px 10px 24px ${colors.buttonShadow}`,
   dark: '0px 13px 17px rgba(0, 0, 0, 0.4)',
 };
 
@@ -36,9 +39,12 @@ export function PrimaryButton({
   onPress,
   disabled = false,
   shadow = 'ember',
+  tone = 'dark',
   style,
   testID,
 }: PrimaryButtonProps) {
+  const fill = tone === 'light' ? colors.cream : colors.charcoal;
+  const ink = tone === 'light' ? colors.ink : colors.white;
   const scale = useSharedValue(1);
   const shakeX = useSharedValue(0);
   const enabled = useSharedValue(disabled ? 0 : 1);
@@ -51,7 +57,7 @@ export function PrimaryButton({
     backgroundColor: interpolateColor(
       enabled.value,
       [0, 1],
-      [colors.buttonDisabled, colors.charcoal],
+      [colors.buttonDisabled, fill],
     ),
     transform: [{ translateX: shakeX.value }, { scale: scale.value }],
   }));
@@ -66,7 +72,7 @@ export function PrimaryButton({
     color: interpolateColor(
       enabled.value,
       [0, 1],
-      [colors.textOnDisabled, colors.white],
+      [colors.textOnDisabled, ink],
     ),
   }));
 
@@ -109,7 +115,7 @@ export function PrimaryButton({
       >
         <Animated.View style={[styles.button, buttonStyle]}>
           <Animated.Text style={[typography.button, labelStyle]}>
-            {label}
+            {sansDigits(label)}
           </Animated.Text>
         </Animated.View>
       </Pressable>
@@ -136,6 +142,13 @@ const styles = StyleSheet.create({
   outlineLabel: {
     color: colors.ink,
   },
+  outlineDark: {
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  outlineLabelDark: {
+    color: colors.white,
+  },
   shadow: {
     ...StyleSheet.absoluteFill,
     borderRadius: radii.button,
@@ -150,9 +163,12 @@ export function OutlineButton({
   style,
   testID,
   icon,
-}: Omit<PrimaryButtonProps, 'disabled' | 'shadow'> & {
+  onDark = false,
+}: Omit<PrimaryButtonProps, 'disabled' | 'shadow' | 'tone'> & {
   /** Shown before the label, e.g. a Google or Apple mark. */
   icon?: React.ReactNode;
+  /** On a night screen: a hairline outline on the dark ground. */
+  onDark?: boolean;
 }) {
   const scale = useSharedValue(1);
   const pressStyle = useAnimatedStyle(() => ({
@@ -175,10 +191,23 @@ export function OutlineButton({
         scale.value = withSpring(1, motion.pressSpring);
       }}
     >
-      <Animated.View style={[styles.button, styles.outline, pressStyle]}>
+      <Animated.View
+        style={[
+          styles.button,
+          styles.outline,
+          onDark && styles.outlineDark,
+          pressStyle,
+        ]}
+      >
         {icon}
-        <Animated.Text style={[typography.button, styles.outlineLabel]}>
-          {label}
+        <Animated.Text
+          style={[
+            typography.button,
+            styles.outlineLabel,
+            onDark && styles.outlineLabelDark,
+          ]}
+        >
+          {sansDigits(label)}
         </Animated.Text>
       </Animated.View>
     </Pressable>

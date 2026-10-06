@@ -14,7 +14,7 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { AppText } from '../../../components/AppText';
-import { colors, motion, spacing, typography } from '../../../theme';
+import { colors, fonts, motion, spacing, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { RitualBar } from './RitualBar';
 
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   number: {
-    fontFamily: typography.display.fontFamily,
+    fontFamily: fonts.sansMedium,
     fontSize: 168,
     lineHeight: 180,
     color: colors.saffron,

@@ -1,3 +1,4 @@
+import { textContent } from '../test/flowHelpers';
 import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
@@ -10,8 +11,6 @@ const findByTestId = (tree: ReactTestRenderer, id: string) =>
   tree.root
     .findAll(node => node.props.testID === id && typeof node.type === 'string')
     .at(-1)!;
-
-const textContent = (tree: ReactTestRenderer) => JSON.stringify(tree.toJSON());
 
 async function press(tree: ReactTestRenderer, id: string) {
   await act(async () => {
@@ -133,7 +132,7 @@ describe('goal setup flow', () => {
     await press(tree, 'next-button');
 
     // Written: now they're worth keeping safe.
-    expect(textContent(tree)).toContain('Your sheets live only on this phone.');
+    expect(textContent(tree)).toContain('This lives only on this phone.');
     expect(useGoalSetup.getState().completed).toBe(true);
     expect(useGoalSetup.getState().toPlan()).toMatchObject({
       action: 'Attempt a full-length mock test',

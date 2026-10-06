@@ -31,7 +31,7 @@ describe('account and vow', () => {
       tree = create(<App />);
     });
 
-    expect(textContent(tree)).toContain('Your sheets live only on this phone.');
+    expect(textContent(tree)).toContain('This lives only on this phone.');
     await press(tree, 'auth-phone');
     expect(textContent(tree)).toContain('Your phone number');
     await type(tree, 'phone-input', '98765 4321');

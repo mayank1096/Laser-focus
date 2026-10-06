@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { motion, spacing, typography } from '../theme';
+import { sansDigits } from './Numerals';
 
 /** Each line of a question rises in slightly after the one above it. */
 export const rise = (order: number) =>
@@ -37,7 +38,7 @@ export function QuestionHeader({
           style={typography.title}
           accessibilityRole="header"
         >
-          {title}
+          {sansDigits(title)}
         </Animated.Text>
         {subtitle ? (
           <Animated.Text entering={rise(2)} style={typography.body}>

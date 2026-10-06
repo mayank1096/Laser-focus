@@ -11,6 +11,7 @@ import Check from '../assets/icons/check.svg';
 import { colors, layout, motion, radii, spacing, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 import { useSurface } from './Surface';
+import { sansDigits } from './Numerals';
 
 export interface OptionCardProps {
   title: string;
@@ -98,7 +99,7 @@ export function OptionCard({
             <>
               <View style={styles.titleRow}>
                 <Animated.Text style={[typography.cardTitle, styles.flex]}>
-                  {title}
+                  {sansDigits(title)}
                 </Animated.Text>
                 {tag ? (
                   <Animated.Text

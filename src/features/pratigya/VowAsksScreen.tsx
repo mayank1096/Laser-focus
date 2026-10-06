@@ -11,7 +11,7 @@ import {
 } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography } from '../../theme';
 import { PRATIGYAS, useProfile } from '../account/store';
 import { VOW_STEPS } from './PathScreen';
 
@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   },
   n: {
     ...typography.button,
+    fontFamily: fonts.sansMedium,
     color: colors.saffron,
   },
   flex: {

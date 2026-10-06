@@ -18,6 +18,7 @@ import { planFor, usePlanning } from '../planning/store';
 import { useStreak } from '../progress';
 import { DayMarkIcon } from './components/DayMarkIcon';
 import { dayMark, useSessions } from './store';
+import { sansDigits } from '../../components/Numerals';
 
 const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
@@ -64,7 +65,7 @@ export function StreakMarkScreen({
         {`Day ${streak}`}
       </Animated.Text>
       <Animated.Text entering={rise(2)} style={[styles.title, styles.center]}>
-        {copy.title}
+        {sansDigits(copy.title)}
       </Animated.Text>
       <Animated.Text
         entering={rise(3)}

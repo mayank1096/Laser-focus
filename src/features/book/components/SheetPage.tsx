@@ -7,6 +7,7 @@ import { IconButton } from '../../../components/IconButton';
 import { rise } from '../../../components/QuestionHeader';
 import { SurfaceContext } from '../../../components/Surface';
 import { colors, spacing, typography } from '../../../theme';
+import { sansDigits } from '../../../components/Numerals';
 
 export interface SheetPageProps {
   eyebrow: string;
@@ -59,7 +60,7 @@ export function SheetPage({
           style={[typography.display, styles.title]}
           accessibilityRole="header"
         >
-          {title}
+          {sansDigits(title)}
         </Animated.Text>
         <Animated.Text entering={rise(2)} style={typography.body}>
           {subtitle}

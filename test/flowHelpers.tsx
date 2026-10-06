@@ -1,7 +1,25 @@
 import { act, type ReactTestRenderer } from 'react-test-renderer';
 
+type Node = ReturnType<ReactTestRenderer['toJSON']> | string;
+
+/** All text in a node, with nested spans (e.g. sans numerals) joined up. */
+const flatText = (node: Node): string => {
+  if (node == null) {
+    return '';
+  }
+  if (typeof node === 'string') {
+    return node;
+  }
+  if (Array.isArray(node)) {
+    return node.map(flatText).join('');
+  }
+  const inner = (node.children ?? []).map(flatText);
+  return node.type === 'Text' ? inner.join('') : inner.join('\n');
+};
+
+/** The tree as JSON plus its readable text, for `toContain` checks. */
 export const textContent = (tree: ReactTestRenderer) =>
-  JSON.stringify(tree.toJSON());
+  `${JSON.stringify(tree.toJSON())}\n${flatText(tree.toJSON())}`;
 
 /** The host node with a testID; screens lower in the stack stay mounted. */
 export const host = (tree: ReactTestRenderer, id: string) =>

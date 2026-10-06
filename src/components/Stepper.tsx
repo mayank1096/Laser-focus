@@ -2,7 +2,7 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Minus from '../assets/icons/minus.svg';
 import Plus from '../assets/icons/plus.svg';
-import { colors, radii, typography } from '../theme';
+import { colors, fonts, radii, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 import { AppText } from './AppText';
 
@@ -101,6 +101,7 @@ const styles = StyleSheet.create({
   },
   value: {
     ...typography.button,
+    fontFamily: fonts.sansMedium,
     color: colors.ink,
     minWidth: 16,
     textAlign: 'center',

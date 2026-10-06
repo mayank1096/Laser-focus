@@ -9,7 +9,14 @@ import {
 import { SimpleScreen } from '../../../components/SimpleScreen';
 import type { RootScreenProps } from '../../../navigation/types';
 import { auth } from '../../../services/auth';
-import { colors, layout, radii, spacing, typography } from '../../../theme';
+import {
+  colors,
+  fonts,
+  layout,
+  radii,
+  spacing,
+  typography,
+} from '../../../theme';
 
 /** 9876543210 → "98765 43210". */
 export const formatIndianNumber = (digits: string) =>
@@ -65,7 +72,7 @@ export function PhoneScreen({ navigation, route }: RootScreenProps<'Phone'>) {
               placeholderTextColor={colors.textGhost}
               selectionColor={colors.saffron}
               cursorColor={colors.saffron}
-              style={[typography.heading, styles.input]}
+              style={[typography.heading, styles.input, styles.digits]}
               onSubmitEditing={() => ready && send()}
             />
           </View>
@@ -79,6 +86,9 @@ export function PhoneScreen({ navigation, route }: RootScreenProps<'Phone'>) {
 }
 
 const styles = StyleSheet.create({
+  digits: {
+    fontFamily: fonts.sansMedium,
+  },
   row: {
     flexDirection: 'row',
     gap: spacing.md,

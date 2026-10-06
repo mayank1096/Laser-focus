@@ -13,6 +13,7 @@ import { useGoalSetup } from '../onboarding/store';
 import { usePlanning } from '../planning/store';
 import { useProfile, type Pratigya } from '../account/store';
 import { VOW_STEPS } from './PathScreen';
+import { sansDigits } from '../../components/Numerals';
 
 const DATE = new Intl.DateTimeFormat('en-IN', {
   day: 'numeric',
@@ -79,7 +80,7 @@ export function TakeVowScreen({ navigation }: RootScreenProps<'TakeVow'>) {
         मैं प्रतिज्ञा लेता हूँ।
       </Animated.Text>
       <Animated.Text entering={rise(2)} style={styles.vow}>
-        {vowText(pratigya ?? 'arjun', goal)}
+        {sansDigits(vowText(pratigya ?? 'arjun', goal))}
       </Animated.Text>
       <Animated.View entering={rise(3)} style={styles.signature}>
         <AppText style={styles.name} numberOfLines={1}>

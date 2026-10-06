@@ -17,6 +17,7 @@ import { useGoalProgress, useStreak } from '../progress';
 import { isComplete, useSessions } from '../session/store';
 import { GoalFlight } from './GoalFlight';
 import { SunDial, type DialArc } from './SunDial';
+import { sansDigits } from '../../components/Numerals';
 
 const WORDS = ['No', 'One', 'Two', 'Three'];
 const DATE = new Intl.DateTimeFormat('en-IN', {
@@ -160,7 +161,7 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
         style={styles.headline}
         accessibilityRole="header"
       >
-        {headline}
+        {sansDigits(headline)}
       </Animated.Text>
       <Animated.Text entering={rise(2)} style={[typography.body, styles.muted]}>
         {sub}
