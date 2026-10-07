@@ -68,7 +68,7 @@ describe('a focused session', () => {
       await press(tree, `check-${item}`);
     }
     await press(tree, 'next-button');
-    expect(textContent(tree)).toContain('Slow. Like a warrior monk.');
+    expect(textContent(tree)).toContain('Breathe in');
     // Three breaths of 4 + 4 + 6 seconds, then it moves on by itself.
     for (let i = 0; i < 12; i++) {
       await tick(4000);
@@ -80,7 +80,7 @@ describe('a focused session', () => {
       await tick(1500);
     }
     await hold(tree, 'values-hold');
-    expect(textContent(tree)).toContain('Look at your work.');
+    expect(textContent(tree)).toContain('Look at your work');
     await press(tree, 'tratak-skip');
     // 3, 2, 1, then Jay Shree Ram, each fading in and out.
     for (let i = 0; i < 12; i++) {

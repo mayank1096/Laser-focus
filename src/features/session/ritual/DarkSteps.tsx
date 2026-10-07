@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '../../../components/AppText';
 import { colors, fonts, motion, spacing, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
-import { CalmCircle } from './CalmCircle';
+import { BreathOrb } from './BreathOrb';
 import { RitualBar } from './RitualBar';
 
 /* ------------------------------------------------------------------------ */
@@ -25,20 +25,18 @@ const TRATAK_SECONDS = 45;
 export function TratakStep({ onDone }: { onDone: () => void }) {
   const insets = useSafeAreaInsets();
   const [left, setLeft] = useState(TRATAK_SECONDS);
-  const progress = useSharedValue(0);
   const level = useSharedValue(0.4);
   const dim = useSharedValue(0);
   const done = useRef(onDone);
   done.current = onDone;
 
   useEffect(() => {
-    progress.value = withTiming(1, {
-      duration: TRATAK_SECONDS * 1000,
-      easing: Easing.linear,
-    });
     // The orb breathes slowly, about one long breath every eight seconds.
     level.value = withRepeat(
-      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.sin) }),
+      withTiming(1, {
+        duration: 4000,
+        easing: Easing.bezier(0.42, 0, 0.58, 1),
+      }),
       -1,
       true,
     );
@@ -53,7 +51,7 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
       clearInterval(tick);
       clearTimeout(end);
     };
-  }, [progress, level, dim]);
+  }, [level, dim]);
 
   const veil = useAnimatedStyle(() => ({ opacity: dim.value * 0.75 }));
 
@@ -67,29 +65,18 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
         >
           Tratak
         </Animated.Text>
-        <Animated.Text
-          entering={FadeIn.delay(150).duration(motion.slow)}
-          style={[typography.title, styles.white, styles.title]}
-        >
-          Look at your work.
-        </Animated.Text>
-        <Animated.Text
-          entering={FadeIn.delay(300).duration(motion.slow)}
-          style={[typography.body, styles.soft]}
-        >
-          Not at me. Three deep breaths, then stare at your desk until the
-          screen wakes you.
-        </Animated.Text>
       </View>
-      <View style={styles.centre}>
-        <CalmCircle
+      <Animated.View
+        entering={FadeIn.delay(200).duration(motion.cinematic)}
+        style={styles.centre}
+      >
+        <BreathOrb
           tone="dark"
           level={level}
-          progress={progress}
-          label="Eyes on the desk"
+          label="Look at your work"
           sub={`0:${String(left).padStart(2, '0')}`}
         />
-      </View>
+      </Animated.View>
       <Pressable
         testID="tratak-skip"
         accessibilityRole="button"

@@ -13,7 +13,7 @@ import { rise } from '../../../components/QuestionHeader';
 import type { SessionSheet } from '../../../types/models';
 import { colors, motion, spacing, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
-import { CalmCircle } from './CalmCircle';
+import { BreathOrb } from './BreathOrb';
 import { CHECKLIST, PRAYERS, RITUAL_STEPS } from './content';
 
 /* ------------------------------------------------------------------------ */
@@ -166,29 +166,18 @@ export const CHECKLIST_COUNT = CHECKLIST.reduce(
 
 const PHASES = [
   { word: 'Breathe in', seconds: 4, to: 1 },
-  { word: 'Hold', seconds: 4, to: 1 },
+  { word: 'Hold', seconds: 4, to: 0.96 },
   { word: 'Breathe out', seconds: 6, to: 0 },
 ];
 const BREATHS = 3;
-const BREATH_SECONDS = PHASES.reduce((n, p) => n + p.seconds, 0);
 
 export function BreatheStep({ onDone }: { onDone: () => void }) {
   const [breath, setBreath] = useState(0);
   const [phase, setPhase] = useState(0);
   const [left, setLeft] = useState(PHASES[0].seconds);
   const level = useSharedValue(0);
-  const progress = useSharedValue(0);
   const done = useRef(onDone);
   done.current = onDone;
-
-  // The ring fills once per breath, so you always see how far into it you are.
-  useEffect(() => {
-    progress.value = 0;
-    progress.value = withTiming(1, {
-      duration: BREATH_SECONDS * 1000,
-      easing: Easing.linear,
-    });
-  }, [breath, progress]);
 
   useEffect(() => {
     const p = PHASES[phase];
@@ -198,9 +187,11 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
     } else {
       haptics.tap();
     }
+    // Even, controlled breaths: a slow start, a steady middle, a soft
+    // arrival. Hold barely moves, like lungs resting full.
     level.value = withTiming(p.to, {
       duration: p.seconds * 1000,
-      easing: Easing.inOut(Easing.sin),
+      easing: Easing.bezier(0.42, 0, 0.58, 1),
     });
     const tick = setInterval(() => setLeft(l => Math.max(1, l - 1)), 1000);
     const next = setTimeout(() => {
@@ -224,23 +215,13 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
       <Animated.Text entering={rise(0)} style={typography.eyebrow}>
         {`Breathe · ${breath + 1} of ${BREATHS}`}
       </Animated.Text>
-      <Animated.Text
-        entering={rise(1)}
-        style={[typography.title, styles.title]}
-      >
-        Slow. Like a warrior monk.
-      </Animated.Text>
-      <Animated.Text entering={rise(2)} style={typography.body}>
-        Spine straight. Eyes closed. Follow the pulse.
-      </Animated.Text>
       <Animated.View
-        entering={FadeIn.delay(300).duration(motion.slow)}
+        entering={FadeIn.delay(200).duration(motion.cinematic)}
         style={styles.breath}
         accessibilityLiveRegion="polite"
       >
-        <CalmCircle
+        <BreathOrb
           level={level}
-          progress={progress}
           label={PHASES[phase].word}
           sub={String(left)}
         />
@@ -430,7 +411,7 @@ const styles = StyleSheet.create({
     borderColor: colors.saffron,
   },
   breath: {
-    marginTop: 36,
+    marginTop: 48,
   },
   white: {
     color: colors.white,
