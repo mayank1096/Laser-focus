@@ -143,7 +143,7 @@ export function SaveSheetsScreen({
           A warrior never leaves his bow behind.
         </Animated.Text>
         <Animated.Text entering={rise(2)} style={styles.sub}>
-          Sign in, and your vow and sheets go wherever you go.
+          Sign in and your sheets go where you go.
         </Animated.Text>
 
         <Animated.View entering={rise(3)} style={styles.actions}>
