@@ -69,12 +69,6 @@ export function EnterStep({
           </View>
         ))}
       </Animated.View>
-      <Animated.Text
-        entering={rise(5)}
-        style={[typography.caption, styles.note]}
-      >
-        About 5 minutes
-      </Animated.Text>
     </>
   );
 }
@@ -394,9 +388,6 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: colors.border,
-  },
-  note: {
-    marginTop: spacing.xl,
   },
   pinned: {
     gap: spacing.sm,
