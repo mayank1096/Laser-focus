@@ -38,9 +38,9 @@ export function MilestonesStep() {
   return (
     <>
       <QuestionHeader
-        eyebrow="Steps"
-        title="What are the steps?"
-        subtitle="In order. Each one must finish something."
+        eyebrow="Milestones"
+        title="Break it into milestones."
+        subtitle="Checkpoints on the way to your goal, each with a month to finish by."
       />
       <QuestionBody>
         <ListField
@@ -49,7 +49,7 @@ export function MilestonesStep() {
           onChange={setMilestones}
           max={LIMITS.milestones.max}
           min={LIMITS.milestones.min}
-          addLabel="Add a new Milestone"
+          addLabel="Add a milestone"
           placeholder="Finish the first 10 mock tests"
           idPrefix="milestone"
           inlineTrailing
