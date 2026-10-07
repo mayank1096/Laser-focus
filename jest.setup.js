@@ -29,3 +29,8 @@ jest.mock('./src/components/orb', () => {
     ThinkingOrb: props => require('react').createElement(View, props),
   };
 });
+
+// The aurora is a Skia shader, which has no native side under Jest.
+jest.mock('./src/components/aurora', () => ({
+  AuroraSky: () => null,
+}));

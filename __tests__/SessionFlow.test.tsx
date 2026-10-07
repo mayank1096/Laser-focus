@@ -9,7 +9,7 @@ import { useSessions } from '../src/features/session/store';
 import { hold, press, textContent, tick, type } from '../test/flowHelpers';
 
 jest.useFakeTimers();
-// Today's glow drifts on a loop, so each faked second renders frames.
+// Looping animations (the session dial) render frames each faked second.
 jest.setTimeout(15000);
 const DAY = '2026-10-04';
 
