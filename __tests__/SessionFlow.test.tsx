@@ -106,6 +106,8 @@ describe('a focused session', () => {
       note: '64/100 in 2 h 58',
       endedEarly: false,
     });
+    // Fill today's mark by holding it.
+    await hold(tree, 'mark-fill');
     expect(textContent(tree)).toContain('Full mark.');
   });
 
@@ -142,6 +144,7 @@ describe('a focused session', () => {
       minutes: 14,
       earlyReason: 'Called away',
     });
+    await hold(tree, 'mark-fill');
     expect(textContent(tree)).toContain('Half mark.');
   });
 });
