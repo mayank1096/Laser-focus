@@ -12,6 +12,9 @@ import { now } from '../../utils/clock';
 import { planFor, usePlanning } from '../planning/store';
 import { HALF_MARK_MINUTES, useSessions } from './store';
 
+/** Ending early is a serious act; the whole screen says so. */
+const DEEP_RED = '#7A0C12';
+
 const REASONS = ['Family emergency', 'Health', 'Called away', 'I gave in'];
 
 /** There is no pause. Ending early is possible, but it is a held decision. */
@@ -67,6 +70,7 @@ export function EmergencyEndScreen({
               role="radio"
               label={r}
               selected={reason === r}
+              onColor
               onPress={() => setReason(r)}
             />
           ))}
@@ -80,6 +84,7 @@ export function EmergencyEndScreen({
           testID="end-hold"
           label="Hold to end"
           onDark
+          tone="red"
           duration={2000}
           onComplete={() => {
             const result = end(now(), { reason: reason ?? 'Not said' });
@@ -114,7 +119,7 @@ export function EmergencyEndScreen({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.charcoal,
+    backgroundColor: DEEP_RED,
     paddingHorizontal: spacing.gutter,
   },
   title: {

@@ -10,6 +10,9 @@ import Animated, {
 import { colors, motion, radii, spacing, typography } from '../theme';
 import { haptics } from '../utils/haptics';
 
+/** Text on a chosen chip over the end-early red. */
+const DEEP_RED = '#7A0C12';
+
 export interface ChipProps {
   label: string;
   selected?: boolean;
@@ -19,6 +22,8 @@ export interface ChipProps {
   /** Fixed square size, for single letters like days of the week. */
   square?: number;
   accessibilityLabel?: string;
+  /** On a deep coloured screen: translucent white, filled white when chosen. */
+  onColor?: boolean;
   style?: ViewStyle;
   testID?: string;
 }
@@ -34,6 +39,7 @@ export function Chip({
   role = 'button',
   square,
   accessibilityLabel,
+  onColor = false,
   style,
   testID,
 }: ChipProps) {
@@ -48,12 +54,16 @@ export function Chip({
     borderColor: interpolateColor(
       active.value,
       [0, 1],
-      [colors.hairline, colors.saffron],
+      onColor
+        ? ['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 1)']
+        : [colors.hairline, colors.saffron],
     ),
     backgroundColor: interpolateColor(
       active.value,
       [0, 1],
-      [colors.white, colors.saffronWash],
+      onColor
+        ? ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 1)']
+        : [colors.white, colors.saffronWash],
     ),
     transform: [{ scale: scale.value }],
   }));
@@ -84,7 +94,13 @@ export function Chip({
           chipStyle,
         ]}
       >
-        <Animated.Text style={typography.label} numberOfLines={1}>
+        <Animated.Text
+          style={[
+            typography.label,
+            onColor && { color: selected ? DEEP_RED : colors.white },
+          ]}
+          numberOfLines={1}
+        >
           {label}
         </Animated.Text>
       </Animated.View>

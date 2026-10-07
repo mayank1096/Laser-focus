@@ -21,6 +21,8 @@ export interface HoldButtonProps {
   duration?: number;
   /** On a dark screen: outline the button so it doesn't vanish. */
   onDark?: boolean;
+  /** `red`: for the end-early screen — a dark button that fills bright red. */
+  tone?: 'saffron' | 'red';
   testID?: string;
 }
 
@@ -40,6 +42,7 @@ export function HoldButton({
   onComplete,
   duration = 1600,
   onDark = false,
+  tone = 'saffron',
   testID,
 }: HoldButtonProps) {
   const progress = useSharedValue(0);
@@ -115,10 +118,17 @@ export function HoldButton({
       onPressOut={release}
     >
       <Animated.View
-        style={[styles.button, onDark && styles.onDark, pressStyle]}
+        style={[
+          styles.button,
+          onDark && styles.onDark,
+          tone === 'red' && styles.redButton,
+          pressStyle,
+        ]}
       >
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Animated.View style={[styles.fill, fillStyle]} />
+          <Animated.View
+            style={[styles.fill, tone === 'red' && styles.redFill, fillStyle]}
+          />
         </View>
         <Animated.Text style={typography.button}>
           {sansDigits(label)}
@@ -148,5 +158,12 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.saffron,
     transformOrigin: 'left',
+  },
+  redButton: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.18)',
+  },
+  redFill: {
+    backgroundColor: '#E3262E',
   },
 });
