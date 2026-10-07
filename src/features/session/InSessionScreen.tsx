@@ -7,27 +7,26 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, spacing, typography } from '../../theme';
+import { colors, fonts, motion, spacing, typography } from '../../theme';
 import { now } from '../../utils/clock';
 import { formatClock } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { planFor, usePlanning } from '../planning/store';
+import { FocusDial } from './components/FocusDial';
 import { STAGES } from './ritual/content';
 import { useSessions } from './store';
 
 /** The screen dims this long after the last touch. */
 const DIM_AFTER = 5000;
-const SIZE = 340;
-const C = SIZE / 2;
-const RADII = [160, 128, 96, 64, 32];
 
 /**
- * During a session the phone is mostly dark. When woken, it shows the
- * aperture: five rings for the course's attention stages, closing in on
- * the eye as focus deepens. Hold anywhere to end early.
+ * During a session the phone is mostly dark. When woken, it shows the dial:
+ * a ring of ticks that turns saffron as the session passes, the time left
+ * in the middle, and a row of five boxes for the course's attention stages.
+ * Hold anywhere to end early.
  *
  * TODO(devs): keep the screen from locking (react-native-keep-awake) and
  * post an ongoing notification so the timer survives the app being closed.
@@ -121,13 +120,6 @@ export function InSessionScreen({ navigation }: RootScreenProps<'InSession'>) {
   const mm = Math.floor(remaining / 60);
   const ss = Math.floor(remaining % 60);
 
-  // Rings: outer = first minutes. Passed rings fade, the current one carries
-  // the light, the ones ahead wait dotted.
-  const r = RADII[Math.min(stage, RADII.length - 1)];
-  const a = inStage * 2 * Math.PI;
-  const x = C + r * Math.sin(a);
-  const y = C - r * Math.cos(a);
-
   return (
     <Pressable
       testID="in-session"
@@ -155,97 +147,36 @@ export function InSessionScreen({ navigation }: RootScreenProps<'InSession'>) {
         </AppText>
       </View>
 
-      <Animated.View
-        entering={FadeIn.duration(motion.cinematic)}
-        style={styles.aperture}
-      >
-        <Svg width={SIZE} height={SIZE}>
-          {RADII.map((rad, i) => (
-            <Circle
-              key={rad}
-              cx={C}
-              cy={C}
-              r={rad}
-              fill="none"
-              stroke="#FFFFFF"
-              strokeOpacity={
-                i < stage
-                  ? 0.05
-                  : i === stage
-                  ? 0.12
-                  : i === RADII.length - 1
-                  ? 0.22
-                  : 0.16
-              }
-              strokeWidth={1}
-              strokeDasharray={
-                i > stage && i < RADII.length - 1 ? '1 5' : undefined
-              }
-              strokeLinecap="round"
-            />
-          ))}
-          {stage < RADII.length ? (
-            <Path
-              d={`M${C} ${C - r} A${r} ${r} 0 ${
-                inStage > 0.5 ? 1 : 0
-              } 1 ${x} ${y}`}
-              fill="none"
-              stroke={colors.saffron}
-              strokeWidth={2}
-              strokeLinecap="round"
-            />
-          ) : null}
-          <Circle
-            cx={x}
-            cy={y}
-            r={10}
-            fill={colors.saffron}
-            fillOpacity={0.16}
-          />
-          <Circle cx={x} cy={y} r={3.5} fill={colors.saffron} />
-          <Circle
-            cx={C}
-            cy={C}
-            r={stage === RADII.length - 1 ? 5 : 3}
-            fill={stage === RADII.length - 1 ? colors.saffron : '#FFFFFF'}
-            fillOpacity={stage === RADII.length - 1 ? 1 : 0.35}
-          />
-        </Svg>
-        {STAGES.slice(1).map((s, i) => (
-          <AppText
-            key={s.from}
-            variant="micro"
-            style={[
-              styles.mark,
-              i + 1 <= stage ? styles.markPassed : styles.markAhead,
-              { top: C - RADII[i + 1] - 16 },
-            ]}
-          >
-            {String(s.from)}
-          </AppText>
-        ))}
-      </Animated.View>
+      <View style={styles.middle}>
+        <Animated.View entering={FadeIn.duration(motion.cinematic)}>
+          <FocusDial elapsed={elapsed} total={total}>
+            <AppText style={styles.time} testID="session-remaining">
+              {`${mm}:${String(ss).padStart(2, '0')}`}
+            </AppText>
+            <AppText variant="micro" style={styles.faint}>
+              {`left of ${active.minutes} min`}
+            </AppText>
+          </FocusDial>
+        </Animated.View>
 
-      <View style={styles.readout}>
-        <AppText style={styles.time} testID="session-remaining">
-          {`${mm}:${String(ss).padStart(2, '0')}`}
-        </AppText>
-        <AppText variant="micro" style={styles.faint}>
-          {`left of ${active.minutes} min`}
-        </AppText>
-        <AppText variant="eyebrow" style={styles.stage}>
-          {`Stage ${stage + 1} of ${STAGES.length} · ${STAGES[stage].name}`}
-        </AppText>
-        <AppText style={styles.line}>{STAGES[stage].line}</AppText>
+        <View style={styles.readout}>
+          <AppText style={styles.stageName}>{STAGES[stage].name}</AppText>
+          <View style={styles.stages}>
+            {STAGES.map((st, i) => (
+              <StageBox
+                key={st.from}
+                state={i < stage ? 'done' : i === stage ? 'now' : 'ahead'}
+                fill={i === stage ? inStage : 0}
+              />
+            ))}
+          </View>
+          <AppText style={styles.line}>{STAGES[stage].line}</AppText>
+        </View>
       </View>
 
       <AppText
         variant="micro"
-        style={[
-          styles.faint,
-          styles.exit,
-          { marginBottom: insets.bottom + 28 },
-        ]}
+        style={[styles.faint, { marginBottom: insets.bottom + 28 }]}
       >
         Hold anywhere to end early · Dims in 5 s
       </AppText>
@@ -255,6 +186,39 @@ export function InSessionScreen({ navigation }: RootScreenProps<'InSession'>) {
         style={[StyleSheet.absoluteFill, styles.veil, veil]}
       />
     </Pressable>
+  );
+}
+
+/** One attention stage: ticked once passed, filling while you're in it. */
+function StageBox({
+  state,
+  fill,
+}: {
+  state: 'done' | 'now' | 'ahead';
+  fill: number;
+}) {
+  const level = useSharedValue(fill);
+  useEffect(() => {
+    level.value = withTiming(fill, { duration: 1000, easing: motion.easeOut });
+  }, [fill, level]);
+  const fillStyle = useAnimatedStyle(() => ({
+    height: `${level.value * 100}%`,
+  }));
+  return (
+    <View
+      style={[
+        styles.box,
+        state === 'done' && styles.boxDone,
+        state === 'now' && styles.boxNow,
+      ]}
+    >
+      {state === 'now' ? (
+        <Animated.View style={[styles.boxFill, fillStyle]} />
+      ) : null}
+      {state === 'done' ? (
+        <Check width={14} height={14} color={colors.night} strokeWidth={2.4} />
+      ) : null}
+    </View>
   );
 }
 
@@ -274,35 +238,55 @@ const styles = StyleSheet.create({
   faint: {
     color: 'rgba(255, 255, 255, 0.28)',
   },
-  aperture: {
-    marginTop: 40,
-    width: SIZE,
-    height: SIZE,
-  },
-  mark: {
-    position: 'absolute',
-    left: C + 6,
-  },
-  markPassed: {
-    color: 'rgba(255, 255, 255, 0.5)',
-  },
-  markAhead: {
-    color: 'rgba(255, 255, 255, 0.22)',
+  middle: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: spacing.xxl,
   },
   readout: {
-    marginTop: 28,
+    marginTop: 36,
     alignItems: 'center',
     gap: spacing.xs,
   },
   time: {
-    ...typography.display,
-    fontSize: 56,
-    lineHeight: 60,
-    color: 'rgba(255, 255, 255, 0.82)',
+    fontFamily: fonts.sansBold,
+    fontSize: 58,
+    lineHeight: 64,
+    letterSpacing: -1.5,
+    color: 'rgba(255, 255, 255, 0.92)',
+    fontVariant: ['tabular-nums'],
   },
-  stage: {
-    marginTop: spacing.xl,
-    color: colors.saffron,
+  stageName: {
+    ...typography.heading,
+    color: 'rgba(255, 255, 255, 0.86)',
+  },
+  stages: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: spacing.lg,
+  },
+  box: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.14)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  boxDone: {
+    backgroundColor: 'rgba(255, 255, 255, 0.82)',
+    borderColor: 'transparent',
+  },
+  boxNow: {
+    borderColor: colors.saffron,
+    justifyContent: 'flex-end',
+  },
+  boxFill: {
+    alignSelf: 'stretch',
+    backgroundColor: 'rgba(250, 140, 34, 0.32)',
   },
   line: {
     ...typography.caption,
@@ -311,9 +295,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'rgba(255, 255, 255, 0.5)',
     marginTop: spacing.sm,
-  },
-  exit: {
-    marginTop: 'auto',
   },
   veil: {
     backgroundColor: '#000',
