@@ -25,6 +25,8 @@ export interface OptionCardProps {
   disabled?: boolean;
   /** An icon on the left that comes alive when the card is chosen. */
   icon?: IconComponent;
+  /** A tall card for side-by-side choices: icon and tag on top, text below. */
+  tile?: boolean;
   testID?: string;
 }
 
@@ -41,6 +43,7 @@ export function OptionCard({
   tag,
   disabled = false,
   icon,
+  tile = false,
   testID,
 }: OptionCardProps) {
   const surface = useSurface();
@@ -73,6 +76,67 @@ export function OptionCard({
   const contentStyle = useAnimatedStyle(() => ({
     opacity: description ? 0.5 + active.value * 0.5 : 1,
   }));
+
+  if (tile) {
+    return (
+      <Pressable
+        testID={testID}
+        accessibilityRole="radio"
+        accessibilityState={{ selected, disabled }}
+        disabled={disabled}
+        style={[styles.tileSlot, disabled && styles.disabled]}
+        onPress={() => {
+          if (!selected) {
+            haptics.selection();
+          }
+          onPress();
+        }}
+        onPressIn={() => {
+          scale.value = withSpring(0.98, motion.pressSpring);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, motion.pressSpring);
+        }}
+      >
+        <Animated.View
+          style={[
+            styles.card,
+            styles.tile,
+            { backgroundColor: surface },
+            cardStyle,
+          ]}
+        >
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.wash, washStyle]}
+          />
+          <View style={styles.tileTop}>
+            {icon ? <OptionIcon Icon={icon} active={selected} /> : <View />}
+            {tag ? (
+              <Animated.Text
+                style={[
+                  typography.eyebrow,
+                  selected ? styles.tagOn : styles.tagOff,
+                ]}
+              >
+                {tag}
+              </Animated.Text>
+            ) : null}
+          </View>
+          <Animated.View style={[styles.tileText, contentStyle]}>
+            <Animated.Text style={typography.cardTitle}>
+              {sansDigits(title)}
+            </Animated.Text>
+            {description ? (
+              <Animated.Text style={typography.micro}>
+                {description}
+              </Animated.Text>
+            ) : null}
+          </Animated.View>
+        </Animated.View>
+      </Pressable>
+    );
+  }
 
   return (
     <Pressable
@@ -148,9 +212,19 @@ export function OptionCard({
   );
 }
 
-export function OptionList({ children }: { children: React.ReactNode }) {
+export function OptionList({
+  children,
+  horizontal = false,
+}: {
+  children: React.ReactNode;
+  /** Lay the choices side by side, for two `tile` cards. */
+  horizontal?: boolean;
+}) {
   return (
-    <View style={styles.list} accessibilityRole="radiogroup">
+    <View
+      style={[styles.list, horizontal && styles.row]}
+      accessibilityRole="radiogroup"
+    >
       {children}
     </View>
   );
@@ -159,6 +233,31 @@ export function OptionList({ children }: { children: React.ReactNode }) {
 const styles = StyleSheet.create({
   list: {
     gap: spacing.md,
+  },
+  row: {
+    flexDirection: 'row',
+  },
+  tileSlot: {
+    flex: 1,
+  },
+  tile: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    minHeight: 150,
+  },
+  tileTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  tileText: {
+    marginTop: 'auto',
+    paddingTop: 24,
+    gap: spacing.xs,
   },
   card: {
     minHeight: layout.fieldHeight,

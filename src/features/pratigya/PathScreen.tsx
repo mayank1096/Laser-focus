@@ -35,22 +35,24 @@ export function PathScreen({ navigation }: RootScreenProps<'Path'>) {
         subtitle="You can switch later. Your streak stays either way."
       />
       <QuestionBody>
-        <OptionList>
+        <OptionList horizontal>
           <OptionCard
             testID="path-challenge"
+            tile
             icon={Trophy}
             title="Challenge mode"
             tag="Levels"
-            description="A focus task every day. Finish it and climb a level. Miss it and fall back to your last one."
+            description="A task a day. Climb levels."
             selected={path === 'challenge'}
             onPress={() => setPath('challenge')}
           />
           <OptionCard
             testID="path-self"
+            tile
             icon={Compass}
             title="Self Focus"
             tag="Free"
-            description="No daily test. Start a session whenever you decide to sit."
+            description="Sit when you choose."
             selected={path === 'self'}
             onPress={() => setPath('self')}
           />
