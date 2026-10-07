@@ -1,28 +1,28 @@
 /// <reference lib="dom" />
 import React, { useEffect, useRef } from 'react';
-import { View, type ViewStyle } from 'react-native';
-import { AURORA_GLSL } from './shader';
+import { View } from 'react-native';
+import { colourUniforms, glslFor } from './presets';
+import type { ShaderViewProps } from './ShaderView';
 
 const VERTEX = `
 attribute vec2 p;
 void main() { gl_Position = vec4(p, 0.0, 1.0); }
 `;
 
-/** Browser preview: the same aurora as a WebGL fragment shader. */
-export function AuroraSky({
+/** Browser preview: the same preset as a WebGL fragment shader. */
+export function ShaderView({
+  preset,
   width,
   height,
+  colours,
   style,
-}: {
-  width: number;
-  height: number;
-  style?: ViewStyle;
-}) {
+}: ShaderViewProps) {
   const host = useRef<React.ComponentRef<typeof View>>(null);
+  const key = colours?.join();
 
   useEffect(() => {
     const el = host.current as unknown as HTMLElement | null;
-    if (!el) {
+    if (!el || !width || !height) {
       return;
     }
     const canvas = document.createElement('canvas');
@@ -45,11 +45,10 @@ export function AuroraSky({
     };
     const prog = gl.createProgram()!;
     gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERTEX));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, AURORA_GLSL));
+    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, glslFor(preset)));
     gl.linkProgram(prog);
     gl.useProgram(prog);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(
       gl.ARRAY_BUFFER,
       new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
@@ -58,9 +57,15 @@ export function AuroraSky({
     const loc = gl.getAttribLocation(prog, 'p');
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const uRes = gl.getUniformLocation(prog, 'res');
+    gl.uniform2f(
+      gl.getUniformLocation(prog, 'res'),
+      canvas.width,
+      canvas.height,
+    );
+    colourUniforms(key ? key.split(',') : []).forEach((c, i) =>
+      gl.uniform3f(gl.getUniformLocation(prog, `c${i}`), c[0], c[1], c[2]),
+    );
     const uTime = gl.getUniformLocation(prog, 'time');
-    gl.uniform2f(uRes, canvas.width, canvas.height);
     const start = Date.now();
     let frame = 0;
     const draw = () => {
@@ -73,8 +78,9 @@ export function AuroraSky({
     return () => {
       cancelAnimationFrame(frame);
       canvas.remove();
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [width, height]);
+  }, [preset, width, height, key]);
 
   return (
     <View ref={host} pointerEvents="none" style={[{ width, height }, style]} />

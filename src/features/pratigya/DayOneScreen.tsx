@@ -5,14 +5,13 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
   withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { sansDigits } from '../../components/Numerals';
 import { ThinkingOrb } from '../../components/orb';
+import { ShaderView } from '../../components/shader';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing, typography } from '../../theme';
 import { today } from '../../utils/clock';
@@ -28,8 +27,6 @@ const HOLD = 2600;
 const OUT = 800;
 /** A breath before the first line, while the colour settles. */
 const FIRST_DELAY = 900;
-/** The light at the bottom rises and sinks over this long. */
-const TIDE = 5200;
 
 const DEEP = '#DD5800';
 const LIGHT = '#F9E0CB';
@@ -124,21 +121,10 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
     ],
   }));
 
-  // The tide: the light at the bottom slowly rises and sinks.
-  const tide = useSharedValue(0);
   const arrive = useSharedValue(0);
   useEffect(() => {
     arrive.value = withTiming(1, { duration: 700 });
-    tide.value = withRepeat(
-      withTiming(1, { duration: TIDE, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true,
-    );
-  }, [tide, arrive]);
-  const glowHeight = height * 0.92;
-  const tideStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: (1 - tide.value) * height * 0.16 }],
-  }));
+  }, [arrive]);
   const orbStyle = useAnimatedStyle(() => ({
     opacity: arrive.value,
     transform: [{ scale: 0.92 + arrive.value * 0.08 }],
@@ -152,34 +138,15 @@ export function DayOneScreen({ navigation }: RootScreenProps<'DayOne'>) {
       onPress={next}
       style={styles.screen}
     >
-      {/* Deep saffron above, warming toward the light below. */}
-      <Svg style={StyleSheet.absoluteFill} width={width} height={height}>
-        <Defs>
-          <LinearGradient id="greet-base" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor={DEEP} />
-            <Stop offset="0.5" stopColor="#E06A12" />
-            <Stop offset="1" stopColor="#EB9050" />
-          </LinearGradient>
-        </Defs>
-        <Rect width={width} height={height} fill="url(#greet-base)" />
-      </Svg>
-
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.glow, { height: glowHeight }, tideStyle]}
-      >
-        <Svg width={width} height={glowHeight}>
-          <Defs>
-            <LinearGradient id="greet-tide" x1="0" y1="0" x2="0" y2="1">
-              <Stop offset="0" stopColor={LIGHT} stopOpacity="0" />
-              <Stop offset="0.45" stopColor="#F2B183" stopOpacity="0.5" />
-              <Stop offset="0.8" stopColor={LIGHT} stopOpacity="0.95" />
-              <Stop offset="1" stopColor={LIGHT} stopOpacity="1" />
-            </LinearGradient>
-          </Defs>
-          <Rect width={width} height={glowHeight} fill="url(#greet-tide)" />
-        </Svg>
-      </Animated.View>
+      {/* Deep saffron that churns slowly, its light rising and sinking
+          from the bottom like a tide. */}
+      <ShaderView
+        preset="ember"
+        width={width}
+        height={height}
+        colours={[DEEP, '#E46A10', '#F2A15F', LIGHT]}
+        style={StyleSheet.absoluteFill}
+      />
 
       <Animated.View
         pointerEvents="none"
@@ -213,12 +180,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: DEEP,
     overflow: 'hidden',
-  },
-  glow: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: -60,
   },
   orb: {
     position: 'absolute',

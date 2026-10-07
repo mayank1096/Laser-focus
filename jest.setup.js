@@ -30,7 +30,7 @@ jest.mock('./src/components/orb', () => {
   };
 });
 
-// The aurora is a Skia shader, which has no native side under Jest.
-jest.mock('./src/components/aurora', () => ({
-  AuroraSky: () => null,
+// Shaders draw with Skia, which has no native side under Jest.
+jest.mock('./src/components/shader', () => ({
+  ShaderView: () => null,
 }));

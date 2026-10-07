@@ -4,8 +4,8 @@ import Animated, {
   useAnimatedStyle,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { ThinkingOrb, type OrbState } from '../../../components/orb';
+import { ShaderView } from '../../../components/shader';
 import { colors, fonts } from '../../../theme';
 
 /** The orb's drawn size at full breath; it rests at REST of this. */
@@ -15,14 +15,12 @@ const GLOW = 340;
 
 const TONES = {
   light: {
-    glow: colors.saffron,
-    glowOpacity: 0.32,
+    glow: ['#FBD9B8', '#FFB877', '#FA8C22'],
     label: 'rgba(40, 20, 6, 0.82)',
     sub: 'rgba(40, 20, 6, 0.45)',
   },
   dark: {
-    glow: '#E25E00',
-    glowOpacity: 0.42,
+    glow: ['#3A1206', '#8A3208', '#E25E00'],
     label: 'rgba(255, 255, 255, 0.86)',
     sub: 'rgba(255, 255, 255, 0.45)',
   },
@@ -65,29 +63,12 @@ export function BreathOrb({
     <View style={styles.wrap}>
       <View style={styles.stage}>
         <Animated.View style={[styles.glow, glowStyle]} pointerEvents="none">
-          <Svg width={GLOW} height={GLOW}>
-            <Defs>
-              <RadialGradient id={`breath-${tone}`} cx="50%" cy="50%" r="50%">
-                <Stop
-                  offset="0"
-                  stopColor={t.glow}
-                  stopOpacity={t.glowOpacity}
-                />
-                <Stop
-                  offset="0.55"
-                  stopColor={t.glow}
-                  stopOpacity={t.glowOpacity * 0.35}
-                />
-                <Stop offset="1" stopColor={t.glow} stopOpacity="0" />
-              </RadialGradient>
-            </Defs>
-            <Circle
-              cx={GLOW / 2}
-              cy={GLOW / 2}
-              r={GLOW / 2}
-              fill={`url(#breath-${tone})`}
-            />
-          </Svg>
+          <ShaderView
+            preset="glow"
+            width={GLOW}
+            height={GLOW}
+            colours={t.glow}
+          />
         </Animated.View>
         <Animated.View style={orbStyle}>
           <ThinkingOrb

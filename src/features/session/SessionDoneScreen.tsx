@@ -12,15 +12,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { scheduleOnRN } from 'react-native-worklets';
-import Svg, {
-  Circle,
-  Defs,
-  Line,
-  Path,
-  RadialGradient,
-  Stop,
-} from 'react-native-svg';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { AppText } from '../../components/AppText';
+import { ShaderView } from '../../components/shader';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, motion, spacing, typography } from '../../theme';
 import { formatMinutes } from '../../utils/date';
@@ -30,6 +24,8 @@ import { lastResultFor, useSessions, type Finished } from './store';
 
 const W = 402;
 const EYE = { x: 201, y: 210 };
+/** The light that blooms behind the eye when the arrow lands. */
+const BLOOM = 160;
 const TAIL = { x: 48, y: 364 };
 
 function PiercedEye() {
@@ -79,17 +75,13 @@ function PiercedEye() {
 
   return (
     <View style={styles.eye}>
-      <Animated.View style={[StyleSheet.absoluteFill, bloomStyle]}>
-        <Svg width={W} height={420}>
-          <Defs>
-            <RadialGradient id="bloom" cx="50%" cy="50%" r="50%">
-              <Stop offset="0" stopColor="#FFB15C" stopOpacity="0.9" />
-              <Stop offset="0.25" stopColor="#FA8C22" stopOpacity="0.45" />
-              <Stop offset="1" stopColor="#E25E00" stopOpacity="0" />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={EYE.x} cy={EYE.y} r={150} fill="url(#bloom)" />
-        </Svg>
+      <Animated.View style={[styles.bloom, bloomStyle]}>
+        <ShaderView
+          preset="glow"
+          width={BLOOM * 2}
+          height={BLOOM * 2}
+          colours={['#E25E00', '#FA8C22', '#FFC27A']}
+        />
       </Animated.View>
       <Svg width={W} height={420} style={StyleSheet.absoluteFill}>
         {[150, 118, 86, 54].map((r, i) => (
@@ -261,6 +253,11 @@ export function SessionDoneScreen({
 }
 
 const styles = StyleSheet.create({
+  bloom: {
+    position: 'absolute',
+    left: EYE.x - BLOOM,
+    top: EYE.y - BLOOM,
+  },
   screen: {
     flex: 1,
     backgroundColor: colors.night,

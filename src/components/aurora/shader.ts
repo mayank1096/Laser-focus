@@ -28,7 +28,10 @@ export const SKY = {
   page: '#F7F5F4',
 };
 
-/** Shared body. Expects `uv` with y pointing up; returns an opaque colour. */
+/**
+ * Shared body (needs `vnoise` from the shader presets' common block).
+ * Expects `uv` with y pointing up; returns an opaque colour.
+ */
 export const AURORA_BODY = `
 const float CX = 0.5;
 const float CY = 0.34;
@@ -38,23 +41,6 @@ const float HEIGHT = 1.05;
 const float INTENSITY = 1.2;
 const float BALANCE = 1.45;
 const float SEED = 7.0;
-
-float hash3(vec3 p) {
-  p = fract(p * 0.3183099 + 0.1);
-  p *= 17.0;
-  return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
-}
-
-float vnoise(vec3 x) {
-  vec3 i = floor(x);
-  vec3 f = fract(x);
-  f = f * f * (3.0 - 2.0 * f);
-  float a = mix(mix(hash3(i), hash3(i + vec3(1.0, 0.0, 0.0)), f.x),
-                mix(hash3(i + vec3(0.0, 1.0, 0.0)), hash3(i + vec3(1.0, 1.0, 0.0)), f.x), f.y);
-  float b = mix(mix(hash3(i + vec3(0.0, 0.0, 1.0)), hash3(i + vec3(1.0, 0.0, 1.0)), f.x),
-                mix(hash3(i + vec3(0.0, 1.0, 1.0)), hash3(i + vec3(1.0, 1.0, 1.0)), f.x), f.y);
-  return mix(a, b, f.z) * 2.0 - 1.0;
-}
 
 float hp(float s, float k, float big) {
   return fract(sin(s * k) * big) * 6.2831853;
@@ -107,27 +93,5 @@ vec4 aurora(vec2 uv, float aspect, float t) {
   // they fade out before the page below.
   float fade = smoothstep(0.12, 0.3, y);
   return vec4(clamp(sky + col * glow * 0.7 * fade, 0.0, 1.0), 1.0);
-}
-`;
-
-/** Skia runtime effect: `res` in pixels, `time` in seconds. */
-export const AURORA_SKSL = `
-uniform float2 res;
-uniform float time;
-${AURORA_BODY}
-half4 main(float2 fc) {
-  vec2 uv = vec2(fc.x / res.x, 1.0 - fc.y / res.y);
-  return half4(aurora(uv, res.x / max(res.y, 1.0), time * 3.0));
-}
-`;
-
-export const AURORA_GLSL = `
-precision highp float;
-uniform vec2 res;
-uniform float time;
-${AURORA_BODY}
-void main() {
-  vec2 uv = gl_FragCoord.xy / res;
-  gl_FragColor = aurora(uv, res.x / max(res.y, 1.0), time * 3.0);
 }
 `;
