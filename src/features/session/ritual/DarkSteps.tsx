@@ -3,22 +3,18 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
-  FadeOut,
-  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
+  withRepeat,
   withTiming,
-  ZoomIn,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { AppText } from '../../../components/AppText';
 import { colors, fonts, motion, spacing, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
+import { CalmCircle } from './CalmCircle';
 import { RitualBar } from './RitualBar';
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 /* ------------------------------------------------------------------------ */
 /* 7.06 Tratak                                                               */
@@ -30,6 +26,7 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
   const insets = useSafeAreaInsets();
   const [left, setLeft] = useState(TRATAK_SECONDS);
   const progress = useSharedValue(0);
+  const level = useSharedValue(0.4);
   const dim = useSharedValue(0);
   const done = useRef(onDone);
   done.current = onDone;
@@ -39,6 +36,12 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
       duration: TRATAK_SECONDS * 1000,
       easing: Easing.linear,
     });
+    // The orb breathes slowly, about one long breath every eight seconds.
+    level.value = withRepeat(
+      withTiming(1, { duration: 4000, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true,
+    );
     // After a few seconds the screen dims, so the eyes go to the desk.
     dim.value = withDelay(4000, withTiming(1, { duration: 2000 }));
     const tick = setInterval(() => setLeft(l => Math.max(0, l - 1)), 1000);
@@ -50,13 +53,8 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
       clearInterval(tick);
       clearTimeout(end);
     };
-  }, [progress, dim]);
+  }, [progress, level, dim]);
 
-  const R = 64;
-  const L = 2 * Math.PI * R;
-  const arcProps = useAnimatedProps(() => ({
-    strokeDashoffset: L * (1 - progress.value),
-  }));
   const veil = useAnimatedStyle(() => ({ opacity: dim.value * 0.75 }));
 
   return (
@@ -84,40 +82,13 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
         </Animated.Text>
       </View>
       <View style={styles.centre}>
-        <Svg width={360} height={360} style={StyleSheet.absoluteFill}>
-          <Defs>
-            <RadialGradient id="ember" cx="50%" cy="50%" r="50%">
-              <Stop offset="0" stopColor="#E25E00" stopOpacity="0.38" />
-              <Stop offset="1" stopColor="#E25E00" stopOpacity="0" />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={180} cy={180} r={180} fill="url(#ember)" />
-          <Circle
-            cx={180}
-            cy={180}
-            r={R}
-            fill="none"
-            stroke="#FFFFFF"
-            strokeOpacity={0.1}
-            strokeWidth={2}
-          />
-          <AnimatedCircle
-            cx={180}
-            cy={180}
-            r={R}
-            fill="none"
-            stroke={colors.saffron}
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeDasharray={`${L} ${L}`}
-            animatedProps={arcProps}
-            transform="rotate(-90 180 180)"
-          />
-        </Svg>
-        <AppText style={styles.timer}>{`0:${String(left).padStart(
-          2,
-          '0',
-        )}`}</AppText>
+        <CalmCircle
+          tone="dark"
+          level={level}
+          progress={progress}
+          label="Eyes on the desk"
+          sub={`0:${String(left).padStart(2, '0')}`}
+        />
       </View>
       <Pressable
         testID="tratak-skip"
@@ -142,63 +113,69 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
 /* 7.07 Countdown                                                            */
 /* ------------------------------------------------------------------------ */
 
+/** Each number arrives, rests, and leaves this slowly. */
+const COUNT_IN = 900;
+const COUNT_HOLD = 500;
+const COUNT_OUT = 700;
+const WORDS = ['3', '2', '1', 'Jay Shree Ram.'];
+
+/**
+ * Nothing but black and one word at a time: 3, 2, 1, then Jay Shree Ram.
+ * Each rises a few points into place as it fades in, rests, then fades
+ * as it drifts on up.
+ */
 export function CountdownStep({ onDone }: { onDone: () => void }) {
-  const insets = useSafeAreaInsets();
-  const [n, setN] = useState(5);
+  const [i, setI] = useState(0);
+  const shown = useSharedValue(0);
+  const leave = useSharedValue(0);
   const done = useRef(onDone);
   done.current = onDone;
+  const last = i === WORDS.length - 1;
 
   useEffect(() => {
-    haptics.heavy();
-    if (n === 0) {
-      const t = setTimeout(() => done.current(), 1600);
-      return () => clearTimeout(t);
+    shown.value = 0;
+    leave.value = 0;
+    if (last) {
+      haptics.confirm();
+    } else {
+      haptics.heavy();
     }
-    const t = setTimeout(() => setN(n - 1), 1000);
-    return () => clearTimeout(t);
-  }, [n]);
+    shown.value = withTiming(1, {
+      duration: COUNT_IN,
+      easing: Easing.bezier(0.16, 1, 0.3, 1),
+    });
+    const out = setTimeout(() => {
+      leave.value = withTiming(1, {
+        duration: COUNT_OUT,
+        easing: Easing.in(Easing.quad),
+      });
+    }, COUNT_IN + (last ? COUNT_HOLD * 2 : COUNT_HOLD));
+    const next = setTimeout(
+      () => (last ? done.current() : setI(i + 1)),
+      COUNT_IN + (last ? COUNT_HOLD * 2 : COUNT_HOLD) + COUNT_OUT,
+    );
+    return () => {
+      clearTimeout(out);
+      clearTimeout(next);
+    };
+  }, [i, last, shown, leave]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: shown.value * (1 - leave.value),
+    transform: [
+      { translateY: (1 - shown.value) * 10 - leave.value * 10 },
+      { scale: 0.97 + shown.value * 0.03 },
+    ],
+  }));
 
   return (
-    <View style={[styles.dark, { paddingTop: insets.top + spacing.lg }]}>
-      <View style={styles.pad}>
-        <RitualBar step={6} dark />
-      </View>
-      <View style={styles.centre} accessibilityLiveRegion="assertive">
-        {n > 0 ? (
-          <Animated.Text
-            key={n}
-            entering={ZoomIn.duration(motion.base)}
-            exiting={FadeOut.duration(motion.fast)}
-            style={styles.number}
-          >
-            {n}
-          </Animated.Text>
-        ) : (
-          <Animated.Text
-            entering={FadeIn.duration(motion.slow)}
-            style={[typography.display, styles.white, styles.jay]}
-          >
-            Jay Shree Ram.
-          </Animated.Text>
-        )}
-        <View style={styles.count}>
-          {[5, 4, 3, 2, 1].map(k => (
-            <View
-              key={k}
-              style={[
-                styles.countDot,
-                k >= n && n > 0 ? styles.countOn : null,
-                n === 0 && styles.countOn,
-              ]}
-            />
-          ))}
-        </View>
-      </View>
-      <View style={[styles.bottom, { paddingBottom: insets.bottom + 40 }]}>
-        <AppText variant="body" style={[styles.soft, styles.middle]}>
-          Then the first tiny action. One line. One stroke.
-        </AppText>
-      </View>
+    <View
+      style={[styles.dark, styles.centre]}
+      accessibilityLiveRegion="assertive"
+    >
+      <Animated.Text style={[styles.word, last && styles.phrase, style]}>
+        {WORDS[i]}
+      </Animated.Text>
     </View>
   );
 }
@@ -243,30 +220,15 @@ const styles = StyleSheet.create({
   veil: {
     backgroundColor: '#000',
   },
-  number: {
+  word: {
     fontFamily: fonts.sansMedium,
-    fontSize: 168,
-    lineHeight: 180,
-    color: colors.saffron,
-  },
-  jay: {
+    fontSize: 44,
+    lineHeight: 52,
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
   },
-  count: {
-    marginTop: spacing.xxl,
-    flexDirection: 'row',
-    gap: 8,
-  },
-  countDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  },
-  countOn: {
-    backgroundColor: colors.saffron,
-  },
-  middle: {
-    textAlign: 'center',
+  phrase: {
+    fontSize: 26,
+    lineHeight: 32,
   },
 });

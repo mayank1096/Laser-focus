@@ -82,8 +82,8 @@ describe('a focused session', () => {
     await hold(tree, 'values-hold');
     expect(textContent(tree)).toContain('Look at your work.');
     await press(tree, 'tratak-skip');
-    // 5…1, then Jay Shree Ram.
-    for (let i = 0; i < 8; i++) {
+    // 3, 2, 1, then Jay Shree Ram, each fading in and out.
+    for (let i = 0; i < 12; i++) {
       await tick(1000);
     }
 

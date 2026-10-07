@@ -4,7 +4,6 @@ import Animated, {
   Easing,
   FadeIn,
   FadeInDown,
-  useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -14,6 +13,7 @@ import { rise } from '../../../components/QuestionHeader';
 import type { SessionSheet } from '../../../types/models';
 import { colors, motion, spacing, typography } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
+import { CalmCircle } from './CalmCircle';
 import { CHECKLIST, PRAYERS, RITUAL_STEPS } from './content';
 
 /* ------------------------------------------------------------------------ */
@@ -170,14 +170,25 @@ const PHASES = [
   { word: 'Breathe out', seconds: 6, to: 0 },
 ];
 const BREATHS = 3;
+const BREATH_SECONDS = PHASES.reduce((n, p) => n + p.seconds, 0);
 
 export function BreatheStep({ onDone }: { onDone: () => void }) {
   const [breath, setBreath] = useState(0);
   const [phase, setPhase] = useState(0);
   const [left, setLeft] = useState(PHASES[0].seconds);
-  const size = useSharedValue(0);
+  const level = useSharedValue(0);
+  const progress = useSharedValue(0);
   const done = useRef(onDone);
   done.current = onDone;
+
+  // The ring fills once per breath, so you always see how far into it you are.
+  useEffect(() => {
+    progress.value = 0;
+    progress.value = withTiming(1, {
+      duration: BREATH_SECONDS * 1000,
+      easing: Easing.linear,
+    });
+  }, [breath, progress]);
 
   useEffect(() => {
     const p = PHASES[phase];
@@ -187,7 +198,7 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
     } else {
       haptics.tap();
     }
-    size.value = withTiming(p.to, {
+    level.value = withTiming(p.to, {
       duration: p.seconds * 1000,
       easing: Easing.inOut(Easing.sin),
     });
@@ -206,15 +217,7 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
       clearInterval(tick);
       clearTimeout(next);
     };
-  }, [phase, breath, size]);
-
-  const orb = useAnimatedStyle(() => ({
-    transform: [{ scale: 0.62 + size.value * 0.38 }],
-  }));
-  const halo = useAnimatedStyle(() => ({
-    opacity: 0.15 + size.value * 0.25,
-    transform: [{ scale: 0.8 + size.value * 0.35 }],
-  }));
+  }, [phase, breath, level]);
 
   return (
     <>
@@ -230,21 +233,18 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
       <Animated.Text entering={rise(2)} style={typography.body}>
         Spine straight. Eyes closed. Follow the pulse.
       </Animated.Text>
-      <View style={styles.breath} accessibilityLiveRegion="polite">
-        <Animated.View style={[styles.halo, halo]} />
-        <Animated.View style={[styles.orb, orb]} />
-        <View style={styles.breathText}>
-          <AppText variant="heading" style={styles.white}>
-            {PHASES[phase].word}
-          </AppText>
-          <AppText variant="micro" style={styles.white}>
-            {left}
-          </AppText>
-        </View>
-      </View>
-      <AppText variant="micro" style={[styles.center, styles.muted]}>
-        In 4 · Hold 4 · Out 6
-      </AppText>
+      <Animated.View
+        entering={FadeIn.delay(300).duration(motion.slow)}
+        style={styles.breath}
+        accessibilityLiveRegion="polite"
+      >
+        <CalmCircle
+          level={level}
+          progress={progress}
+          label={PHASES[phase].word}
+          sub={String(left)}
+        />
+      </Animated.View>
     </>
   );
 }
@@ -430,30 +430,7 @@ const styles = StyleSheet.create({
     borderColor: colors.saffron,
   },
   breath: {
-    marginTop: 40,
-    height: 300,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  halo: {
-    position: 'absolute',
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: 'rgba(250, 140, 34, 0.25)',
-  },
-  orb: {
-    position: 'absolute',
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: colors.saffron,
-    backgroundImage:
-      'radial-gradient(circle at 50% 40%, #FFC27A 0%, #FA8C22 70%)',
-  },
-  breathText: {
-    alignItems: 'center',
-    gap: spacing.xs,
+    marginTop: 36,
   },
   white: {
     color: colors.white,
