@@ -13,7 +13,7 @@ import {
 } from '../../../components/QuestionHeader';
 import { useSurface } from '../../../components/Surface';
 import type { SessionSlot } from '../../../types/models';
-import { colors, layout, motion, radii, spacing } from '../../../theme';
+import { colors, fonts, layout, motion, radii, spacing } from '../../../theme';
 import { formatClock, partOfDay } from '../../../utils/date';
 import { haptics } from '../../../utils/haptics';
 import { SlotSheet } from '../components/SlotSheet';
@@ -119,7 +119,9 @@ function SlotRow({
       >
         <View style={styles.time}>
           <AppText variant="eyebrow">{partOfDay(slot.start)}</AppText>
-          <AppText variant="heading">{formatClock(slot.start)}</AppText>
+          <AppText variant="heading" style={styles.clock}>
+            {formatClock(slot.start)}
+          </AppText>
         </View>
         <View style={styles.length}>
           <AppText variant="label">{`${slot.minutes} min`}</AppText>
@@ -162,6 +164,9 @@ export function AddRow({
 }
 
 const styles = StyleSheet.create({
+  clock: {
+    fontFamily: fonts.sansMedium,
+  },
   list: {
     gap: 10,
   },

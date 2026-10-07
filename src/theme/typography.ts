@@ -54,11 +54,12 @@ export const typography = {
     letterSpacing: tight(16),
     color: colors.white,
   }),
+  /** Text inside option and list boxes: always Google Sans. */
   cardTitle: style({
-    fontFamily: fonts.serif,
-    fontSize: 14,
-    lineHeight: 14 * 1.3,
-    letterSpacing: tight(14),
+    fontFamily: fonts.sansMedium,
+    fontSize: 15,
+    lineHeight: 15 * 1.3,
+    letterSpacing: tight(15),
     color: colors.ink,
   }),
   eyebrow: style({
