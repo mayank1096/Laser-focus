@@ -70,8 +70,13 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
         entering={FadeIn.delay(200).duration(motion.cinematic)}
         style={styles.centre}
       >
+        {/* A full, slowly turning globe of embers: something steady to
+            rest the eyes on before they go to the desk. */}
         <BreathOrb
           tone="dark"
+          state="searching"
+          speed={0.35}
+          tint="#FFB066"
           level={level}
           label="Look at your work"
           sub={`0:${String(left).padStart(2, '0')}`}

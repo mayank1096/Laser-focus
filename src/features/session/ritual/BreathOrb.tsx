@@ -5,7 +5,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { ThinkingOrb } from '../../../components/orb';
+import { ThinkingOrb, type OrbState } from '../../../components/orb';
 import { colors, fonts } from '../../../theme';
 
 /** The orb's drawn size at full breath; it rests at REST of this. */
@@ -39,11 +39,18 @@ export function BreathOrb({
   label,
   sub,
   tone = 'light',
+  state = 'breathing',
+  speed = 0.55,
+  tint = colors.saffron,
 }: {
   level: SharedValue<number>;
   label: string;
   sub?: string;
   tone?: keyof typeof TONES;
+  /** Which orb to draw; the breathing ring by default. */
+  state?: OrbState;
+  speed?: number;
+  tint?: string;
 }) {
   const t = TONES[tone];
   const orbStyle = useAnimatedStyle(() => ({
@@ -84,12 +91,12 @@ export function BreathOrb({
         </Animated.View>
         <Animated.View style={orbStyle}>
           <ThinkingOrb
-            state="breathing"
+            state={state}
             size={64}
             displaySize={ORB}
-            speed={0.55}
+            speed={speed}
             theme={tone}
-            tint={colors.saffron}
+            tint={tint}
             accessibilityLabel={label}
           />
         </Animated.View>
