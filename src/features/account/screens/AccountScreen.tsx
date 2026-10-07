@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import type { SvgProps } from 'react-native-svg';
+import Svg, { Circle, type SvgProps } from 'react-native-svg';
 import { art } from '../../../assets/art';
 import Ban from '../../../assets/icons/ban.svg';
 import Bell from '../../../assets/icons/bell.svg';
@@ -24,10 +24,10 @@ import Shield from '../../../assets/icons/shield-check.svg';
 import { AppText } from '../../../components/AppText';
 import { rise } from '../../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../../components/TabBar';
-import { colors, spacing } from '../../../theme';
+import { colors, fonts, spacing } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
-import { useGoalProgress, useRecentMarks } from '../../progress';
-import { MarkGrid } from '../../session/components/MarkGrid';
+import { useGoalProgress, useRecentMarks, useStreak } from '../../progress';
+import type { DayMark } from '../../session/store';
 import { PRATIGYAS, useProfile } from '../store';
 
 export type AccountDestination =
@@ -44,7 +44,8 @@ export function AccountScreen({
   const insets = useSafeAreaInsets();
   const profile = useProfile();
   const progress = useGoalProgress();
-  const marks = useRecentMarks(36).map(m => m.mark);
+  const marks = useRecentMarks(35).map(m => m.mark);
+  const streak = useStreak();
   const [confirmOut, setConfirmOut] = useState(false);
   const deleted = profile.apps.filter(a => a.deleted).length;
   const contact = profile.account?.phone
@@ -66,31 +67,46 @@ export function AccountScreen({
         entering={rise(0)}
         style={[styles.hero, { paddingTop: insets.top + spacing.xxl }]}
       >
-        <View style={styles.who}>
-          <View style={styles.avatar}>
-            <Image source={art.kneeling} style={styles.avatarImage} />
+        <DayRing progress={Math.min(1, progress.day / progress.days)}>
+          <Image source={art.kneeling} style={styles.avatarImage} />
+        </DayRing>
+        <AppText variant="title" style={styles.name}>
+          {profile.name || 'You'}
+        </AppText>
+        <AppText variant="label" style={styles.muted}>
+          {[
+            `Day ${progress.day} of ${progress.days}`,
+            profile.pratigya ? PRATIGYAS[profile.pratigya].latin : null,
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </AppText>
+
+        <View style={styles.statsCard}>
+          <View style={styles.stats}>
+            <Stat value={streak} label="Day streak" />
+            <View style={styles.statRule} />
+            <Stat
+              value={marks.filter(m => m === 'full').length}
+              label="Full marks"
+            />
+            <View style={styles.statRule} />
+            <Stat value={progress.days - progress.day} label="Days left" />
           </View>
-          <View style={styles.flex}>
-            <AppText variant="title" style={styles.name}>
-              {profile.name || 'You'}
+          <View style={styles.calendarHead}>
+            <AppText variant="eyebrow">Last 5 weeks</AppText>
+            <AppText variant="micro" style={styles.muted}>
+              {`${marks.filter(m => m === 'full' || m === 'half').length}/${
+                marks.length
+              } marked`}
             </AppText>
-            <AppText variant="label">{`Day ${progress.day}/${progress.days}`}</AppText>
-            <View style={styles.track}>
-              <View
-                style={[
-                  styles.fill,
-                  {
-                    width: `${Math.min(
-                      100,
-                      (progress.day / progress.days) * 100,
-                    )}%`,
-                  },
-                ]}
-              />
-            </View>
+          </View>
+          <View style={styles.calendar}>
+            {marks.map((m, i) => (
+              <MarkDot key={i} mark={m} today={i === marks.length - 1} />
+            ))}
           </View>
         </View>
-        <MarkGrid marks={marks} size={15} gap={4} />
       </Animated.View>
 
       <Animated.View entering={rise(1)} style={styles.body}>
@@ -262,55 +278,186 @@ function Row({
   );
 }
 
+const RING = 96;
+const RING_STROKE = 3;
+
+/** The avatar inside a ring that fills as the run goes on. */
+function DayRing({
+  progress,
+  children,
+}: {
+  progress: number;
+  children: React.ReactNode;
+}) {
+  const r = (RING - RING_STROKE) / 2;
+  const length = 2 * Math.PI * r;
+  return (
+    <View style={styles.ring}>
+      <Svg width={RING} height={RING} style={StyleSheet.absoluteFill}>
+        <Circle
+          cx={RING / 2}
+          cy={RING / 2}
+          r={r}
+          fill="none"
+          stroke={colors.saffronLine}
+          strokeWidth={RING_STROKE}
+        />
+        <Circle
+          cx={RING / 2}
+          cy={RING / 2}
+          r={r}
+          fill="none"
+          stroke={colors.saffron}
+          strokeWidth={RING_STROKE}
+          strokeLinecap="round"
+          strokeDasharray={`${length} ${length}`}
+          strokeDashoffset={length * (1 - Math.max(0.02, progress))}
+          transform={`rotate(-90 ${RING / 2} ${RING / 2})`}
+        />
+      </Svg>
+      <View style={styles.avatar}>{children}</View>
+    </View>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.stat}>
+      <AppText style={styles.statValue}>{String(value)}</AppText>
+      <AppText variant="micro" style={styles.muted}>
+        {label}
+      </AppText>
+    </View>
+  );
+}
+
+/** One day: filled for a full mark, half-filled for a half, a ring otherwise. */
+function MarkDot({ mark, today }: { mark: DayMark; today: boolean }) {
+  return (
+    <View style={styles.dotCell}>
+      <View
+        style={[
+          styles.dot,
+          mark === 'full' && styles.dotFull,
+          today && styles.dotToday,
+        ]}
+      >
+        {mark === 'half' ? <View style={styles.dotHalf} /> : null}
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.white,
   },
   hero: {
-    gap: spacing.xxl,
+    alignItems: 'center',
     paddingHorizontal: 22,
-    paddingBottom: spacing.xxl,
+    paddingBottom: 28,
     backgroundColor: colors.parchment,
   },
-  who: {
-    flexDirection: 'row',
+  ring: {
+    width: RING,
+    height: RING,
     alignItems: 'center',
-    gap: spacing.xl,
+    justifyContent: 'center',
   },
   avatar: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
+    width: RING - 16,
+    height: RING - 16,
+    borderRadius: (RING - 16) / 2,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.ink,
+    backgroundColor: colors.white,
   },
   avatarImage: {
-    width: 120,
-    height: 120,
-    marginLeft: -30,
-    marginTop: -38,
+    width: 140,
+    height: 140,
+    marginLeft: -34,
+    marginTop: -44,
   },
   flex: {
     flex: 1,
     gap: spacing.xs,
   },
   name: {
-    fontSize: 22,
-    lineHeight: 26,
+    marginTop: spacing.lg,
+    textAlign: 'center',
   },
-  track: {
-    height: 3,
-    borderRadius: 2,
-    marginTop: spacing.xs,
-    backgroundColor: colors.saffronLine,
+  muted: {
+    color: colors.textMuted,
+  },
+  statsCard: {
+    alignSelf: 'stretch',
+    marginTop: 24,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 20,
+    borderRadius: 18,
+    backgroundColor: colors.white,
+    boxShadow: '0px 8px 20px rgba(60, 30, 10, 0.05)',
+  },
+  stats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+  },
+  statValue: {
+    fontFamily: fonts.sansBold,
+    fontSize: 24,
+    lineHeight: 30,
+    color: colors.ink,
+  },
+  statRule: {
+    width: StyleSheet.hairlineWidth,
+    height: 32,
+    backgroundColor: colors.divider,
+  },
+  calendarHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginTop: 20,
+    paddingTop: 18,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.divider,
+  },
+  calendar: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 14,
+    rowGap: 10,
+  },
+  dotCell: {
+    width: `${100 / 7}%`,
+    alignItems: 'center',
+  },
+  dot: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.2,
+    borderColor: colors.saffronLine,
     overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
-  fill: {
-    height: 3,
+  dotFull: {
     backgroundColor: colors.saffron,
+    borderColor: colors.saffron,
+  },
+  dotHalf: {
+    height: '50%',
+    backgroundColor: colors.saffron,
+  },
+  dotToday: {
+    borderColor: colors.saffron,
+    borderWidth: 1.6,
   },
   body: {
     padding: 22,
@@ -340,8 +487,5 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 15,
-  },
-  muted: {
-    color: colors.textMuted,
   },
 });
