@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle, Line } from 'react-native-svg';
 import { art } from '../../assets/art';
@@ -116,11 +123,7 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
           style={[styles.glow, { height: GLOW_HEIGHT * scale }]}
           pointerEvents="none"
         >
-          <Image
-            source={art.homeGlow}
-            style={{ width, height: GLOW_ART_HEIGHT * scale }}
-            resizeMode="cover"
-          />
+          <MovingGlow width={width} height={GLOW_ART_HEIGHT * scale} />
         </View>
 
         <View style={[styles.hero, { paddingTop: insets.top + 6 }]}>
@@ -407,6 +410,42 @@ const sans = (size: number, weight: 'regular' | 'medium' | 'bold') => ({
   lineHeight: size * 1.3,
   letterSpacing: size * -0.02,
 });
+
+/**
+ * The glow drifts: it sways side to side and breathes on two different
+ * clocks, so the light never visibly repeats. Always a little enlarged so
+ * no edge ever shows.
+ */
+function MovingGlow({ width, height }: { width: number; height: number }) {
+  // One slow clock; the sway and the breath ride it at different rates.
+  const t = useSharedValue(0);
+  useEffect(() => {
+    t.value = withRepeat(
+      withTiming(1, { duration: 14000, easing: Easing.linear }),
+      -1,
+      false,
+    );
+  }, [t]);
+  const style = useAnimatedStyle(() => {
+    const sway = Math.sin(t.value * Math.PI * 2);
+    const breath = Math.sin(t.value * Math.PI * 6);
+    return {
+      transform: [
+        { translateX: sway * width * 0.04 },
+        { translateY: breath * height * 0.015 },
+        { scale: 1.13 + breath * 0.03 },
+      ],
+      opacity: 0.94 + breath * 0.06,
+    };
+  });
+  return (
+    <Animated.Image
+      source={art.homeGlow}
+      style={[{ width, height }, style]}
+      resizeMode="cover"
+    />
+  );
+}
 
 const styles = StyleSheet.create({
   screen: {
