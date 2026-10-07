@@ -25,6 +25,8 @@ export interface OptionCardProps {
   disabled?: boolean;
   /** An icon on the left that comes alive when the card is chosen. */
   icon?: IconComponent;
+  /** A quiet second name beside the title, e.g. in Devanagari. */
+  note?: string;
   /** A tall card for side-by-side choices: icon and tag on top, text below. */
   tile?: boolean;
   testID?: string;
@@ -44,6 +46,7 @@ export function OptionCard({
   disabled = false,
   icon,
   tile = false,
+  note,
   testID,
 }: OptionCardProps) {
   const surface = useSurface();
@@ -112,16 +115,7 @@ export function OptionCard({
           />
           <View style={styles.tileTop}>
             {icon ? <OptionIcon Icon={icon} active={selected} /> : <View />}
-            {tag ? (
-              <Animated.Text
-                style={[
-                  typography.eyebrow,
-                  selected ? styles.tagOn : styles.tagOff,
-                ]}
-              >
-                {tag}
-              </Animated.Text>
-            ) : null}
+            {tag ? <Tag label={tag} selected={selected} /> : null}
           </View>
           <Animated.View style={[styles.tileText, contentStyle]}>
             <Animated.Text style={typography.cardTitle}>
@@ -171,19 +165,15 @@ export function OptionCard({
           {description ? (
             <>
               <View style={styles.titleRow}>
-                <Animated.Text style={[typography.cardTitle, styles.flex]}>
-                  {sansDigits(title)}
-                </Animated.Text>
-                {tag ? (
-                  <Animated.Text
-                    style={[
-                      typography.eyebrow,
-                      selected ? styles.tagOn : styles.tagOff,
-                    ]}
-                  >
-                    {tag}
+                <View style={styles.names}>
+                  <Animated.Text style={typography.cardTitle}>
+                    {sansDigits(title)}
                   </Animated.Text>
-                ) : null}
+                  {note ? (
+                    <Animated.Text style={styles.note}>{note}</Animated.Text>
+                  ) : null}
+                </View>
+                {tag ? <Tag label={tag} selected={selected} /> : null}
               </View>
               <Animated.Text style={typography.micro}>
                 {description}
@@ -209,6 +199,19 @@ export function OptionCard({
         </Animated.View>
       </Animated.View>
     </Pressable>
+  );
+}
+
+/** The small label on a card: a soft pill that warms when chosen. */
+function Tag({ label, selected }: { label: string; selected: boolean }) {
+  return (
+    <View style={[styles.tag, selected ? styles.tagBgOn : styles.tagBgOff]}>
+      <Animated.Text
+        style={[styles.tagText, selected ? styles.tagOn : styles.tagOff]}
+      >
+        {label}
+      </Animated.Text>
+    </View>
   );
 }
 
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
   icon: {
     alignSelf: 'flex-start',
     marginTop: 1,
-    marginRight: spacing.md,
+    marginRight: 16,
   },
   hidden: {
     display: 'none',
@@ -297,11 +300,38 @@ const styles = StyleSheet.create({
   flex: {
     flex: 1,
   },
+  names: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.sm,
+  },
+  note: {
+    ...typography.label,
+    color: colors.textMuted,
+  },
+  tag: {
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: radii.pill,
+  },
+  tagBgOn: {
+    backgroundColor: 'rgba(250, 140, 34, 0.14)',
+  },
+  tagBgOff: {
+    backgroundColor: 'rgba(0, 0, 0, 0.045)',
+  },
+  tagText: {
+    ...typography.eyebrow,
+    fontSize: 10,
+    lineHeight: 13,
+    letterSpacing: 1.2,
+  },
   tagOn: {
-    color: colors.saffron,
+    color: '#C2620C',
   },
   tagOff: {
-    color: colors.textFaint,
+    color: colors.textMuted,
   },
   disabled: {
     opacity: 0.5,

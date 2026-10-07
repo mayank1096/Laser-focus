@@ -129,7 +129,7 @@ export const PRATIGYAS: Record<
     name: 'अभिमन्यु',
     latin: 'Abhimanyu',
     tag: 'Begin here',
-    short: 'Silence every distraction before each session.',
+    short: 'Silence the phone before every session.',
     asks: [
       'Silent mode on before every session',
       'Phone out of sight, in another room',
@@ -140,7 +140,7 @@ export const PRATIGYAS: Record<
     name: 'अर्जुन',
     latin: 'Arjun',
     tag: 'Serious',
-    short: 'Delete social media and games. Reinstall one and the app locks.',
+    short: 'Delete social media and games.',
     asks: [
       'Delete every social media app',
       'Delete every game',
@@ -152,7 +152,7 @@ export const PRATIGYAS: Record<
     name: 'भीष्म',
     latin: 'Bhishma',
     tag: 'For life',
-    short: 'Browser-only, fixed hours. The vow that is never taken back.',
+    short: 'Smartphone off. Calls at fixed hours.',
     asks: [
       'Smartphone off, kept for emergencies only',
       'Or move to a keypad phone',

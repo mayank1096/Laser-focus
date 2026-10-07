@@ -38,7 +38,8 @@ export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
             <OptionCard
               key={p}
               testID={`pratigya-${p}`}
-              title={PRATIGYAS[p].name}
+              title={PRATIGYAS[p].latin}
+              note={PRATIGYAS[p].name}
               tag={PRATIGYAS[p].tag}
               description={PRATIGYAS[p].short}
               selected={pratigya === p}

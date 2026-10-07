@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingVertical: 14,
-    paddingLeft: spacing.lg,
+    paddingLeft: 16,
     paddingRight: spacing.md,
   },
   divided: {
@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
   iconSlot: {
     alignSelf: 'flex-start',
     paddingTop: 1,
+    marginRight: spacing.md,
   },
   flex: {
     flex: 1,
