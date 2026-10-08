@@ -27,7 +27,9 @@ import { TAB_BAR_CLEARANCE } from '../../../components/TabBar';
 import { colors, fonts, spacing } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { useGoalProgress, useRecentMarks, useStreak } from '../../progress';
-import type { DayMark } from '../../session/store';
+import { MarkHeatmap } from '../../session/components/MarkHeatmap';
+import { today } from '../../../utils/clock';
+import { addDays } from '../../../utils/date';
 import { PRATIGYAS, useProfile } from '../store';
 
 export type AccountDestination =
@@ -44,7 +46,7 @@ export function AccountScreen({
   const insets = useSafeAreaInsets();
   const profile = useProfile();
   const progress = useGoalProgress();
-  const marks = useRecentMarks(35).map(m => m.mark);
+  const marks = useRecentMarks(progress.day).map(m => m.mark);
   const streak = useStreak();
   const [confirmOut, setConfirmOut] = useState(false);
   const deleted = profile.apps.filter(a => a.deleted).length;
@@ -94,18 +96,19 @@ export function AccountScreen({
             <Stat value={progress.days - progress.day} label="Days left" />
           </View>
           <View style={styles.calendarHead}>
-            <AppText variant="eyebrow">Last 5 weeks</AppText>
-            <AppText variant="micro" style={styles.muted}>
-              {`${marks.filter(m => m === 'full' || m === 'half').length}/${
-                marks.length
-              } marked`}
-            </AppText>
+            <AppText variant="eyebrow">Your marks</AppText>
+            <View style={styles.legend}>
+              <View style={[styles.key, styles.keyHalf]} />
+              <AppText variant="micro" style={styles.muted}>
+                Half
+              </AppText>
+              <View style={[styles.key, styles.keyFull]} />
+              <AppText variant="micro" style={styles.muted}>
+                Full
+              </AppText>
+            </View>
           </View>
-          <View style={styles.calendar}>
-            {marks.map((m, i) => (
-              <MarkDot key={i} mark={m} today={i === marks.length - 1} />
-            ))}
-          </View>
+          <MarkHeatmap runStart={addDays(today(), 1 - progress.day)} />
         </View>
       </Animated.View>
 
@@ -331,23 +334,6 @@ function Stat({ value, label }: { value: number; label: string }) {
   );
 }
 
-/** One day: filled for a full mark, half-filled for a half, a ring otherwise. */
-function MarkDot({ mark, today }: { mark: DayMark; today: boolean }) {
-  return (
-    <View style={styles.dotCell}>
-      <View
-        style={[
-          styles.dot,
-          mark === 'full' && styles.dotFull,
-          today && styles.dotToday,
-        ]}
-      >
-        {mark === 'half' ? <View style={styles.dotHalf} /> : null}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -422,42 +408,29 @@ const styles = StyleSheet.create({
   calendarHead: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'baseline',
+    alignItems: 'center',
+    marginBottom: 14,
     marginTop: 20,
     paddingTop: 18,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.divider,
   },
-  calendar: {
+  legend: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 14,
-    rowGap: 10,
-  },
-  dotCell: {
-    width: `${100 / 7}%`,
     alignItems: 'center',
+    gap: 6,
   },
-  dot: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.2,
-    borderColor: colors.saffronLine,
-    overflow: 'hidden',
-    justifyContent: 'flex-end',
+  key: {
+    width: 10,
+    height: 10,
+    borderRadius: 3,
+    marginLeft: 4,
   },
-  dotFull: {
+  keyHalf: {
+    backgroundColor: '#FBC48F',
+  },
+  keyFull: {
     backgroundColor: colors.saffron,
-    borderColor: colors.saffron,
-  },
-  dotHalf: {
-    height: '50%',
-    backgroundColor: colors.saffron,
-  },
-  dotToday: {
-    borderColor: colors.saffron,
-    borderWidth: 1.6,
   },
   body: {
     padding: 22,
