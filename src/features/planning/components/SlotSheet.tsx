@@ -2,13 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { AppText } from '../../../components/AppText';
 import { Chip, ChipRow } from '../../../components/Chip';
+import { TextField } from '../../../components/TextField';
+import { partOfDay } from '../../../utils/date';
 import type { SessionSlot } from '../../../types/models';
 import { colors, spacing } from '../../../theme';
 import { haptics } from '../../../utils/haptics';
 import { PLANNING_LIMITS, SLOT_LENGTHS, usePlanning } from '../store';
 import { ClockSheet } from './ClockSheet';
 
-/** Edit one daily session time: when it starts and how long it runs. */
+/** Edit one daily session: its name, when it starts and how long it runs. */
 export function SlotSheet({
   slot,
   onClose,
@@ -22,9 +24,11 @@ export function SlotSheet({
     s => s.slots.length > PLANNING_LIMITS.slots.min,
   );
   const [minutes, setMinutes] = useState(slot?.minutes ?? 90);
+  const [name, setName] = useState(slot?.name ?? '');
   useEffect(() => {
     if (slot) {
       setMinutes(slot.minutes);
+      setName(slot.name ?? '');
     }
   }, [slot]);
 
@@ -32,13 +36,13 @@ export function SlotSheet({
     <ClockSheet
       testID="slot-sheet"
       visible={slot !== null}
-      title="Session time"
-      subtitle="The same time every day."
+      title="Session"
+      subtitle="Name it, and set the same time every day."
       value={slot?.start ?? 6 * 60}
       onClose={onClose}
       onDone={start => {
         if (slot) {
-          updateSlot(slot.id, { start, minutes });
+          updateSlot(slot.id, { start, minutes, name: name.trim() });
         }
         onClose();
       }}
@@ -62,6 +66,17 @@ export function SlotSheet({
         ) : null
       }
     >
+      <View style={styles.group}>
+        <AppText variant="eyebrow">Name</AppText>
+        <TextField
+          testID="slot-name"
+          accessibilityLabel="Session name"
+          value={name}
+          onChangeText={setName}
+          placeholder={slot ? partOfDay(slot.start) : 'Morning'}
+          maxLength={28}
+        />
+      </View>
       <View style={styles.group}>
         <AppText variant="eyebrow">Length</AppText>
         <ChipRow>

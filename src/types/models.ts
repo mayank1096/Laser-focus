@@ -93,6 +93,8 @@ export interface SessionSlot {
   start: ClockTime;
   /** Planned length in minutes. */
   minutes: number;
+  /** What the user calls it, e.g. "Mock test". Falls back to the time of day. */
+  name?: string;
 }
 
 /** The one-hour window for shallow tasks. */

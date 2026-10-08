@@ -15,16 +15,16 @@ const hex = (h: string) => {
 };
 
 export const AURORA = {
-  base: '#FF4E12',
-  core: '#FF9A3C',
-  tip: '#FFD6A8',
+  base: '#E8763C',
+  core: '#F0A066',
+  tip: '#F8D9BC',
 };
 
 /** The sky it hangs in: ember night at the top, a saffron horizon, then the page. */
 export const SKY = {
-  top: '#260B04',
-  mid: '#842B08',
-  horizon: '#E0661C',
+  top: '#2E1A12',
+  mid: '#6B3C26',
+  horizon: '#C98A62',
   page: '#F7F5F4',
 };
 
@@ -38,7 +38,7 @@ const float CY = 0.34;
 const float WAV = 0.85;
 const float RAYS = 0.6;
 const float HEIGHT = 1.05;
-const float INTENSITY = 1.2;
+const float INTENSITY = 0.95;
 const float BALANCE = 1.45;
 const float SEED = 7.0;
 
@@ -92,6 +92,6 @@ vec4 aurora(vec2 uv, float aspect, float t) {
   // The curtains give off light, so they add to the sky rather than cover it;
   // they fade out before the page below.
   float fade = smoothstep(0.12, 0.3, y);
-  return vec4(clamp(sky + col * glow * 0.7 * fade, 0.0, 1.0), 1.0);
+  return vec4(clamp(sky + col * glow * 0.5 * fade, 0.0, 1.0), 1.0);
 }
 `;

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Check from '../../../assets/icons/check.svg';
+import Pencil from '../../../assets/icons/pencil.svg';
 import { AppText } from '../../../components/AppText';
 import { BottomSheet } from '../../../components/BottomSheet';
 import { PrimaryButton } from '../../../components/PrimaryButton';
@@ -30,12 +31,23 @@ export function TaskPickerSheet({
 }: TaskPickerSheetProps) {
   const state = usePlanning();
   const addTask = usePlanning(s => s.addTask);
+  const updateTask = usePlanning(s => s.updateTask);
   const [draft, setDraft] = useState('');
+  const [editing, setEditing] = useState<{ id: Id; text: string } | null>(null);
   useEffect(() => {
     if (slot) {
       setDraft('');
+      setEditing(null);
     }
   }, [slot]);
+
+  const saveEdit = () => {
+    if (editing && editing.text.trim().length >= 2) {
+      updateTask(editing.id, { text: editing.text.trim() });
+      haptics.selection();
+    }
+    setEditing(null);
+  };
 
   const open = useMemo(
     () =>
@@ -62,12 +74,39 @@ export function TaskPickerSheet({
     >
       <SheetTitle
         title={slot ? `${formatClock(slot.start)} session` : 'Session'}
-        subtitle="One task. Nothing else gets this time."
+        subtitle="One task. Nothing else gets this time. Tap the pencil to fix a task."
       />
       <View style={styles.list} accessibilityRole="radiogroup">
         {open.map(task => {
           const selected = task.id === selectedId;
           const left = task.sessionsNeeded - task.sessionsDone;
+          if (editing?.id === task.id) {
+            return (
+              <View key={task.id} style={[styles.option, styles.selected]}>
+                <View style={styles.flex}>
+                  <TextField
+                    testID={`edit-${task.id}`}
+                    accessibilityLabel="Task"
+                    value={editing.text}
+                    onChangeText={text => setEditing({ id: task.id, text })}
+                    onSubmitEditing={saveEdit}
+                    autoFocus
+                    maxLength={70}
+                  />
+                </View>
+                <Pressable
+                  testID={`save-${task.id}`}
+                  accessibilityRole="button"
+                  hitSlop={8}
+                  onPress={saveEdit}
+                >
+                  <AppText variant="label" style={styles.saffron}>
+                    Save
+                  </AppText>
+                </Pressable>
+              </View>
+            );
+          }
           return (
             <Pressable
               key={task.id}
@@ -101,6 +140,19 @@ export function TaskPickerSheet({
                   strokeWidth={2.25}
                 />
               ) : null}
+              <Pressable
+                testID={`edit-open-${task.id}`}
+                accessibilityRole="button"
+                accessibilityLabel={`Edit ${task.text}`}
+                hitSlop={10}
+                onPress={() => {
+                  haptics.tap();
+                  setEditing({ id: task.id, text: task.text });
+                }}
+                style={styles.edit}
+              >
+                <Pencil width={15} height={15} color={colors.textMuted} />
+              </Pressable>
             </Pressable>
           );
         })}
@@ -179,6 +231,15 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.textMuted,
+  },
+  saffron: {
+    color: colors.saffron,
+  },
+  flex: {
+    flex: 1,
+  },
+  edit: {
+    paddingLeft: spacing.sm,
   },
   newTask: {
     marginTop: spacing.xxl,

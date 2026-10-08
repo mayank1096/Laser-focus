@@ -102,6 +102,11 @@ export function partOfDay(minutes: ClockTime): string {
   return minutes < 17 * 60 ? 'Afternoon' : 'Evening';
 }
 
+/** The session's own name, or its time of day when it has none. */
+export function slotName(slot: { start: ClockTime; name?: string }): string {
+  return slot.name?.trim() || partOfDay(slot.start);
+}
+
 /** 90 → "90 min", 180 → "3 h", 150 → "2 h 30 min". */
 export function formatMinutes(total: number): string {
   if (total < 120) {

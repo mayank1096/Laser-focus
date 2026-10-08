@@ -21,6 +21,7 @@ import {
   formatClock,
   formatDay,
   formatWindow,
+  slotName,
 } from '../../../utils/date';
 import { haptics } from '../../../utils/haptics';
 import { SlotSheet } from '../components/SlotSheet';
@@ -113,6 +114,7 @@ export function PlanDayScreen({
             <SlotCard
               key={session.slot.id}
               session={session}
+              onEditSlot={() => setEditingSlot(session.slot)}
               onPick={() => setPicking(session)}
               onWrite={() => writeSheet(session.slot.id)}
             />
@@ -167,10 +169,12 @@ export function PlanDayScreen({
 
 function SlotCard({
   session,
+  onEditSlot,
   onPick,
   onWrite,
 }: {
   session: SessionView;
+  onEditSlot: () => void;
   onPick: () => void;
   onWrite: () => void;
 }) {
@@ -183,12 +187,28 @@ function SlotCard({
       exiting={FadeOut.duration(motion.fast)}
       style={[styles.card, needsSheet && styles.cardOpen]}
     >
-      <View style={styles.time}>
+      <Pressable
+        testID={`plan-time-${slot.id}`}
+        accessibilityRole="button"
+        accessibilityLabel={`${slotName(slot)} session at ${formatClock(
+          slot.start,
+        )}`}
+        accessibilityHint="Rename it or change its time"
+        hitSlop={6}
+        onPress={() => {
+          haptics.tap();
+          onEditSlot();
+        }}
+        style={styles.time}
+      >
+        <AppText variant="eyebrow" numberOfLines={1}>
+          {slotName(slot)}
+        </AppText>
         <AppText variant="bodyBold">{formatClock(slot.start)}</AppText>
         <AppText variant="micro" style={styles.muted}>
           {`${slot.minutes} min`}
         </AppText>
-      </View>
+      </Pressable>
       <View style={styles.rule} />
       <View style={styles.body}>
         <Pressable
@@ -253,7 +273,7 @@ const styles = StyleSheet.create({
     borderColor: colors.saffron,
   },
   time: {
-    width: 64,
+    width: 78,
     gap: spacing.xxs,
   },
   muted: {

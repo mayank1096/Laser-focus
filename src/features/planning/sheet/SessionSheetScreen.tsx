@@ -7,7 +7,7 @@ import {
 } from '../../../components/FlowFrame';
 import { PrimaryButton } from '../../../components/PrimaryButton';
 import type { RootScreenProps } from '../../../navigation/types';
-import { formatClock } from '../../../utils/date';
+import { formatClock, slotName } from '../../../utils/date';
 import { haptics } from '../../../utils/haptics';
 import { lastSheetBefore, planFor, usePlanning } from '../store';
 import { ChallengeStep } from './ChallengeStep';
@@ -93,9 +93,9 @@ export function SessionSheetScreen({
   }
   const step = STEPS[index];
   const isLast = index === STEPS.length - 1;
-  const tag = `${formatClock(session.slot.start)} · ${
-    session.task?.text ?? 'Session'
-  }`;
+  const tag = `${slotName(session.slot)} · ${formatClock(
+    session.slot.start,
+  )} · ${session.task?.text ?? 'Session'}`;
 
   const goTo = (target: number, dir: FlowDirection) => {
     setDirection(dir);

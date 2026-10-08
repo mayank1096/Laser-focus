@@ -18,7 +18,7 @@ import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
 import type { Id, Priority } from '../../types/models';
 import { colors, fonts, motion, spacing, typography } from '../../theme';
 import { today as todayISO } from '../../utils/clock';
-import { addDays, formatClock } from '../../utils/date';
+import { addDays, formatClock, slotName } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { useGoalSetup } from '../onboarding/store';
 import {
@@ -225,9 +225,9 @@ export function TodayScreen({ onBegin, onPlanToday }: TodayActions) {
               >
                 <AppText style={styles.startLabel}>Start Session</AppText>
                 <AppText style={styles.startMeta}>
-                  {`${formatClock(next.slot.start)} · ${
-                    next.sheet?.minutes ?? next.slot.minutes
-                  } mins`}
+                  {`${slotName(next.slot)} · ${formatClock(
+                    next.slot.start,
+                  )} · ${next.sheet?.minutes ?? next.slot.minutes} mins`}
                 </AppText>
               </Pressable>
             </>

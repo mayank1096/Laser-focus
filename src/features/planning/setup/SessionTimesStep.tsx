@@ -14,7 +14,7 @@ import {
 import { useSurface } from '../../../components/Surface';
 import type { SessionSlot } from '../../../types/models';
 import { colors, fonts, layout, motion, radii, spacing } from '../../../theme';
-import { formatClock, partOfDay } from '../../../utils/date';
+import { formatClock, slotName } from '../../../utils/date';
 import { haptics } from '../../../utils/haptics';
 import { SlotSheet } from '../components/SlotSheet';
 import { findClash, PLANNING_LIMITS, usePlanning } from '../store';
@@ -103,10 +103,10 @@ function SlotRow({
       <Pressable
         testID={`slot-${slot.id}`}
         accessibilityRole="button"
-        accessibilityLabel={`${partOfDay(slot.start)} session at ${formatClock(
+        accessibilityLabel={`${slotName(slot)} session at ${formatClock(
           slot.start,
         )}, ${slot.minutes} minutes`}
-        accessibilityHint="Change the time or length"
+        accessibilityHint="Change the name, time or length"
         onPress={() => {
           haptics.tap();
           onPress();
@@ -118,7 +118,7 @@ function SlotRow({
         ]}
       >
         <View style={styles.time}>
-          <AppText variant="eyebrow">{partOfDay(slot.start)}</AppText>
+          <AppText variant="eyebrow">{slotName(slot)}</AppText>
           <AppText variant="heading" style={styles.clock}>
             {formatClock(slot.start)}
           </AppText>
