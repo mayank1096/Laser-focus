@@ -12,6 +12,8 @@ export interface IconButtonProps {
   /** Square background; omit for a bare icon. */
   filled?: boolean;
   disabled?: boolean;
+  /** Icon colour; ink by default, white on dark or saffron grounds. */
+  color?: string;
   testID?: string;
 }
 
@@ -22,6 +24,7 @@ export function IconButton({
   size = 18,
   filled = false,
   disabled = false,
+  color = colors.ink,
   testID,
 }: IconButtonProps) {
   return (
@@ -42,7 +45,7 @@ export function IconButton({
         (pressed || disabled) && styles.dim,
       ]}
     >
-      <Icon width={size} height={size} color={colors.ink} strokeWidth={1.75} />
+      <Icon width={size} height={size} color={color} strokeWidth={1.75} />
     </Pressable>
   );
 }

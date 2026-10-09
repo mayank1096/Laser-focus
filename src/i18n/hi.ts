@@ -324,15 +324,13 @@ export const hi: Strings = {
   },
 
   goalDone: {
+    summary: (days: number, full: number, half: number) =>
+      `${days} दिन। ${full} पूरे, ${half} ज़िग-ज़ैग।`,
     reached: 'लक्ष्य हासिल',
     ended: 'दौर खत्म',
     span: (from: string, to: string) => `${from} – ${to}`,
-    days: 'दिन',
-    full: 'पूरे',
-    half: 'ज़िग-ज़ैग',
     milestones: (done: number, total: number) =>
       `माइलस्टोन · ${total} में से ${done}`,
-    journey: 'लक्ष्य चुनने के बाद का हर दिन',
     rest: 'अब आराम करें',
     counts: (full: number, half: number) =>
       `${full} ● दिन · ${half} ज़िग-ज़ैग दिन`,

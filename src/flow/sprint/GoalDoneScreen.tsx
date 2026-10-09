@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -6,20 +6,13 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, {
-  Easing,
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withTiming,
-} from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle } from 'react-native-svg';
 import Check from '../../assets/icons/check.svg';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import { AppText } from '../../components/AppText';
 import { IconButton } from '../../components/IconButton';
+import { sansDigits } from '../../components/Numerals';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { rise } from '../../components/QuestionHeader';
 import { ShaderView } from '../../components/shader';
@@ -30,32 +23,30 @@ import { circledGoal, useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { shortDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, fonts, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography, SILK } from '../../theme';
 import { addDays, daysBetween } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { countDays } from '../components/Calendar';
 
-const HERO = 260;
-const RINGS = [96, 72, 48];
+const GUTTER = 22;
 const INK_50 = 'rgba(0, 0, 0, 0.5)';
-const INK_06 = 'rgba(0, 0, 0, 0.06)';
-/** Squares in the journey grid: big for a short run, small for years. */
+const WHITE_70 = 'rgba(255, 255, 255, 0.72)';
+/** The Home silk, melting into this white page. */
+const SKY = [...SILK, '#FFFFFF'];
+/** The same grid as Home: nineteen squares a row, one per day. */
+const PER_ROW = 19;
 const TILE_GAP = 4;
-const tileFor = (days: number, room: number) =>
-  Math.max(
-    8,
-    Math.min(22, Math.floor((room + TILE_GAP) / Math.min(days, 14)) - TILE_GAP),
-  );
 
 /**
- * A goal reached, or a sprint ended. The target glows at the top with the
- * goal beneath it; then the run in three numbers, the milestones as a
- * thread, and every day since the circle as a field of squares.
+ * A goal reached, or a sprint ended. The goal sits on the same silk it
+ * lived on at Home, and under it every day of the run fills in, one box
+ * after another, as it happened. Below: the milestones as a thread.
  */
 export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const [heroH, setHeroH] = useState(0);
   const state = useBook();
   const goal = circledGoal(state);
   const today = appDay();
@@ -65,7 +56,9 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   const milestones = activeMilestones(state);
   const done = milestones.filter(m => m.done).length;
   const reached = milestones.length > 0 && done === milestones.length;
-  const tile = tileFor(days, width - spacing.gutter * 2);
+  const tile = (width - GUTTER * 2 - TILE_GAP * (PER_ROW - 1)) / PER_ROW;
+  // A short run plays back box by box; a long one arrives at once.
+  const step = days <= 120 ? Math.min(40, 1100 / days) : 0;
   const marks: (Mark | null)[] = Array.from({ length: days }, (_, i) =>
     dayMark(state, addDays(from, i)),
   );
@@ -76,63 +69,72 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
         contentContainerStyle={{ paddingBottom: spacing.xxl }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.hero, { height: HERO + insets.top }]}>
-          <View
-            pointerEvents="none"
-            style={[
-              styles.glow,
-              { top: insets.top - 40, left: (width - 360) / 2 },
-            ]}
-          >
+        <View
+          style={[styles.hero, { paddingTop: insets.top + 6 }]}
+          onLayout={e => setHeroH(e.nativeEvent.layout.height)}
+        >
+          {heroH ? (
             <ShaderView
-              preset="glow"
-              width={360}
-              height={360}
-              colours={['#F9C08A', '#FA8C22', '#FFE1C2']}
+              preset="silk"
+              width={width}
+              height={heroH}
+              colours={SKY}
+              style={styles.sky}
             />
-          </View>
-          <View style={[styles.back, { top: insets.top + 6 }]}>
+          ) : null}
+          <View style={styles.back}>
             <IconButton
               Icon={ChevronLeft}
               size={20}
+              color={colors.white}
               testID="back-button"
               accessibilityLabel={t.common.back}
               onPress={() => navigation.goBack()}
             />
           </View>
-          <View style={[styles.targetWrap, { paddingTop: insets.top + 40 }]}>
-            <Target reached={reached} />
-          </View>
-        </View>
-
-        <View style={styles.head}>
-          <Animated.Text
-            entering={rise(0)}
-            style={[typography.eyebrow, styles.saffron]}
-          >
-            {reached ? t.goalDone.reached : t.goalDone.ended}
+          <Animated.Text entering={rise(0)} style={styles.eyebrow}>
+            {`${
+              reached ? t.goalDone.reached : t.goalDone.ended
+            } · ${t.goalDone.span(shortDate(t, from), shortDate(t, today))}`}
           </Animated.Text>
           <Animated.Text
             entering={rise(1)}
             style={styles.goal}
             accessibilityRole="header"
           >
-            {goal?.text ?? ''}
+            {sansDigits(goal?.text ?? '')}
           </Animated.Text>
-          <Animated.Text entering={rise(2)} style={styles.span}>
-            {t.goalDone.span(shortDate(t, from), shortDate(t, today))}
+          <View
+            style={[styles.field, { gap: TILE_GAP }]}
+            accessibilityLabel={t.goalDone.summary(days, full, half)}
+          >
+            {marks.map((m, i) => (
+              <Animated.View
+                key={i}
+                entering={
+                  step ? FadeIn.delay(500 + i * step).duration(220) : undefined
+                }
+                style={[
+                  styles.tile,
+                  { width: tile, height: tile, borderRadius: tile * 0.28 },
+                ]}
+              >
+                {m === 'full' ? <View style={styles.tileFull} /> : null}
+                {m === 'half' ? (
+                  <View style={[styles.tileHalf, { width: tile / 2 }]} />
+                ) : null}
+              </Animated.View>
+            ))}
+          </View>
+          <Animated.Text
+            entering={FadeIn.delay(600 + days * step).duration(400)}
+            style={styles.summary}
+          >
+            {t.goalDone.summary(days, full, half)}
           </Animated.Text>
         </View>
 
-        <Animated.View entering={rise(3)} style={styles.stats}>
-          <Stat value={days} label={t.goalDone.days} />
-          <View style={styles.rule} />
-          <Stat value={full} label={t.goalDone.full} accent />
-          <View style={styles.rule} />
-          <Stat value={half} label={t.goalDone.half} />
-        </Animated.View>
-
-        <Animated.View entering={rise(4)} style={styles.section}>
+        <Animated.View entering={rise(2)} style={styles.section}>
           <AppText variant="eyebrow">
             {t.goalDone.milestones(done, milestones.length)}
           </AppText>
@@ -178,26 +180,6 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
             ))}
           </View>
         </Animated.View>
-
-        <Animated.View entering={rise(5)} style={styles.section}>
-          <AppText variant="eyebrow">{t.goalDone.journey}</AppText>
-          <View style={styles.field}>
-            {marks.map((m, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.tile,
-                  { width: tile, height: tile, borderRadius: tile * 0.3 },
-                  m === 'full'
-                    ? styles.tileFull
-                    : m === 'half'
-                    ? styles.tileHalf
-                    : null,
-                ]}
-              />
-            ))}
-          </View>
-        </Animated.View>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
@@ -218,188 +200,68 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   );
 }
 
-/** Three rings that settle in one after another, the bullseye last. */
-function Target({ reached }: { reached: boolean }) {
-  const p = useSharedValue(0);
-  useEffect(() => {
-    p.value = withDelay(
-      200,
-      withTiming(1, { duration: 1100, easing: Easing.bezier(0.16, 1, 0.3, 1) }),
-    );
-    if (reached) {
-      const id = setTimeout(() => haptics.success(), 900);
-      return () => clearTimeout(id);
-    }
-  }, [p, reached]);
-  const size = RINGS[0] * 2;
-  return (
-    <View style={{ width: size, height: size }}>
-      {RINGS.map((r, i) => (
-        <Ring key={r} r={r} index={i} p={p} size={size} />
-      ))}
-      <Animated.View
-        entering={FadeIn.delay(900).duration(400)}
-        style={styles.bull}
-      >
-        <View style={styles.bullDisc}>
-          <Check
-            width={26}
-            height={26}
-            color={colors.saffron}
-            strokeWidth={2.8}
-          />
-        </View>
-      </Animated.View>
-    </View>
-  );
-}
-
-function Ring({
-  r,
-  index,
-  p,
-  size,
-}: {
-  r: number;
-  index: number;
-  p: ReturnType<typeof useSharedValue<number>>;
-  size: number;
-}) {
-  const style = useAnimatedStyle(() => {
-    const local = Math.min(1, Math.max(0, p.value * 1.6 - index * 0.25));
-    return {
-      opacity: local,
-      transform: [{ scale: 1.3 - local * 0.3 }],
-    };
-  });
-  return (
-    <Animated.View style={[StyleSheet.absoluteFill, style]}>
-      <Svg width={size} height={size}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={r - 1}
-          stroke="rgba(255, 255, 255, 0.85)"
-          strokeWidth={1.2}
-          fill={
-            index === RINGS.length - 1 ? 'rgba(255, 255, 255, 0.25)' : 'none'
-          }
-        />
-      </Svg>
-    </Animated.View>
-  );
-}
-
-function Stat({
-  value,
-  label,
-  accent = false,
-}: {
-  value: number;
-  label: string;
-  accent?: boolean;
-}) {
-  return (
-    <View style={styles.stat}>
-      <AppText style={[styles.statValue, accent && styles.saffron]}>
-        {value}
-      </AppText>
-      <AppText variant="micro" style={styles.statLabel}>
-        {label}
-      </AppText>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.white,
   },
   hero: {
-    zIndex: -1,
+    paddingHorizontal: GUTTER,
+    // Room for the silk to melt into the page below the summary.
+    paddingBottom: 110,
   },
-  glow: {
+  sky: {
     position: 'absolute',
-    width: 360,
-    height: 360,
+    top: 0,
+    left: 0,
   },
   back: {
-    position: 'absolute',
-    left: 12,
-    zIndex: 1,
+    marginLeft: -10,
+    marginBottom: 28,
+    alignSelf: 'flex-start',
   },
-  targetWrap: {
-    alignItems: 'center',
-  },
-  bull: {
-    ...StyleSheet.absoluteFill,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bullDisc: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.white,
-    boxShadow: '0px 10px 24px rgba(122, 52, 12, 0.22)',
-  },
-  head: {
-    marginTop: spacing.section,
-    paddingHorizontal: spacing.gutter,
-    alignItems: 'center',
-    gap: 10,
-  },
-  saffron: {
-    color: colors.saffron,
+  eyebrow: {
+    ...typography.eyebrow,
+    color: WHITE_70,
   },
   goal: {
     ...typography.display,
-    fontSize: 30,
-    lineHeight: 35,
-    textAlign: 'center',
-    color: colors.ink,
+    fontSize: 38,
+    lineHeight: 42,
+    marginTop: 12,
+    color: colors.white,
   },
-  span: {
-    fontFamily: fonts.sans,
-    fontSize: 13,
-    lineHeight: 18,
-    letterSpacing: 0.26,
-    color: INK_50,
-  },
-  stats: {
-    marginTop: spacing.section,
-    marginHorizontal: spacing.gutter,
+  field: {
+    marginTop: 36,
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 18,
-    borderRadius: 18,
-    backgroundColor: colors.stone,
+    flexWrap: 'wrap',
   },
-  stat: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 4,
+  tile: {
+    backgroundColor: 'rgba(255, 255, 255, 0.22)',
+    overflow: 'hidden',
   },
-  statValue: {
-    fontFamily: fonts.serif,
-    fontSize: 28,
-    lineHeight: 32,
-    color: colors.ink,
+  tileFull: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: colors.white,
   },
-  statLabel: {
-    color: INK_50,
+  tileHalf: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    backgroundColor: colors.white,
   },
-  rule: {
-    width: 1,
-    alignSelf: 'stretch',
-    backgroundColor: INK_06,
+  summary: {
+    marginTop: 16,
+    fontFamily: fonts.sans,
+    fontSize: 15,
+    lineHeight: 21,
+    letterSpacing: -0.3,
+    color: WHITE_70,
   },
   section: {
-    marginTop: spacing.section,
-    paddingHorizontal: spacing.gutter,
+    marginTop: spacing.lg,
+    paddingHorizontal: GUTTER,
     gap: 16,
   },
   msRow: {
@@ -450,20 +312,6 @@ const styles = StyleSheet.create({
   },
   msOpen: {
     color: INK_50,
-  },
-  field: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: TILE_GAP,
-  },
-  tile: {
-    backgroundColor: INK_06,
-  },
-  tileFull: {
-    backgroundColor: colors.saffron,
-  },
-  tileHalf: {
-    backgroundColor: 'rgba(250, 140, 34, 0.35)',
   },
   footer: {
     paddingTop: spacing.md,

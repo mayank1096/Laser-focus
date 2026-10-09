@@ -56,3 +56,6 @@ export const colors = {
 } as const;
 
 export type ColorToken = keyof typeof colors;
+
+/** The silk behind Home and the goal: deep, body, light. Add the page colour it melts into. */
+export const SILK = ['#9A3C14', '#D2652A', '#E9A77C'] as const;

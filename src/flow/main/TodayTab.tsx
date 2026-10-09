@@ -28,7 +28,14 @@ import { useBook } from '../../core/store';
 import { useT, type Strings } from '../../i18n';
 import { clock, dayDate, shortDate } from '../../i18n/format';
 import type { RootStackParamList } from '../../navigation/types';
-import { colors, fonts, spacing, typography, SMALL_TEXT } from '../../theme';
+import {
+  colors,
+  fonts,
+  spacing,
+  typography,
+  SILK,
+  SMALL_TEXT,
+} from '../../theme';
 import { addDays } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 
@@ -39,8 +46,8 @@ const ROWS = 3;
 const GLOW_HEIGHT = 462;
 const DESIGN_WIDTH = 402;
 
-/** The hero's silk: deep, body, light, and the page it melts into. */
-const SILK = ['#9A3C14', '#D2652A', '#E9A77C', '#F7F5F4'];
+/** The hero's silk, melting into the stone page. */
+const SKY = [...SILK, '#F7F5F4'];
 
 const WHITE_80 = 'rgba(255, 255, 255, 0.8)';
 const WHITE_22 = 'rgba(255, 255, 255, 0.22)';
@@ -108,7 +115,7 @@ export function TodayTab({ go }: { go: Go }) {
             preset="silk"
             width={width}
             height={GLOW_HEIGHT * scale}
-            colours={SILK}
+            colours={SKY}
             style={styles.aurora}
           />
         </View>
