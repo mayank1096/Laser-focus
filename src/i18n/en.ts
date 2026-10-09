@@ -174,6 +174,10 @@ export const en = {
   },
 
   rhythm: {
+    selectFocus: 'Select your focus time',
+    focusSub: 'The same window, every day.',
+    from: 'From',
+    to: 'To',
     eyebrow: 'Your rhythm',
     title: 'Fix your deep-work time.',
     sub: 'Two to three slots at the same time every day. Fit everything else around them.',
@@ -186,7 +190,6 @@ export const en = {
     reminder: 'Evening reminder',
     reminderAt: 'Remind me at',
     onlyOne: 'This is the only notification the app will ever send.',
-    pickTime: 'Focus starts',
     other: 'Other',
     window: (from: string, to: string) => `${from} – ${to}`,
     reviewShort: 'Weekly review',

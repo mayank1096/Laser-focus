@@ -172,6 +172,10 @@ export const hi: Strings = {
   },
 
   rhythm: {
+    selectFocus: 'अपना फ़ोकस समय चुनें',
+    focusSub: 'हर दिन, यही समय।',
+    from: 'से',
+    to: 'तक',
     eyebrow: 'आपकी लय',
     title: 'गहरे काम का समय तय करें।',
     sub: 'हर दिन एक ही समय पर दो-तीन स्लॉट। बाकी सब इनके आसपास रखें।',
@@ -184,7 +188,6 @@ export const hi: Strings = {
     reminder: 'शाम का रिमाइंडर',
     reminderAt: 'याद दिलाएँ',
     onlyOne: 'ऐप इसके अलावा कभी कोई नोटिफ़िकेशन नहीं भेजेगा।',
-    pickTime: 'फ़ोकस शुरू',
     other: 'दूसरा समय',
     window: (from: string, to: string) => `${from} – ${to}`,
     reviewShort: 'हफ़्ते की समीक्षा',

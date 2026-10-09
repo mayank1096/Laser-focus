@@ -11,7 +11,7 @@ import Sunrise from '../../assets/icons/sunrise.svg';
 import Sunset from '../../assets/icons/sunset.svg';
 import { AppText } from '../../components/AppText';
 import { Pill, PillRow, SectionHeader } from '../../components/Pill';
-import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
+import { TRACK } from '../../components/SegmentedControl';
 import type { ClockTime } from '../../types/models';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
@@ -19,10 +19,8 @@ import { clock } from '../../i18n/format';
 import { colors, fonts, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { ClockSheet } from './ClockSheet';
+import { FocusTimeSheet } from './FocusTimeSheet';
 
-const LENGTHS = [60, 90, 120, 180];
-/** Common deep-work starts: early, morning, evening, night. */
-const FOCUS_TIMES = [300, 360, 420, 480, 1080, 1200, 1320];
 const REMINDER_TIMES = [1200, 1260, 1320];
 
 /** The sky at that hour: sunrise, sun, sunset or moon. */
@@ -48,12 +46,11 @@ export function RhythmEditor() {
   const t = useT();
   const rhythm = useBook(s => s.rhythm);
   const setRhythm = useBook(s => s.setRhythm);
-  const [picking, setPicking] = useState<'focus' | 'reminder' | null>(null);
+  const [picking, setPicking] = useState<'reminder' | null>(null);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const FocusIcon = skyIcon(rhythm.focusStart);
 
   // A custom time shows up as its own pill, first in the row.
-  const focusTimes = FOCUS_TIMES.includes(rhythm.focusStart)
-    ? FOCUS_TIMES
-    : [rhythm.focusStart, ...FOCUS_TIMES];
   const reminderTimes = REMINDER_TIMES.includes(rhythm.reminderAt)
     ? REMINDER_TIMES
     : [rhythm.reminderAt, ...REMINDER_TIMES];
@@ -65,43 +62,41 @@ export function RhythmEditor() {
     <View style={styles.wrap}>
       {/* Focus time */}
       <View style={styles.section}>
-        <SectionHeader
-          Icon={Clock}
-          title={t.rhythm.focus}
-          value={t.rhythm.window(
-            clock(t, rhythm.focusStart),
-            clock(t, rhythm.focusStart + rhythm.focusMinutes),
-          )}
-        />
-        <PillRow>
-          {focusTimes.map(at => (
-            <Pill
-              key={at}
-              testID={`focus-at-${at}`}
-              Icon={skyIcon(at)}
-              label={clock(t, at)}
-              selected={rhythm.focusStart === at}
-              onPress={() => setRhythm({ focusStart: at })}
+        <SectionHeader Icon={Clock} title={t.rhythm.focus} />
+        <Pressable
+          testID="rhythm-focus"
+          accessibilityRole="button"
+          accessibilityLabel={t.rhythm.selectFocus}
+          onPress={() => {
+            haptics.tap();
+            setFocusOpen(true);
+          }}
+          style={({ pressed }) => [
+            styles.focusButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <View style={styles.focusIcon}>
+            <FocusIcon
+              width={20}
+              height={20}
+              color={colors.saffron}
+              strokeWidth={1.75}
             />
-          ))}
-          <Pill
-            Icon={Clock}
-            role="button"
-            testID="rhythm-focus"
-            label={t.rhythm.other}
-            selected={false}
-            onPress={() => setPicking('focus')}
-          />
-        </PillRow>
-        <SegmentedControl
-          segments={LENGTHS.map(m => ({
-            id: m,
-            label: t.common.minutes(m),
-            testID: `rhythm-length-${m}`,
-          }))}
-          value={rhythm.focusMinutes}
-          onChange={m => setRhythm({ focusMinutes: m })}
-        />
+          </View>
+          <View style={styles.flex}>
+            <AppText variant="detail">{t.rhythm.selectFocus}</AppText>
+            <AppText style={styles.focusValue}>
+              {t.rhythm.window(
+                clock(t, rhythm.focusStart),
+                clock(t, rhythm.focusStart + rhythm.focusMinutes),
+              )}
+            </AppText>
+          </View>
+          <AppText variant="label" style={styles.focusLength}>
+            {t.common.minutes(rhythm.focusMinutes)}
+          </AppText>
+        </Pressable>
       </View>
 
       {/* Weekly review */}
@@ -184,16 +179,25 @@ export function RhythmEditor() {
         ) : null}
       </View>
 
+      <FocusTimeSheet
+        visible={focusOpen}
+        start={rhythm.focusStart}
+        minutes={rhythm.focusMinutes}
+        onClose={() => setFocusOpen(false)}
+        onDone={(focusStart, focusMinutes) => {
+          haptics.success();
+          setRhythm({ focusStart, focusMinutes });
+          setFocusOpen(false);
+        }}
+      />
       <ClockSheet
         testID="rhythm-clock"
         visible={picking !== null}
-        title={picking === 'focus' ? t.rhythm.pickTime : t.rhythm.pickReminder}
-        value={picking === 'focus' ? rhythm.focusStart : rhythm.reminderAt}
+        title={t.rhythm.pickReminder}
+        value={rhythm.reminderAt}
         onClose={() => setPicking(null)}
         onDone={at => {
-          setRhythm(
-            picking === 'focus' ? { focusStart: at } : { reminderAt: at },
-          );
+          setRhythm({ reminderAt: at });
           setPicking(null);
         }}
       />
@@ -204,6 +208,40 @@ export function RhythmEditor() {
 const styles = StyleSheet.create({
   wrap: {
     gap: 40,
+  },
+  focusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: colors.saffron,
+    backgroundColor: colors.saffronWash,
+  },
+  focusIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.white,
+  },
+  focusValue: {
+    marginTop: 2,
+    fontFamily: fonts.sansMedium,
+    fontSize: 17,
+    lineHeight: 22,
+    color: colors.ink,
+  },
+  focusLength: {
+    color: colors.saffron,
+  },
+  flex: {
+    flex: 1,
+  },
+  pressed: {
+    opacity: 0.75,
   },
   section: {
     gap: spacing.xl,
