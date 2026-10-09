@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
+import { Image, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, type SvgProps } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { art } from '../../assets/art';
 import Ban from '../../assets/icons/ban.svg';
 import Bell from '../../assets/icons/bell.svg';
-import ChevronRight from '../../assets/icons/chevron-right.svg';
 import Flag from '../../assets/icons/flag.svg';
 import Hourglass from '../../assets/icons/hourglass.svg';
 import Languages from '../../assets/icons/languages.svg';
@@ -23,6 +15,7 @@ import Scroll from '../../assets/icons/scroll-text.svg';
 import Settings from '../../assets/icons/settings.svg';
 import Shield from '../../assets/icons/shield-check.svg';
 import { AppText } from '../../components/AppText';
+import { SettingsRow, SettingsSection } from '../../components/SettingsList';
 import { rise } from '../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
 import { appDay } from '../../core/days';
@@ -121,31 +114,31 @@ export function AccountTab({
       </Animated.View>
 
       <Animated.View entering={rise(1)} style={styles.body}>
-        <Section title={t.account.lifetime}>
-          <Row
+        <SettingsSection title={t.account.lifetime}>
+          <SettingsRow
             testID="account-values"
             Icon={Scroll}
             title={t.account.values}
             detail={t.account.valuesSub}
             onPress={() => onOpen('values')}
           />
-          <Row
+          <SettingsRow
             testID="account-antigoal"
             Icon={Ban}
             title={t.account.antiGoal}
             detail={t.account.antiGoalSub}
             onPress={() => onOpen('antiGoal')}
           />
-          <Row
+          <SettingsRow
             Icon={Flag}
             title={t.account.pratigya}
             detail={vow ? t.account.taken(vow) : undefined}
             onPress={() => onOpen('pratigya')}
             last
           />
-        </Section>
-        <Section title={t.account.focus}>
-          <Row
+        </SettingsSection>
+        <SettingsSection title={t.account.focus}>
+          <SettingsRow
             testID="account-rhythm"
             Icon={Hourglass}
             title={t.account.rhythm}
@@ -154,7 +147,7 @@ export function AccountTab({
             }`}
             onPress={() => onOpen('settings')}
           />
-          <Row
+          <SettingsRow
             Icon={Bell}
             title={t.account.reminder}
             detail={
@@ -175,22 +168,22 @@ export function AccountTab({
               />
             }
           />
-          <Row
+          <SettingsRow
             Icon={Shield}
             title={t.account.blocking}
             detail={t.account.blockingSub(deleted)}
             last
           />
-        </Section>
-        <Section title={t.account.accountSection}>
+        </SettingsSection>
+        <SettingsSection title={t.account.accountSection}>
           {phone ? (
-            <Row
+            <SettingsRow
               Icon={Mail}
               title={profile.account?.phone ? t.account.phone : t.signIn.email}
               detail={phone}
             />
           ) : null}
-          <Row
+          <SettingsRow
             testID="account-language"
             Icon={Languages}
             title={t.account.language}
@@ -204,14 +197,14 @@ export function AccountTab({
               profile.setLanguage(profile.language === 'en' ? 'hi' : 'en')
             }
           />
-          <Row
+          <SettingsRow
             testID="account-settings"
             Icon={Settings}
             title={t.settings.title}
             detail={`${t.account.how} · ${t.account.export}`}
             onPress={() => onOpen('settings')}
           />
-          <Row
+          <SettingsRow
             testID="sign-out"
             Icon={LogOut}
             title={confirmOut ? t.account.signOutSure : t.account.signOut}
@@ -227,90 +220,9 @@ export function AccountTab({
               }
             }}
           />
-        </Section>
+        </SettingsSection>
       </Animated.View>
     </ScrollView>
-  );
-}
-
-function Section({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.section}>
-      <AppText variant="eyebrow">{title}</AppText>
-      <View style={styles.card}>{children}</View>
-    </View>
-  );
-}
-
-function Row({
-  Icon,
-  title,
-  detail,
-  onPress,
-  trailing,
-  last,
-  danger,
-  testID,
-}: {
-  Icon: React.FC<SvgProps>;
-  title: string;
-  detail?: string;
-  onPress?: () => void;
-  trailing?: React.ReactNode;
-  last?: boolean;
-  danger?: boolean;
-  testID?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-      onPress={() => {
-        haptics.tap();
-        onPress?.();
-      }}
-      style={({ pressed }) => [
-        styles.row,
-        !last && styles.divider,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Icon
-        width={20}
-        height={20}
-        color={danger ? colors.danger : colors.ink}
-        strokeWidth={1.6}
-      />
-      <View style={styles.flex}>
-        <AppText
-          variant="heading"
-          style={[styles.rowTitle, danger && { color: colors.danger }]}
-        >
-          {title}
-        </AppText>
-        {detail ? (
-          <AppText variant="micro" style={styles.muted}>
-            {detail}
-          </AppText>
-        ) : null}
-      </View>
-      {trailing ??
-        (onPress ? (
-          <ChevronRight
-            width={16}
-            height={16}
-            color={colors.textMuted}
-            strokeWidth={1.75}
-          />
-        ) : null)}
-    </Pressable>
   );
 }
 
@@ -468,31 +380,6 @@ const styles = StyleSheet.create({
   body: {
     padding: 22,
     gap: spacing.xxl,
-  },
-  section: {
-    gap: spacing.md,
-  },
-  card: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xl,
-  },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  pressed: {
-    backgroundColor: colors.stone,
-  },
-  rowTitle: {
-    fontSize: 15,
   },
   switchLang: {
     color: colors.saffron,

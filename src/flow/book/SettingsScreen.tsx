@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { Pressable, Share, StyleSheet, View } from 'react-native';
+import { Share, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import ArrowDown from '../../assets/icons/arrow-down.svg';
+import BookOpen from '../../assets/icons/book-open.svg';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
+import LogOut from '../../assets/icons/log-out.svg';
+import ScrollText from '../../assets/icons/scroll-text.svg';
+import Trash from '../../assets/icons/trash.svg';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SegmentedControl } from '../../components/SegmentedControl';
+import { SettingsRow, SettingsSection } from '../../components/SettingsList';
 import { useBook } from '../../core/store';
 import { useProfile, type Language } from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, motion, spacing } from '../../theme';
-import { haptics } from '../../utils/haptics';
 import { RhythmEditor } from '../components/RhythmEditor';
 import { SheetPage } from '../components/SheetPage';
 import { SheetTitle } from '../components/SheetTitle';
@@ -66,70 +71,80 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
           <RhythmEditor />
         </View>
 
-        <Section>
-          <Pressable
-            testID="settings-how"
-            accessibilityRole="button"
-            accessibilityState={{ expanded: how }}
-            onPress={() => {
-              haptics.selection();
-              setHow(h => !h);
-            }}
-            style={styles.row}
-          >
-            <AppText variant="bodyMedium" style={styles.flex}>
-              {t.settings.how}
-            </AppText>
-            <ChevronDown
-              width={18}
-              height={18}
-              color={colors.textMuted}
-              style={{ transform: [{ rotate: how ? '180deg' : '0deg' }] }}
-            />
-          </Pressable>
-          {how ? (
-            <Animated.View
-              entering={FadeIn.duration(motion.base)}
-              style={styles.how}
+        <View style={styles.groups}>
+          <SettingsSection title={t.settings.helpSection}>
+            <SettingsRow
+              testID="settings-how"
+              Icon={BookOpen}
+              title={t.settings.how}
+              detail={t.settings.howSub}
+              onPress={() => setHow(h => !h)}
+              trailing={
+                <ChevronDown
+                  width={16}
+                  height={16}
+                  color={colors.textMuted}
+                  strokeWidth={1.75}
+                  style={{ transform: [{ rotate: how ? '180deg' : '0deg' }] }}
+                />
+              }
             >
-              {t.settings.howSteps.map((step, i) => (
-                <AppText key={step} variant="body" style={styles.muted}>
-                  {`${i + 1}.  ${step}`}
-                </AppText>
-              ))}
-            </Animated.View>
-          ) : null}
-          <Row
-            testID="settings-print"
-            label={t.settings.print}
-            onPress={() => setPrintNote(true)}
-          />
-          {printNote ? (
-            <AppText variant="caption">{t.setupDone.printSoon}</AppText>
-          ) : null}
-          <Row
-            testID="settings-export"
-            label={t.settings.export}
-            onPress={exportData}
-          />
-        </Section>
+              {how ? (
+                <Animated.View
+                  entering={FadeIn.duration(motion.base)}
+                  style={styles.how}
+                >
+                  {t.settings.howSteps.map((step, i) => (
+                    <View key={step} style={styles.step}>
+                      <AppText variant="micro" style={styles.stepN}>
+                        {i + 1}
+                      </AppText>
+                      <AppText variant="detail" style={styles.flex}>
+                        {step}
+                      </AppText>
+                    </View>
+                  ))}
+                </Animated.View>
+              ) : null}
+            </SettingsRow>
+            <SettingsRow
+              testID="settings-print"
+              Icon={ScrollText}
+              title={t.settings.print}
+              detail={printNote ? t.setupDone.printSoon : t.settings.printSub}
+              onPress={() => setPrintNote(true)}
+            />
+            <SettingsRow
+              testID="settings-export"
+              Icon={ArrowDown}
+              title={t.settings.export}
+              detail={t.settings.exportSub}
+              onPress={exportData}
+              last
+            />
+          </SettingsSection>
 
-        <Section>
-          <Row
-            testID="sign-out"
-            label={t.settings.signOut}
-            onPress={() => {
-              useProfile.setState({ account: null });
-              toSignIn();
-            }}
-          />
-          <Row
-            testID="delete-account"
-            label={t.settings.delete}
-            danger
-            onPress={() => setDeleteSure(true)}
-          />
-        </Section>
+          <SettingsSection title={t.account.accountSection}>
+            <SettingsRow
+              testID="sign-out"
+              Icon={LogOut}
+              title={t.settings.signOut}
+              onPress={() => {
+                useProfile.setState({ account: null });
+                toSignIn();
+              }}
+            />
+            <SettingsRow
+              testID="delete-account"
+              Icon={Trash}
+              title={t.settings.delete}
+              detail={t.settings.deleteSub}
+              danger
+              last
+              onPress={() => setDeleteSure(true)}
+            />
+          </SettingsSection>
+        </View>
       </SheetPage>
 
       <BottomSheet
@@ -172,34 +187,6 @@ function Section({
   );
 }
 
-function Row({
-  label,
-  onPress,
-  danger,
-  testID,
-}: {
-  label: string;
-  onPress: () => void;
-  danger?: boolean;
-  testID?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      onPress={() => {
-        haptics.selection();
-        onPress();
-      }}
-      style={styles.row}
-    >
-      <AppText variant="bodyMedium" style={danger ? styles.danger : undefined}>
-        {label}
-      </AppText>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   rhythm: {
     marginTop: spacing.xl,
@@ -211,25 +198,31 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.hairline,
     backgroundColor: colors.white,
     gap: spacing.md,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4,
   },
   flex: {
     flex: 1,
   },
+  groups: {
+    gap: spacing.group,
+  },
   how: {
-    gap: spacing.sm,
+    gap: 10,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: 16,
+    paddingLeft: spacing.xl + 34,
   },
-  muted: {
-    color: colors.textMuted,
+  step: {
+    flexDirection: 'row',
+    gap: 10,
   },
-  danger: {
-    color: colors.danger,
+  stepN: {
+    width: 12,
+    color: colors.saffron,
+    lineHeight: 13 * 1.45,
   },
 });
