@@ -1,8 +1,10 @@
 import type { ClockTime, Id, ISODate, SheetLine } from '../types/models';
 
-/** How far off a goal is. */
-export type Term = 2 | 5 | 10 | 20;
+/** How far off a goal is, in whole years. */
+export type Term = number;
+/** Quick picks; any whole number of years in TERM_RANGE works. */
 export const TERMS: Term[] = [2, 5, 10, 20];
+export const TERM_RANGE = { min: 1, max: 30 } as const;
 
 export interface Goal {
   id: Id;

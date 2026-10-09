@@ -7,7 +7,16 @@ import { BottomSheet } from '../../components/BottomSheet';
 import { ListField } from '../../components/ListField';
 import { circledGoal, tasksForWeek, useBook } from '../../core/store';
 import { activeMilestones } from '../../core/home';
-import { LIMITS, TERMS, type TaskKind } from '../../core/model';
+import { Chip, ChipRow } from '../../components/Chip';
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { RulerPicker } from '../../components/RulerPicker';
+import {
+  LIMITS,
+  TERM_RANGE,
+  TERMS,
+  type Goal,
+  type TaskKind,
+} from '../../core/model';
 import { useT } from '../../i18n';
 import { monthLabel } from '../../i18n/format';
 import { colors, motion, radii, spacing } from '../../theme';
@@ -34,12 +43,12 @@ export function ValuesEditor() {
   );
 }
 
-/** Goal rows, each with a term chip that steps through 2 / 5 / 10 / 20 years. */
+/** Goal rows, each with a term pill that opens a years picker. */
 export function GoalsEditor() {
   const t = useT();
   const goals = useBook(s => s.goals);
   const setGoals = useBook(s => s.setGoals);
-  const setTerm = useBook(s => s.setGoalTerm);
+  const [editing, setEditing] = useState<Goal | null>(null);
   const lines = goals.map(g => ({ id: g.id, text: g.text }));
   return (
     <View style={styles.gap}>
@@ -61,10 +70,7 @@ export function GoalsEditor() {
             <Pill
               testID={`term-${goal.id}`}
               label={t.goals.term(goal.term)}
-              onPress={() => {
-                const i = TERMS.indexOf(goal.term);
-                setTerm(goal.id, TERMS[(i + 1) % TERMS.length]);
-              }}
+              onPress={() => setEditing(goal)}
             />
           );
         }}
@@ -72,7 +78,61 @@ export function GoalsEditor() {
       {goals.length >= LIMITS.goals.max ? (
         <AppText variant="caption">{t.goals.full}</AppText>
       ) : null}
+      <TermSheet goal={editing} onClose={() => setEditing(null)} />
     </View>
+  );
+}
+
+/** Any number of years: drag the ruler, or tap a common one. */
+function TermSheet({
+  goal,
+  onClose,
+}: {
+  goal: Goal | null;
+  onClose: () => void;
+}) {
+  const t = useT();
+  const setTerm = useBook(s => s.setGoalTerm);
+  const term = useBook(s => s.goals.find(g => g.id === goal?.id)?.term ?? 5);
+  return (
+    <BottomSheet
+      visible={goal !== null}
+      onClose={onClose}
+      accessibilityLabel={t.goals.termTitle}
+    >
+      <SheetTitle title={t.goals.termTitle} subtitle={goal?.text} />
+      {goal ? (
+        <View style={styles.termBody}>
+          <RulerPicker
+            testID="term-ruler"
+            value={term}
+            min={TERM_RANGE.min}
+            max={TERM_RANGE.max}
+            onChange={y => setTerm(goal.id, y)}
+            formatLabel={t.goals.termYears}
+            accessibilityLabel={t.goals.termTitle}
+          />
+          <ChipRow wrap>
+            {TERMS.map(y => (
+              <Chip
+                key={y}
+                testID={`term-pick-${y}`}
+                role="radio"
+                label={t.goals.term(y)}
+                selected={term === y}
+                onPress={() => setTerm(goal.id, y)}
+              />
+            ))}
+          </ChipRow>
+        </View>
+      ) : null}
+      <PrimaryButton
+        testID="term-done"
+        label={t.common.done}
+        shadow="none"
+        onPress={onClose}
+      />
+    </BottomSheet>
   );
 }
 
@@ -302,6 +362,10 @@ export function useOpenTasks(date: ISODate) {
 }
 
 const styles = StyleSheet.create({
+  termBody: {
+    gap: spacing.xl,
+    marginBottom: spacing.xxl,
+  },
   gap: {
     gap: spacing.lg,
   },

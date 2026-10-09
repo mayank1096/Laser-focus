@@ -109,7 +109,10 @@ export const en = {
       'Earn ₹1 lakh a month',
       'Run a full marathon',
     ],
-    term: (y: number) => `${y} yrs`,
+    term: (y: number) => (y === 1 ? '1 yr' : `${y} yrs`),
+    termTitle: 'By when?',
+    termSub: 'Years from today. Pick any number.',
+    termYears: (y: number) => (y === 1 ? '1 year' : `${y} years`),
     full: 'Five is the most. Fewer goals, better focus.',
   },
 
