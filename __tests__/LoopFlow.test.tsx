@@ -2,6 +2,7 @@ import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
 import { DEFAULT_RHYTHM } from '../src/core/model';
+import { en } from '../src/i18n/en';
 import { useBook } from '../src/core/store';
 import { useProfile } from '../src/features/account/store';
 import {
@@ -84,19 +85,35 @@ describe('the daily loop', () => {
     expect(textContent(tree)).toContain('Start Session 1');
     await press(tree, 'home-action');
 
-    // 13 Start: three ticks unlock the button
-    await press(tree, 'phone-out');
-    expect(useBook.getState().sessions[0].startedAt).toBeUndefined();
-    for (const k of ['phone', 'desk', 'ready']) {
-      await press(tree, `tick-${k}`);
+    // 13 The ritual: enter, clear the field, breathe, pray, values,
+    // tratak, then 3, 2, 1
+    expect(textContent(tree)).toContain('Pranam & enter.');
+    await press(tree, 'next-button');
+    await press(tree, 'next-button'); // locked until every box is ticked
+    expect(textContent(tree)).toContain('Only the work in reach.');
+    for (const item of en.ritual.checklist.flatMap(g => g.items)) {
+      await press(tree, `check-${item}`);
     }
-    await press(tree, 'phone-out');
+    await press(tree, 'next-button');
+    expect(textContent(tree)).toContain('Breathe in');
+    await press(tree, 'breathe-skip');
+    expect(textContent(tree)).toContain('Fold your hands.');
+    await press(tree, 'pray-skip');
+    expect(textContent(tree)).toContain('Arjuna didn’t lift the bow');
+    await tick(1500);
+    await hold(tree, 'values-hold');
+    expect(textContent(tree)).toContain('Look at your work');
+    await press(tree, 'tratak-skip');
+    expect(useBook.getState().sessions[0].startedAt).toBeUndefined();
+    for (let i = 0; i < 14; i++) {
+      await tick(1000);
+    }
     expect(useBook.getState().sessions[0].startedAt).toBeDefined();
 
     // 14 In progress
     jest.setSystemTime(new Date(2026, 9, 7, 6, 4, 59));
     await tick(1000);
-    expect(textContent(tree)).toMatch(/\b55:0\d/);
+    expect(textContent(tree)).toMatch(/\b5\d:\d\d/);
     await press(tree, 'im-done');
 
     // 15 Mark

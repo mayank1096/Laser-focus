@@ -268,36 +268,6 @@ export const en = {
 
   start: {
     header: (i: number, n: number) => `Session ${i} of ${n}`,
-    outcome: 'Outcome',
-    phoneOut: 'Phone is going outside the room',
-    deskOnly: 'Desk has only this task on it',
-    ready: 'Water, pen, clock ready',
-    checklist: 'Full distraction checklist',
-    checklistItems: [
-      'Phone in another room, silent',
-      'Only the tabs you need',
-      'Desk clear, door closed',
-      'Food outside the room',
-      'Ate lightly, water nearby',
-      'Face washed if sleepy',
-      'Spine straight',
-    ],
-    ritual: 'The ritual',
-    ritualSteps: [
-      'Pranam, and enter your corner',
-      'Clear the desk',
-      'Sit, spine straight',
-      'Three slow breaths',
-      'The prayers',
-      'Blinders on: only this task',
-      'Read your sheets',
-      'Tratak: stare at your work',
-      '5, 4, 3, 2, 1',
-      'Jay Shree Ram',
-      'The first tiny action',
-    ],
-    printWall: 'Print it for the wall',
-    go: 'Phone goes out now',
     notFeeling: 'Not feeling it?',
     notFeelingTitle: 'Two ways the course gets you started',
     notFeelingOne:
@@ -703,6 +673,77 @@ export const en = {
     valuesSub: 'Written in past tense. Read slowly.',
     goalsSub: 'One to five goals. The circled one leads.',
     vowSub: 'Read it before every session.',
+  },
+
+  ritual: {
+    steps: ['Clear', 'Breathe', 'Pray', 'Values', 'Tratak', 'Begin'],
+    enterTitle: 'Pranam & enter.',
+    enterSub: 'Your corner is a temple. Enter it like one.',
+    challenge: 'Today’s challenge',
+    begin: 'Begin ritual',
+    clearEyebrow: 'विघ्न सूची · Clear the field',
+    clearTitle: 'Only the work in reach.',
+    sinkYou: 'You said these would sink you',
+    checklist: [
+      {
+        group: 'Outside',
+        items: [
+          'Phone out of the room',
+          'Only the tabs you need',
+          'Desk clear, door closed',
+          'Food outside',
+        ],
+      },
+      {
+        group: 'Inside',
+        items: [
+          'Ate lightly, water nearby',
+          'Face washed if sleepy',
+          'Spine straight',
+        ],
+      },
+    ],
+    left: (n: number) => `${n} left`,
+    allClear: 'All clear',
+    breathe: (i: number, n: number) => `Breathe · ${i} of ${n}`,
+    breatheIn: 'Breathe in',
+    hold: 'Hold',
+    breatheOut: 'Breathe out',
+    skipBreathing: 'Skip breathing',
+    pray: (i: number, n: number) => `Pray · ${i} of ${n}`,
+    prayTitle: 'Fold your hands.',
+    prayers: [
+      {
+        name: 'Guru pranam',
+        text: 'ॐ अज्ञान तिमिरान्धस्य ज्ञानाञ्जन शलाकया ।\nचक्षुरुन्मीलितं येन तस्मै श्री गुरवे नमः ॥',
+        meaning:
+          'To the Guru who opened my eyes, blinded by ignorance, with the light of knowledge — I bow.',
+      },
+      {
+        name: 'Govind pranam',
+        text: 'मूकं करोति वाचालं पंगुं लंघयते गिरिम् ।\nयत्कृपा तमहं वन्दे परमानन्द माधवम् ॥',
+        meaning:
+          'His grace makes the mute speak and the lame cross mountains. I bow to Madhava, the highest joy.',
+      },
+      {
+        name: 'Saraswati pranam',
+        text: 'या कुन्देन्दुतुषारहारधवला या शुभ्रवस्त्रावृता ।\nसा मां पातु सरस्वती भगवती निःशेषजाड्यापहा ॥',
+        meaning:
+          'White as jasmine, moon and snow, robed in white — may Saraswati protect me and clear every dullness.',
+      },
+    ],
+    nextPrayer: 'Next prayer',
+    continue: 'Continue',
+    skipPrayers: 'Skip prayers',
+    valuesEyebrow: 'Your values · read slowly',
+    valuesTitle: 'Arjuna didn’t lift the bow before he knew why.',
+    valuesSub: 'Read what you wrote. Each line appears when you’re ready.',
+    readSlowly: 'Read slowly',
+    holdContinue: 'Hold to continue',
+    tratak: 'Tratak',
+    lookAtWork: 'Look at your work',
+    tratakSkip: 'The screen dims to save your eyes · tap to begin now',
+    countdown: ['3', '2', '1', 'Jay Shree Ram.'],
   },
 };
 
