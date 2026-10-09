@@ -12,13 +12,11 @@ import Sunset from '../../assets/icons/sunset.svg';
 import { AppText } from '../../components/AppText';
 import { Pill, PillRow, SectionHeader } from '../../components/Pill';
 import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
-import { appDay } from '../../core/days';
 import type { ClockTime } from '../../types/models';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clock } from '../../i18n/format';
 import { colors, fonts, motion, spacing } from '../../theme';
-import { addDays, fromISODate } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { ClockSheet } from './ClockSheet';
 
@@ -51,7 +49,6 @@ export function RhythmEditor() {
   const rhythm = useBook(s => s.rhythm);
   const setRhythm = useBook(s => s.setRhythm);
   const [picking, setPicking] = useState<'focus' | 'reminder' | null>(null);
-  const today = appDay();
 
   // A custom time shows up as its own pill, first in the row.
   const focusTimes = FOCUS_TIMES.includes(rhythm.focusStart)
@@ -61,11 +58,8 @@ export function RhythmEditor() {
     ? REMINDER_TIMES
     : [rhythm.reminderAt, ...REMINDER_TIMES];
 
-  // The coming seven days, today first, so the dates read in order.
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const date = fromISODate(addDays(today, i));
-    return { day: date.getDay(), date: date.getDate() };
-  });
+  // Review day repeats every week, so it's a weekday, not a date.
+  const week = [1, 2, 3, 4, 5, 6, 0];
 
   return (
     <View style={styles.wrap}>
@@ -114,7 +108,7 @@ export function RhythmEditor() {
       <View style={styles.section}>
         <SectionHeader Icon={CalendarCheck} title={t.rhythm.reviewShort} />
         <View style={styles.days}>
-          {week.map(({ day, date }) => {
+          {week.map(day => {
             const on = rhythm.reviewDay === day;
             return (
               <Pressable
@@ -131,14 +125,8 @@ export function RhythmEditor() {
                 }}
                 style={[styles.day, on && styles.picked]}
               >
-                <AppText
-                  variant="micro"
-                  style={[styles.dayName, on && styles.pickedSoft]}
-                >
+                <AppText style={[styles.dayName, on && styles.pickedText]}>
                   {t.common.dayShort[day]}
-                </AppText>
-                <AppText style={[styles.dayDate, on && styles.pickedText]}>
-                  {String(date)}
                 </AppText>
               </Pressable>
             );
@@ -229,16 +217,13 @@ const styles = StyleSheet.create({
   pickedText: {
     color: colors.ink,
   },
-  pickedSoft: {
-    color: colors.saffron,
-  },
   days: {
     flexDirection: 'row',
     gap: 6,
   },
   day: {
     flex: 1,
-    height: 76,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
@@ -248,11 +233,9 @@ const styles = StyleSheet.create({
     backgroundColor: TRACK,
   },
   dayName: {
-    color: colors.textMuted,
-  },
-  dayDate: {
-    fontFamily: fonts.sansBold,
-    fontSize: 18,
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    lineHeight: 18,
     color: colors.ink,
   },
   reminder: {
