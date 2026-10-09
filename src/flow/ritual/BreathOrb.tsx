@@ -24,6 +24,12 @@ const TONES = {
     label: 'rgba(255, 255, 255, 0.86)',
     sub: 'rgba(255, 255, 255, 0.45)',
   },
+  /** On the saffron haze: a white orb in a pale glow, so it reads. */
+  mist: {
+    glow: ['#B04A18', '#D9824E', '#EDB48C'],
+    label: 'rgba(255, 255, 255, 0.92)',
+    sub: 'rgba(255, 255, 255, 0.6)',
+  },
 } as const;
 
 /**
@@ -71,15 +77,27 @@ export function BreathOrb({
           />
         </Animated.View>
         <Animated.View style={orbStyle}>
-          <ThinkingOrb
-            state={state}
-            size={64}
-            displaySize={ORB}
-            speed={speed}
-            theme={tone}
-            tint={tint}
-            accessibilityLabel={label}
-          />
+          {tone === 'mist' ? (
+            // The dotted orb mixes its faint dots towards black, which
+            // reads grey on the haze; a plain white ring stays clear.
+            <View
+              style={styles.ring}
+              accessibilityRole="image"
+              accessibilityLabel={label}
+            >
+              <View style={styles.core} />
+            </View>
+          ) : (
+            <ThinkingOrb
+              state={state}
+              size={64}
+              displaySize={ORB}
+              speed={speed}
+              theme={tone}
+              tint={tint}
+              accessibilityLabel={label}
+            />
+          )}
         </Animated.View>
       </View>
       <Text style={[styles.label, { color: t.label }]}>{label}</Text>
@@ -100,6 +118,24 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
+  },
+  ring: {
+    width: ORB,
+    height: ORB,
+    borderRadius: ORB / 2,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  core: {
+    width: ORB * 0.62,
+    height: ORB * 0.62,
+    borderRadius: ORB * 0.31,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   label: {
     marginTop: 8,

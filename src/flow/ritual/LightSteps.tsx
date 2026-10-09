@@ -227,7 +227,7 @@ export function BreatheStep({
         accessibilityLiveRegion="polite"
       >
         <BreathOrb
-          tone={dark ? 'dark' : 'light'}
+          tone={dark ? 'mist' : 'light'}
           level={level}
           label={t.ritual[PHASES[phase].word]}
           sub={String(left)}
