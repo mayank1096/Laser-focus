@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
@@ -25,13 +25,18 @@ import { haptics } from '../../utils/haptics';
 import { MonthPickerSheet } from './MonthPickerSheet';
 import { SheetTitle } from './SheetTitle';
 
+/** How the lists draw: fields during setup, cards on the Action Book. */
+export const EditorAppearance = createContext<'field' | 'card'>('field');
+
 /** The values sheet: the course's lines, every one editable. */
 export function ValuesEditor() {
+  const appearance = useContext(EditorAppearance);
   const t = useT();
   const values = useBook(s => s.values);
   const setValues = useBook(s => s.setValues);
   return (
     <ListField
+      appearance={appearance}
       testID="values-list"
       items={values}
       onChange={setValues}
@@ -45,6 +50,7 @@ export function ValuesEditor() {
 
 /** Goal rows, each with a term pill that opens a years picker. */
 export function GoalsEditor() {
+  const appearance = useContext(EditorAppearance);
   const t = useT();
   const goals = useBook(s => s.goals);
   const setGoals = useBook(s => s.setGoals);
@@ -53,6 +59,7 @@ export function GoalsEditor() {
   return (
     <View style={styles.gap}>
       <ListField
+        appearance={appearance}
         testID="goals-list"
         items={lines}
         onChange={setGoals}
@@ -138,6 +145,7 @@ function TermSheet({
 
 /** The circled goal's milestones, each with an optional target month. */
 export function MilestonesEditor() {
+  const appearance = useContext(EditorAppearance);
   const t = useT();
   const state = useBook();
   const goal = circledGoal(state);
@@ -147,6 +155,7 @@ export function MilestonesEditor() {
   return (
     <>
       <ListField
+        appearance={appearance}
         testID="milestones-list"
         items={mine.map(m => ({ id: m.id, text: m.text }))}
         onChange={state.setMilestoneLines}
@@ -194,6 +203,7 @@ export function TasksEditor({
   week: ISODate;
   showShallow?: boolean;
 }) {
+  const appearance = useContext(EditorAppearance);
   const t = useT();
   const state = useBook();
   const deep = state.tasks.filter(x => x.week === week && x.kind === 'deep');
@@ -209,6 +219,7 @@ export function TasksEditor({
   return (
     <View style={styles.gap}>
       <ListField
+        appearance={appearance}
         testID="tasks-list"
         items={deep.map(x => ({ id: x.id, text: x.text }))}
         onChange={set('deep')}
@@ -269,6 +280,7 @@ export function TasksEditor({
               style={styles.shallow}
             >
               <ListField
+                appearance={appearance}
                 testID="shallow-list"
                 items={shallow.map(x => ({ id: x.id, text: x.text }))}
                 onChange={set('shallow')}

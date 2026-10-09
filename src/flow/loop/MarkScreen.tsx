@@ -36,7 +36,9 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   const session = state.sessions.find(x => x.id === route.params.id);
   const [mark, setMark] = useState<Mark | null>(session?.mark ?? null);
   const [finished, setFinished] = useState(session?.outcome ?? '');
-  const [wrong, setWrong] = useState<Set<string>>(new Set());
+  const [wrong, setWrong] = useState<Set<string>>(
+    new Set(session?.wentWrong ?? []),
+  );
   const fill = useSharedValue(mark === 'full' ? 1 : 0);
   const zig = useSharedValue(mark === 'half' ? 1 : 0);
   if (!session) {
@@ -87,12 +89,15 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   };
 
   const reasons = [
-    ...(session.dontDo ?? []),
-    t.mark.reasons.phone,
-    t.mark.reasons.sleep,
-    t.mark.reasons.mood,
-    t.mark.reasons.time,
-    t.mark.reasons.other,
+    ...new Set([
+      ...(session.wentWrong ?? []),
+      ...(session.dontDo ?? []),
+      t.mark.reasons.phone,
+      t.mark.reasons.sleep,
+      t.mark.reasons.mood,
+      t.mark.reasons.time,
+      t.mark.reasons.other,
+    ]),
   ];
 
   return (

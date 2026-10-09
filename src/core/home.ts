@@ -162,3 +162,31 @@ export function planDateFor(
     ? today
     : addDays(today, 1);
 }
+
+/** Where the circled goal's run stands: day N of its term, and what is left. */
+export function sprintProgress(
+  book: Pick<
+    BookData,
+    'goals' | 'circledGoalId' | 'sprintStart' | 'milestones'
+  >,
+  today: ISODate,
+) {
+  const goal = book.goals.find(g => g.id === book.circledGoalId) ?? null;
+  const start = book.sprintStart ?? today;
+  const days = Math.round((goal?.term ?? 1) * 365);
+  const day = Math.max(1, daysBetween(start, today) + 1);
+  const left = Math.max(0, days - day + 1);
+  const months = Math.floor(left / 30.4);
+  const ms = activeMilestones(book);
+  return {
+    goal,
+    start,
+    day,
+    days,
+    left,
+    monthsLeft: months,
+    daysLeft: Math.round(left - months * 30.4),
+    milestonesDone: ms.filter(m => m.done).length,
+    milestonesTotal: ms.length,
+  };
+}

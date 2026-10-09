@@ -73,6 +73,8 @@ export const hi: Strings = {
     title: 'कोर्स पूरा हुआ। अब इसे जियो।',
     body: 'आपकी एक्शन बुक में लगभग 15 मिनट लगेंगे। कभी भी छोड़ें; आप उसी शीट पर लौटेंगे।',
     begin: 'शुरू करें',
+    name: 'आपको क्या कहकर बुलाएँ?',
+    namePlaceholder: 'आपका पहला नाम',
   },
 
   values: {
@@ -307,6 +309,10 @@ export const hi: Strings = {
 
   dayDone: {
     title: (done: number, total: number) => `${total} में से ${done} पूरे।`,
+    pierced: 'लक्ष्य भेद।',
+    piercedSub: 'निशाना लगा। आज हर डिब्बा भरा।',
+    dayOver: 'दिन पूरा हुआ।',
+    dayOverSub: 'हर तीर निशाने पर नहीं लगा। कल फिर।',
     plan: 'कल की योजना',
     review: 'हफ़्ते की समीक्षा',
     planFirst: 'पहले योजना',
@@ -486,5 +492,189 @@ export const hi: Strings = {
         text: 'जीवन भर मेरा स्मार्टफ़ोन बंद रहेगा, सिवाय उसके जो मेरे काम और परिवार को चाहिए, तय समय पर।',
       },
     },
+  },
+
+  tabs: {
+    today: 'आज',
+    book: 'एक्शन बुक',
+    tasks: 'काम',
+    account: 'अकाउंट',
+  },
+
+  today: {
+    remember: (value: string) => `याद है आपने कहा था: “${value}”`,
+    goal: 'आपका लक्ष्य',
+    milestones: (done: number, total: number) => `${done}/${total} माइलस्टोन`,
+    left: (months: number, days: number) =>
+      months <= 0 && days <= 0
+        ? 'समय सीमा आ गई'
+        : [months ? `${months} महीने` : '', days ? `${days} दिन` : '']
+            .filter(Boolean)
+            .join(', ') + ' बाकी',
+    thisWeek: 'इस हफ़्ते',
+    noTasks: 'इस हफ़्ते इस माइलस्टोन से कोई काम जुड़ा नहीं है।',
+    start: (n: number) => `सत्र ${n} शुरू करें`,
+    startMeta: (time: string, length: string) => `${time} · ${length}`,
+    restTitle: 'आराम।',
+    restBody: 'हर शिखर को एक घाटी चाहिए। आराम पूरा हो तो लौटें।',
+    tomorrowTitle: 'आज के सारे तीर चल चुके।',
+    tomorrowBody: (what: string, time: string) => `कल, ${time}: ${what}`,
+    planTitle: 'खाली दिन।',
+    planBody: 'अभी कुछ तय नहीं है। एक सत्र तय करें, उसके नतीजे के साथ।',
+    reviewTitle: 'हफ़्ता पूरा हुआ।',
+    reviewBody: 'पीछे देखें, माइलस्टोन टिक करें, अगले हफ़्ते के काम तय करें।',
+    markTitle: 'एक डिब्बा अभी खाली है।',
+    goalTitle: 'हर माइलस्टोन पूरा हुआ।',
+    goalBody: 'यह लक्ष्य पूरा हुआ। इसे बंद करें, फिर आराम करें।',
+    rereadTitle: 'वापसी पर स्वागत है।',
+    rereadBody: 'एक हफ़्ता दूर रहे। योजना से पहले मूल्य और लक्ष्य पढ़ें।',
+    reassessTitle: 'आराम पूरा हुआ।',
+    reassessBody: 'इस लक्ष्य ने क्या सिखाया? फिर अगला लक्ष्य चुनें।',
+    setupTitle: 'आपकी एक्शन बुक आधी लिखी है।',
+    progressTitle: 'एक सत्र चल रहा है।',
+  },
+
+  tasksTab: {
+    week: (n: number, range: string) => `हफ़्ता ${n} · ${range}`,
+    title: 'इस हफ़्ते',
+    milestone: (text: string) => `माइलस्टोन: ${text}`,
+    reviewDue: 'हफ़्ता पूरा हुआ। समीक्षा करें।',
+    review: 'समीक्षा',
+    notPlanned: (day: string) => `${day} की योजना अभी नहीं बनी`,
+    planned: (day: string) => `${day} की योजना बन चुकी है`,
+    plan: 'योजना',
+    view: 'देखें',
+    deep: 'गहरा काम',
+    deepMeta: (done: number, total: number) => `${total} में से ${done} पूरे`,
+    deepEmpty:
+      'इस हफ़्ते माइलस्टोन को क्या आगे बढ़ाएगा? उसे गहरे काम में जोड़ें।',
+    shallow: 'हल्का काम',
+    shallowEmpty: 'कॉल, भुगतान, छोटे काम। ये सत्रों से बाहर रहते हैं।',
+    add: '+  इस हफ़्ते के काम बदलें',
+    noMilestone: 'कोई माइलस्टोन नहीं',
+  },
+
+  account: {
+    day: (n: number, of: number) => `${of} में से दिन ${n}`,
+    full: 'पूरे दिन',
+    half: 'ज़िग-ज़ैग दिन',
+    left: 'दिन बाकी',
+    marks: 'आपके निशान',
+    legendHalf: 'ज़िग-ज़ैग',
+    legendFull: 'पूरा',
+    lifetime: 'जीवन में एक बार',
+    values: 'मूल्य',
+    valuesSub: 'जीवन में एक बार',
+    antiGoal: 'एंटी-गोल',
+    antiGoalSub: 'मन न हो तब पढ़ने के लिए',
+    pratigya: 'प्रतिज्ञा',
+    taken: (name: string) => `${name} · ली गई`,
+    focus: 'फ़ोकस',
+    rhythm: 'फ़ोकस का समय और समीक्षा का दिन',
+    reminder: 'शाम का रिमाइंडर',
+    reminderOn: (time: string) => `चालू · ${time}`,
+    reminderOff: 'बंद',
+    blocking: 'ऐप ब्लॉकिंग',
+    blockingSub: (n: number) =>
+      `${n} ऐप हटाए गए · दोबारा इंस्टॉल करने पर ऐप बंद हो जाएगा`,
+    accountSection: 'अकाउंट',
+    phone: 'फ़ोन',
+    language: 'भाषा',
+    languageName: 'हिंदी',
+    how: 'यह ऐप कैसे काम करता है',
+    print: 'प्रिंट करने लायक एक्शन बुक',
+    export: 'मेरा डेटा निर्यात करें',
+    signOut: 'साइन आउट',
+    signOutSure: 'साइन आउट के लिए फिर से टैप करें',
+    signOutSub: 'आपकी शीट्स आपके अकाउंट में रहेंगी।',
+    delete: 'अकाउंट हटाएँ',
+    earlier: 'पिछले हफ़्ते',
+    later: 'अगले हफ़्ते',
+  },
+
+  stages: [
+    {
+      from: 0,
+      name: 'बेचैन',
+      line: 'मन मचलता है। हाथ फ़ोन की ओर जाता है।\nजाने दें। बैठे रहें।',
+    },
+    {
+      from: 5,
+      name: 'ठहराव',
+      line: 'मोल-भाव रुकता है।\nबातें समझ आने लगती हैं।',
+    },
+    {
+      from: 10,
+      name: 'स्थिर',
+      line: 'विचार अब भी हैं।\nपर वे आपको नहीं चलाते।',
+    },
+    {
+      from: 20,
+      name: 'साफ़',
+      line: 'शोर थम गया।\nसिर्फ़ चुने हुए विचार बचे हैं।',
+    },
+    { from: 30, name: 'लीन', line: 'यही प्रवाह है।\nटिके रहें।' },
+  ],
+
+  endEarly: {
+    holdHint: 'जल्दी खत्म करने के लिए कहीं भी दबाकर रखें · 5 सेकंड में मंद',
+    eyebrow: (min: number, what: string) => `${min} मिनट · ${what}`,
+    title: 'जल्दी खत्म करें?',
+    counts: '10 मिनट से ज़्यादा हुए, यह ज़िग-ज़ैग गिना जाएगा।',
+    wontCount: (left: number) =>
+      `10 मिनट से कम, यह नहीं गिना जाएगा। ${left} मिनट और, तो गिना जाता।`,
+    what: 'क्या हुआ',
+    reasons: [
+      'परिवार में आपात स्थिति',
+      'सेहत',
+      'किसी ने बुलाया',
+      'मैं हार गया',
+    ],
+    honest: 'सच्चे जवाब से अगली शीट बेहतर बनती है।',
+    hold: 'खत्म करने के लिए दबाकर रखें',
+    back: 'फ़ोकस पर लौटें',
+  },
+
+  dayOne: {
+    hey: (name: string) => (name ? `नमस्ते, ${name}` : 'नमस्ते, योद्धा'),
+    taken: 'प्रतिज्ञा ले ली गई।',
+    day: (n: number) => `${n} दिनों में से आज पहला दिन है।`,
+    bow: 'धनुष अब आपके हाथ में है।',
+    plan: 'अब अपना पहला सत्र तय करें।',
+  },
+
+  sessionsPage: {
+    eyebrow: 'आपकी शीट्स',
+    title: 'सत्र',
+    sub: 'हर वो डिब्बा जो आपने भरा।',
+  },
+
+  bookTab: {
+    eyebrow: 'आपकी शीट्स',
+    title: 'एक्शन बुक',
+    sub: 'मूल्य › लक्ष्य › माइलस्टोन › काम › सत्र',
+    values: 'मूल्य',
+    valuesMeta: 'जीवन में एक बार',
+    goals: 'लक्ष्य',
+    goalsMeta: 'कुछ सालों में एक बार',
+    milestones: 'माइलस्टोन',
+    milestonesMeta: (done: number, total: number) =>
+      `हर कुछ महीनों में · ${String(done).padStart(2, '0')}/${String(
+        total,
+      ).padStart(2, '0')}`,
+    tasks: 'काम',
+    tasksMeta: (range: string, n: number) => `हर हफ़्ते · ${range} · ${n} काम`,
+    sessions: 'सत्र',
+    sessionsMeta: 'हर रात',
+    antiGoal: 'एंटी-गोल',
+    antiGoalMeta: 'मन न हो तब पढ़ें',
+    sacrifice: 'त्याग',
+    sacrificeMeta: 'क्या जाएगा, क्या रहेगा',
+  },
+
+  bookSheet: {
+    valuesSub: 'भूतकाल में लिखे हुए। धीरे पढ़ें।',
+    goalsSub: 'एक से पाँच लक्ष्य। चुना हुआ लक्ष्य आगे चलता है।',
+    vowSub: 'हर सत्र से पहले इसे पढ़ें।',
   },
 };

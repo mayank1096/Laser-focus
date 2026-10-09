@@ -25,6 +25,8 @@ export interface DistractingApp {
 
 interface ProfileData {
   language: Language;
+  /** What the app calls you: "Hey, Mayank". */
+  name: string;
   account: Account | null;
   pratigya: Pratigya | null;
   permissions: Record<Permission, boolean>;
@@ -37,6 +39,7 @@ interface ProfileData {
 
 interface ProfileActions {
   setLanguage: (language: Language) => void;
+  setName: (name: string) => void;
   signIn: (account: Omit<Account, 'signedInAt'>, at: string) => void;
   setPratigya: (pratigya: Pratigya) => void;
   grant: (permission: Permission) => void;
@@ -62,6 +65,7 @@ const MOCK_DISTRACTING_APPS: DistractingApp[] = [
 
 const initial: ProfileData = {
   language: 'en',
+  name: '',
   account: null,
   pratigya: null,
   permissions: { screenTime: false, focus: false, notifications: false },
@@ -75,6 +79,7 @@ export const useProfile = create<ProfileState>()(
     set => ({
       ...initial,
       setLanguage: language => set({ language }),
+      setName: name => set({ name }),
       signIn: (account, at) => set({ account: { ...account, signedInAt: at } }),
       setPratigya: pratigya => set({ pratigya }),
       grant: permission =>
@@ -100,6 +105,7 @@ export const useProfile = create<ProfileState>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: s => ({
         language: s.language,
+        name: s.name,
         account: s.account,
         pratigya: s.pratigya,
         permissions: s.permissions,
@@ -117,3 +123,6 @@ export const PRATIGYAS: Record<Pratigya, { name: string; latin: string }> = {
   arjun: { name: 'अर्जुन', latin: 'Arjun' },
   bhishma: { name: 'भीष्म', latin: 'Bhishma' },
 };
+
+/** "Mayank Sharma" → "Mayank". */
+export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? '';

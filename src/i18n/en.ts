@@ -75,6 +75,8 @@ export const en = {
     title: 'You finished the course. Now live it.',
     body: 'Your Action Book takes about 15 minutes. Leave any time; you’ll come back to the same sheet.',
     begin: 'Begin',
+    name: 'What should we call you?',
+    namePlaceholder: 'Your first name',
   },
 
   values: {
@@ -312,6 +314,10 @@ export const en = {
 
   dayDone: {
     title: (done: number, total: number) => `${done} of ${total} done.`,
+    pierced: 'Lakshya bhed.',
+    piercedSub: 'The target, pierced. Every box full today.',
+    dayOver: 'The day is done.',
+    dayOverSub: 'Not every arrow landed. Tomorrow, again.',
     plan: 'Plan tomorrow',
     review: 'Review the week',
     planFirst: 'Plan first',
@@ -488,6 +494,188 @@ export const en = {
         text: 'For life, my smartphone stays off except for what my work and my family need, at fixed hours.',
       },
     },
+  },
+
+  tabs: {
+    today: 'Today',
+    book: 'Action Book',
+    tasks: 'Tasks',
+    account: 'Account',
+  },
+
+  today: {
+    remember: (value: string) => `Remember you said: “${value}”`,
+    goal: 'Your goal',
+    milestones: (done: number, total: number) => `${done}/${total} milestones`,
+    left: (months: number, days: number) =>
+      months <= 0 && days <= 0
+        ? 'Deadline reached'
+        : [
+            months ? `${months} ${months === 1 ? 'month' : 'months'}` : '',
+            days ? `${days} ${days === 1 ? 'day' : 'days'}` : '',
+          ]
+            .filter(Boolean)
+            .join(', ') + ' left',
+    thisWeek: 'This week',
+    noTasks: 'No tasks linked to this milestone this week.',
+    start: (n: number) => `Start Session ${n}`,
+    startMeta: (time: string, length: string) => `${time} · ${length}`,
+    restTitle: 'Resting.',
+    restBody: 'Every peak needs a valley. Come back when the rest is over.',
+    tomorrowTitle: 'Every arrow has flown.',
+    tomorrowBody: (what: string, time: string) => `Tomorrow, ${time}: ${what}`,
+    planTitle: 'An open day.',
+    planBody: 'Nothing is planned yet. Plan one session, with its outcome.',
+    reviewTitle: 'The week is over.',
+    reviewBody: 'Look back, tick milestones, set next week’s tasks.',
+    markTitle: 'One box is still empty.',
+    goalTitle: 'Every milestone is ticked.',
+    goalBody: 'This goal is done. Close it, then rest.',
+    rereadTitle: 'Welcome back.',
+    rereadBody: 'A week away. Read your values and goals before you plan.',
+    reassessTitle: 'Rest is over.',
+    reassessBody: 'What did this goal teach you? Then circle the next one.',
+    setupTitle: 'Your Action Book is half written.',
+    progressTitle: 'A session is running.',
+  },
+
+  tasksTab: {
+    week: (n: number, range: string) => `Week ${n} · ${range}`,
+    title: 'This week',
+    milestone: (text: string) => `Milestone: ${text}`,
+    reviewDue: 'The week is over. Review it.',
+    review: 'Review',
+    notPlanned: (day: string) => `${day} isn’t planned yet`,
+    planned: (day: string) => `${day} is planned`,
+    plan: 'Plan',
+    view: 'View',
+    deep: 'Deep work',
+    deepMeta: (done: number, total: number) => `${done} of ${total} done`,
+    deepEmpty: 'What moves the milestone this week? Add it as deep work.',
+    shallow: 'Shallow',
+    shallowEmpty: 'Calls, payments, errands. They stay out of sessions.',
+    add: '+  Edit this week’s tasks',
+    noMilestone: 'No milestone',
+  },
+
+  account: {
+    day: (n: number, of: number) => `Day ${n} of ${of}`,
+    full: 'Full days',
+    half: 'Zig-zag days',
+    left: 'Days left',
+    marks: 'Your marks',
+    legendHalf: 'Zig-zag',
+    legendFull: 'Full',
+    lifetime: 'Once in a lifetime',
+    values: 'Values',
+    valuesSub: 'Once in a lifetime',
+    antiGoal: 'Anti-goal',
+    antiGoalSub: 'What you read when you don’t feel like it',
+    pratigya: 'Pratigya',
+    taken: (name: string) => `${name} · taken`,
+    focus: 'Focus',
+    rhythm: 'Focus time and review day',
+    reminder: 'Evening reminder',
+    reminderOn: (time: string) => `On · ${time}`,
+    reminderOff: 'Off',
+    blocking: 'App blocking',
+    blockingSub: (n: number) =>
+      `${n} apps deleted · reinstalling one closes the app`,
+    accountSection: 'Account',
+    phone: 'Phone',
+    language: 'Language',
+    languageName: 'English',
+    how: 'How this app works',
+    print: 'Printable Action Book',
+    export: 'Export my data',
+    signOut: 'Sign out',
+    signOutSure: 'Tap again to sign out',
+    signOutSub: 'Your sheets stay in your account.',
+    delete: 'Delete account',
+    earlier: 'Earlier weeks',
+    later: 'Later weeks',
+  },
+
+  stages: [
+    {
+      from: 0,
+      name: 'Restless',
+      line: 'Tantrums. The hand reaches for the phone.\nLet it reach. Stay.',
+    },
+    {
+      from: 5,
+      name: 'Settling',
+      line: 'The bargaining stops.\nThings begin to make sense.',
+    },
+    {
+      from: 10,
+      name: 'Steady',
+      line: 'Thoughts are still there.\nThey don’t control you anymore.',
+    },
+    {
+      from: 20,
+      name: 'Clear',
+      line: 'The noise has cleared.\nOnly the thoughts you choose stay.',
+    },
+    { from: 30, name: 'Immersed', line: 'This is the flow.\nStay in.' },
+  ],
+
+  endEarly: {
+    holdHint: 'Hold anywhere to end early · Dims in 5 s',
+    eyebrow: (min: number, what: string) => `${min} min in · ${what}`,
+    title: 'End early?',
+    counts: 'Past 10 minutes, so it still counts as a zig-zag.',
+    wontCount: (left: number) =>
+      `Under 10 minutes, this one won’t count. ${left} more and it would.`,
+    what: 'What happened',
+    reasons: ['Family emergency', 'Health', 'Called away', 'I gave in'],
+    honest: 'Honest answers make better sheets.',
+    hold: 'Hold to end',
+    back: 'Back to focus',
+  },
+
+  dayOne: {
+    hey: (name: string) => (name ? `Hey, ${name}` : 'Hey, warrior'),
+    taken: 'The vow is taken.',
+    day: (n: number) => `This is day 1 of ${n}.`,
+    bow: 'The bow is in your hands now.',
+    plan: 'Now plan your first session.',
+  },
+
+  sessionsPage: {
+    eyebrow: 'Your sheets',
+    title: 'Sessions',
+    sub: 'Every box you have filled.',
+  },
+
+  bookTab: {
+    eyebrow: 'Your sheets',
+    title: 'Action Book',
+    sub: 'Values › Goals › Milestones › Tasks › Sessions',
+    values: 'Values',
+    valuesMeta: 'Once in a lifetime',
+    goals: 'Goals',
+    goalsMeta: 'Once every few years',
+    milestones: 'Milestones',
+    milestonesMeta: (done: number, total: number) =>
+      `Every few months · ${String(done).padStart(2, '0')}/${String(
+        total,
+      ).padStart(2, '0')}`,
+    tasks: 'Tasks',
+    tasksMeta: (range: string, n: number) =>
+      `Every week · ${range} · ${n} ${n === 1 ? 'task' : 'tasks'}`,
+    sessions: 'Sessions',
+    sessionsMeta: 'Every night',
+    antiGoal: 'Anti-goal',
+    antiGoalMeta: 'Read when you don’t feel like it',
+    sacrifice: 'Sacrifice',
+    sacrificeMeta: 'What goes, what stays',
+  },
+
+  bookSheet: {
+    valuesSub: 'Written in past tense. Read slowly.',
+    goalsSub: 'One to five goals. The circled one leads.',
+    vowSub: 'Read it before every session.',
   },
 };
 

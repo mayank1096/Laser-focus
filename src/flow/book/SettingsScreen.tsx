@@ -6,14 +6,14 @@ import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { SegmentedControl } from '../../components/SegmentedControl';
-import { SimpleScreen } from '../../components/SimpleScreen';
 import { useBook } from '../../core/store';
 import { useProfile, type Language } from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, spacing, typography } from '../../theme';
+import { colors, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { RhythmEditor } from '../components/RhythmEditor';
+import { SheetPage } from '../components/SheetPage';
 import { SheetTitle } from '../components/SheetTitle';
 
 /** Language, rhythm, how it works, and the account. Nothing else. */
@@ -43,14 +43,13 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
 
   return (
     <>
-      <SimpleScreen
+      <SheetPage
         testID="settings"
-        tone="parchment"
+        eyebrow={t.account.accountSection}
+        title={t.settings.title}
+        subtitle={`${t.settings.language} · ${t.settings.focus} · ${t.settings.review}`}
         onBack={() => navigation.goBack()}
-        footer={null}
       >
-        <AppText style={typography.title}>{t.settings.title}</AppText>
-
         <Section title={t.settings.language}>
           <SegmentedControl<Language>
             testIDPrefix="settings-language"
@@ -131,7 +130,7 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
             onPress={() => setDeleteSure(true)}
           />
         </Section>
-      </SimpleScreen>
+      </SheetPage>
 
       <BottomSheet
         visible={deleteSure}
@@ -203,7 +202,7 @@ function Row({
 
 const styles = StyleSheet.create({
   section: {
-    marginTop: 24,
+    marginBottom: spacing.lg,
     gap: spacing.md,
   },
   card: {

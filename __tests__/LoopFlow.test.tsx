@@ -4,7 +4,14 @@ import App from '../App';
 import { DEFAULT_RHYTHM } from '../src/core/model';
 import { useBook } from '../src/core/store';
 import { useProfile } from '../src/features/account/store';
-import { addLine, press, textContent, tick, type } from '../test/flowHelpers';
+import {
+  addLine,
+  hold,
+  press,
+  textContent,
+  tick,
+  type,
+} from '../test/flowHelpers';
 
 jest.useFakeTimers();
 jest.setTimeout(20000);
@@ -74,7 +81,7 @@ describe('the daily loop', () => {
     await act(async () => {
       tree = create(<App />);
     });
-    expect(textContent(tree)).toContain('Start Session 1: Cut 3 client reels');
+    expect(textContent(tree)).toContain('Start Session 1');
     await press(tree, 'home-action');
 
     // 13 Start: three ticks unlock the button
@@ -113,6 +120,44 @@ describe('the daily loop', () => {
       what: 'Cut 3 client reels',
       outcome: 'Reel 2 exported',
     });
+  });
+
+  it('ends a session early on the red screen, as a zig-zag', async () => {
+    jest.setSystemTime(new Date(2026, 9, 7, 6, 15));
+    useBook.setState({
+      ...book,
+      sessions: [
+        {
+          id: 's1',
+          date: '2026-10-07',
+          order: 0,
+          taskId: 't1',
+          what: 'Cut 3 client reels',
+          outcome: 'Reel 1 exported',
+          minutes: 60,
+          start: 360,
+          startedAt: new Date(2026, 9, 7, 6, 0).toISOString(),
+        },
+      ],
+    });
+    await act(async () => {
+      tree = create(<App />);
+    });
+    expect(textContent(tree)).toContain('Steady');
+    await act(async () => {
+      tree.root
+        .findAll(n => n.props.testID === 'in-progress' && n.props.onLongPress)
+        .at(-1)!
+        .props.onLongPress();
+    });
+    expect(textContent(tree)).toContain('End early?');
+    await press(tree, 'reason-Called away');
+    await hold(tree, 'end-hold');
+    expect(useBook.getState().sessions[0]).toMatchObject({
+      mark: 'half',
+      wentWrong: ['Called away'],
+    });
+    expect(textContent(tree)).toContain('Change');
   });
 
   it('reviews the week, finishes the goal, rests and circles the next one', async () => {
@@ -176,6 +221,6 @@ describe('the daily loop', () => {
     expect(s.circledGoalId).toBe('g2');
     expect(s.reassessing).toBe(false);
     expect(s.restUntil).toBeNull();
-    expect(textContent(tree)).toContain('Tomorrow · Session 1: Run 5 km');
+    expect(textContent(tree)).toContain('Tomorrow, 6:00 AM: Run 5 km');
   });
 });

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { art } from '../../assets/art';
@@ -6,7 +6,9 @@ import { AppText } from '../../components/AppText';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { rise } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
+import { TextField } from '../../components/TextField';
 import { useBook } from '../../core/store';
+import { useProfile } from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing, typography } from '../../theme';
@@ -14,6 +16,7 @@ import { colors, spacing, typography } from '../../theme';
 /** Shown once. The same card lives in Settings as "How this app works". */
 export function WelcomeScreen({ navigation }: RootScreenProps<'Welcome'>) {
   const t = useT();
+  const [name, setName] = useState(useProfile.getState().name);
   return (
     <SimpleScreen
       testID="welcome"
@@ -24,7 +27,9 @@ export function WelcomeScreen({ navigation }: RootScreenProps<'Welcome'>) {
         <PrimaryButton
           testID="begin"
           label={t.welcome.begin}
+          disabled={name.trim().length < 2}
           onPress={() => {
+            useProfile.getState().setName(name.trim());
             useBook.getState().setWelcomed();
             navigation.reset({ index: 0, routes: [{ name: 'Setup' }] });
           }}
@@ -40,6 +45,17 @@ export function WelcomeScreen({ navigation }: RootScreenProps<'Welcome'>) {
             {t.welcome.body}
           </AppText>
         </Animated.View>
+        <Animated.View entering={rise(2)} style={styles.name}>
+          <AppText variant="eyebrow">{t.welcome.name}</AppText>
+          <TextField
+            testID="name-input"
+            accessibilityLabel={t.welcome.name}
+            placeholder={t.welcome.namePlaceholder}
+            value={name}
+            onChangeText={setName}
+            maxLength={40}
+          />
+        </Animated.View>
       </View>
     </SimpleScreen>
   );
@@ -52,5 +68,9 @@ const styles = StyleSheet.create({
   },
   body: {
     color: colors.textMuted,
+  },
+  name: {
+    marginTop: spacing.lg,
+    gap: spacing.sm,
   },
 });

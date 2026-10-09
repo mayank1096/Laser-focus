@@ -37,8 +37,10 @@ describe('setup', () => {
     await tick(500); // six digits verify by themselves
     expect(useProfile.getState().account?.phone).toBe('919876543210');
 
-    // 02 Welcome
+    // 02 Welcome, with a name
+    await type(tree, 'name-input', 'Rohan');
     await press(tree, 'begin');
+    expect(useProfile.getState().name).toBe('Rohan');
 
     // 03 Values: the course's lines are already there
     expect(useBook.getState().values.length).toBeGreaterThanOrEqual(3);
@@ -83,6 +85,13 @@ describe('setup', () => {
     await tick(1000);
     expect(useBook.getState().setup).toBe('plan');
 
+    // Hey, Rohan: tap through the lines
+    expect(textContent(tree)).toContain('Hey, Rohan');
+    for (let i = 0; i < 5; i++) {
+      await press(tree, 'next-button');
+      await tick(300);
+    }
+
     // 09 First session
     await press(tree, `pick-0-${task.id}`);
     await type(tree, 'outcome-0', 'Reel 1 exported');
@@ -102,7 +111,7 @@ describe('setup', () => {
     await tick(1000);
     expect(useBook.getState().setup).toBe('done');
     expect(textContent(tree)).toContain(
-      'Tomorrow · Session 1: Cut 3 client reels',
+      'Tomorrow, 6:00 AM: Cut 3 client reels',
     );
   });
 });

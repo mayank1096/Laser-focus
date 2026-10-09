@@ -44,10 +44,7 @@ export function TakeVowScreen({ navigation }: RootScreenProps<'TakeVow'>) {
           onComplete={() => {
             takeVow(now().toISOString());
             useBook.getState().setSetup('plan');
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Plan', params: { first: true } }],
-            });
+            navigation.reset({ index: 0, routes: [{ name: 'DayOne' }] });
           }}
         />
       }

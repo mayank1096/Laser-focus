@@ -1,4 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { TabId } from '../components/TabBar';
 import type { SetupStep } from '../core/model';
 import type { Id, ISODate } from '../types/models';
 
@@ -8,7 +9,8 @@ export type BookSheet =
   | 'milestones'
   | 'week'
   | 'antiGoal'
-  | 'sacrifice';
+  | 'sacrifice'
+  | 'vow';
 
 export type RootStackParamList = {
   // Part 1 · Set up
@@ -21,12 +23,14 @@ export type RootStackParamList = {
   ClearField: undefined;
   TakeVow: undefined;
   SetupDone: undefined;
+  DayOne: undefined;
   Lockout: undefined;
   // Part 2 · The daily loop
-  Home: undefined;
+  Home: { tab?: TabId } | undefined;
   Plan: { date?: ISODate; first?: boolean } | undefined;
   Start: { id: Id };
   InProgress: { id: Id };
+  EndEarly: { id: Id };
   Mark: { id: Id };
   DayDone: { date: ISODate };
   // Part 3 · Weekly and sprint

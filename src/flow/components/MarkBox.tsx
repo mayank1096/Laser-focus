@@ -268,14 +268,25 @@ export function MarkPad({
         collapsable={false}
         testID="mark-pad"
         accessibilityRole="adjustable"
+        style={styles.pad}
       >
-        <Box size={size} fill={fill} zig={zig} ring={colors.ink} radius={22} />
+        <Box
+          size={size}
+          fill={fill}
+          zig={zig}
+          ring={colors.saffronLine}
+          radius={28}
+        />
       </View>
     </GestureDetector>
   );
 }
 
 const styles = StyleSheet.create({
+  pad: {
+    borderRadius: 28,
+    boxShadow: '0px 18px 36px rgba(120, 60, 10, 0.12)',
+  },
   box: {
     borderWidth: 1.5,
     overflow: 'hidden',

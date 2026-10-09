@@ -8,7 +8,8 @@ import { BookScreen } from '../flow/book/BookScreen';
 import { BookSheetScreen } from '../flow/book/BookSheetScreen';
 import { SettingsScreen } from '../flow/book/SettingsScreen';
 import { DayDoneScreen } from '../flow/loop/DayDoneScreen';
-import { HomeScreen } from '../flow/loop/HomeScreen';
+import { MainScreen } from '../flow/main/MainScreen';
+import { EndEarlyScreen } from '../flow/loop/EndEarlyScreen';
 import { InProgressScreen } from '../flow/loop/InProgressScreen';
 import { MarkScreen } from '../flow/loop/MarkScreen';
 import { PlanScreen } from '../flow/loop/PlanScreen';
@@ -22,6 +23,7 @@ import { ReassessScreen } from '../flow/sprint/ReassessScreen';
 import { RestScreen } from '../flow/sprint/RestScreen';
 import { ReviewScreen } from '../flow/sprint/ReviewScreen';
 import { ClearFieldScreen } from '../flow/vow/ClearFieldScreen';
+import { DayOneScreen } from '../flow/vow/DayOneScreen';
 import { LockoutScreen } from '../flow/vow/LockoutScreen';
 import { PermissionsScreen } from '../flow/vow/PermissionsScreen';
 import { PratigyaScreen } from '../flow/vow/PratigyaScreen';
@@ -98,6 +100,11 @@ export function RootNavigator() {
         <Stack.Screen name="ClearField" component={ClearFieldScreen} />
         <Stack.Screen name="TakeVow" component={TakeVowScreen} />
         <Stack.Screen
+          name="DayOne"
+          component={DayOneScreen}
+          options={noSwipe}
+        />
+        <Stack.Screen
           name="SetupDone"
           component={SetupDoneScreen}
           options={noSwipe}
@@ -107,7 +114,7 @@ export function RootNavigator() {
           component={LockoutScreen}
           options={noSwipe}
         />
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={MainScreen} />
         <Stack.Group screenOptions={{ animation: 'slide_from_right' }}>
           <Stack.Screen
             name="Plan"
@@ -131,6 +138,7 @@ export function RootNavigator() {
               first.name === 'InProgress' ? first.params : undefined
             }
           />
+          <Stack.Screen name="EndEarly" component={EndEarlyScreen} />
           <Stack.Screen name="Mark" component={MarkScreen} />
           <Stack.Screen name="DayDone" component={DayDoneScreen} />
           <Stack.Screen name="GoalDone" component={GoalDoneScreen} />
