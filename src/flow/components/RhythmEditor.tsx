@@ -139,15 +139,15 @@ export function RhythmEditor() {
                     setRhythm({ reviewDay: day });
                   }
                 }}
-                style={[styles.day, on && styles.dark]}
+                style={[styles.day, on && styles.picked]}
               >
                 <AppText
                   variant="micro"
-                  style={[styles.dayName, on && styles.onDarkSoft]}
+                  style={[styles.dayName, on && styles.pickedSoft]}
                 >
                   {t.common.dayShort[day]}
                 </AppText>
-                <AppText style={[styles.dayDate, on && styles.onDark]}>
+                <AppText style={[styles.dayDate, on && styles.pickedText]}>
                   {String(date)}
                 </AppText>
               </Pressable>
@@ -288,16 +288,16 @@ function TimePill({
       }}
       style={({ pressed }) => [
         styles.pill,
-        selected && styles.dark,
+        selected && styles.picked,
         pressed && !selected && styles.pressed,
       ]}
     >
       <Icon
         width={18}
         height={18}
-        color={selected ? colors.white : colors.ink}
+        color={selected ? colors.saffron : colors.ink}
       />
-      <AppText style={[styles.pillText, selected && styles.onDark]}>
+      <AppText style={[styles.pillText, selected && styles.pickedText]}>
         {label}
       </AppText>
     </Pressable>
@@ -352,7 +352,7 @@ function Segmented<T extends number>({
             }}
             style={styles.segment}
           >
-            <AppText style={[styles.segmentText, on && styles.onDark]}>
+            <AppText style={[styles.segmentText, !on && styles.segmentOff]}>
               {o.label}
             </AppText>
           </Pressable>
@@ -396,6 +396,8 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 18,
     borderRadius: 26,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
     backgroundColor: TRACK,
   },
   pillText: {
@@ -406,14 +408,20 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: 'rgba(0, 0, 0, 0.08)',
   },
-  dark: {
-    backgroundColor: colors.charcoal,
+  // Chosen, not pressable-looking: a saffron tint and outline. Only the
+  // screen's main button is dark.
+  picked: {
+    backgroundColor: colors.saffronWash,
+    borderColor: colors.saffron,
   },
-  onDark: {
-    color: colors.white,
+  pickedText: {
+    color: colors.ink,
   },
-  onDarkSoft: {
-    color: 'rgba(255, 255, 255, 0.7)',
+  pickedSoft: {
+    color: colors.saffron,
+  },
+  segmentOff: {
+    color: colors.textMuted,
   },
   track: {
     flexDirection: 'row',
@@ -428,8 +436,8 @@ const styles = StyleSheet.create({
     left: 4,
     bottom: 4,
     borderRadius: 24,
-    backgroundColor: colors.charcoal,
-    boxShadow: '0px 6px 14px rgba(0, 0, 0, 0.18)',
+    backgroundColor: colors.white,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
   },
   segment: {
     flex: 1,
@@ -452,6 +460,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
     backgroundColor: TRACK,
   },
   dayName: {
