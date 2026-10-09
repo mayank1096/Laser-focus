@@ -270,7 +270,10 @@ export function PrayStep({
         entering={FadeInDown.duration(motion.slow)}
         style={[styles.prayer, dark && styles.prayerDark]}
       >
-        <AppText variant="eyebrow" style={styles.saffron}>
+        <AppText
+          variant="eyebrow"
+          style={dark ? styles.nameOnDark : styles.saffron}
+        >
           {p.name}
         </AppText>
         <AppText style={[styles.shloka, dark && styles.white]}>
@@ -489,7 +492,11 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   onDarkFaint: {
-    color: 'rgba(255, 255, 255, 0.55)',
+    color: 'rgba(255, 255, 255, 0.72)',
+  },
+  // Saffron vanishes on the haze; a pale apricot keeps the name legible.
+  nameOnDark: {
+    color: '#FFD9B5',
   },
   onDarkSoft: {
     color: 'rgba(255, 255, 255, 0.7)',
