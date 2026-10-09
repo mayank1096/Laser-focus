@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Pressable,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
-  FadeIn,
   FadeInDown,
   useSharedValue,
   withTiming,
@@ -27,11 +25,12 @@ import type { RootScreenProps } from '../../navigation/types';
 import { colors, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { WeekRow } from '../components/MarkBox';
+import { MarigoldShower } from '../components/MarigoldShower';
 import { RewardCard } from '../components/RewardCard';
 
 /**
- * The reward. A card spins in; hold it and it fills (●), swipe across it
- * for the zig-zag, or say it didn't happen. A beat after the card fills,
+ * The reward. A card spins in; hold it and it fills (●) and petals are
+ * thrown, or swipe across it for the zig-zag. A beat after the card fills,
  * the same day's box in the week above fills too.
  */
 export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
@@ -48,6 +47,8 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   );
   const fill = useSharedValue(mark === 'full' ? 1 : 0);
   const zig = useSharedValue(mark === 'half' ? 1 : 0);
+  const [shower, setShower] = useState(0);
+  const [cardY, setCardY] = useState(0);
   if (!session) {
     return null;
   }
@@ -56,23 +57,20 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
 
   const choose = (m: Mark) => {
     setMark(m);
+    if (m === 'full') {
+      setShower(n => n + 1);
+    }
     fill.value = withTiming(m === 'full' ? 1 : 0, { duration: 300 });
     zig.value = withTiming(m === 'half' ? 1 : 0, { duration: 300 });
     useBook.getState().markSession(session.id, m);
   };
 
-  const reset = () => {
-    setMark(null);
-    fill.value = withTiming(0, { duration: 300 });
-    zig.value = withTiming(0, { duration: 300 });
-  };
-
-  const nextSession =
-    session.date === today
-      ? sessionsOn(state, today).find(
-          s => s.order > session.order && !s.mark && !s.startedAt,
-        )
-      : undefined;
+  // Another session still to come today waits on Home for its own time.
+  const more =
+    session.date === today &&
+    sessionsOn(state, today).some(
+      s => s.order > session.order && !s.mark && !s.startedAt,
+    );
 
   const proceed = () => {
     if (!mark) {
@@ -88,8 +86,8 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
           : { wentWrong: [...wrong] },
       );
     haptics.tap();
-    if (nextSession) {
-      navigation.replace('Start', { id: nextSession.id });
+    if (more) {
+      navigation.replace('Home', { tab: 'today' });
     } else {
       navigation.replace('DayDone', { date: session.date });
     }
@@ -128,7 +126,12 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
           />
         </View>
 
-        <View style={styles.cardWrap}>
+        <View
+          style={styles.cardWrap}
+          onLayout={e =>
+            setCardY(e.nativeEvent.layout.y + e.nativeEvent.layout.height / 2)
+          }
+        >
           <RewardCard
             width={cardWidth}
             eyebrow={t.common.session(session.order + 1)}
@@ -139,50 +142,10 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
             fill={fill}
             zig={zig}
             locked={mark !== null}
+            fullLabel={t.mark.full}
+            halfLabel={t.mark.half}
             onMark={choose}
           />
-          {mark === null ? (
-            <>
-              <AppText variant="detail" style={styles.howTo}>
-                {t.mark.howTo}
-              </AppText>
-              <View style={styles.alt}>
-                <Link
-                  testID="mark-full"
-                  label={t.mark.tapFull}
-                  onPress={() => choose('full')}
-                />
-                <Link
-                  testID="mark-half"
-                  label={t.mark.tapHalf}
-                  onPress={() => choose('half')}
-                />
-                <Link
-                  testID="mark-empty"
-                  label={t.mark.empty}
-                  onPress={() => choose('empty')}
-                />
-              </View>
-            </>
-          ) : (
-            <Animated.View
-              entering={FadeIn.duration(motion.base)}
-              style={styles.verdict}
-            >
-              <AppText variant="bodyMedium">
-                {mark === 'full'
-                  ? t.mark.full
-                  : mark === 'half'
-                  ? t.mark.half
-                  : t.mark.empty}
-              </AppText>
-              <Link
-                testID="mark-change"
-                label={t.mark.change}
-                onPress={reset}
-              />
-            </Animated.View>
-          )}
         </View>
 
         {mark ? (
@@ -239,43 +202,23 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
         ) : null}
       </ScrollView>
 
+      <MarigoldShower
+        fire={shower}
+        x={width / 2}
+        y={insets.top + spacing.xl + cardY}
+        spread={cardWidth}
+        width={width}
+      />
+
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
           testID="mark-next"
-          label={
-            nextSession ? t.mark.next(nextSession.order + 1) : t.common.done
-          }
+          label={t.common.done}
           disabled={!mark}
           onPress={proceed}
         />
       </View>
     </View>
-  );
-}
-
-function Link({
-  label,
-  onPress,
-  testID,
-}: {
-  label: string;
-  onPress: () => void;
-  testID?: string;
-}) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      hitSlop={8}
-      onPress={() => {
-        haptics.selection();
-        onPress();
-      }}
-    >
-      <AppText variant="label" style={styles.link}>
-        {label}
-      </AppText>
-    </Pressable>
   );
 }
 
@@ -299,23 +242,6 @@ const styles = StyleSheet.create({
   cardWrap: {
     marginTop: 20,
     alignItems: 'center',
-  },
-  howTo: {
-    marginTop: spacing.lg,
-    textAlign: 'center',
-  },
-  alt: {
-    marginTop: spacing.lg,
-    flexDirection: 'row',
-    gap: 22,
-  },
-  link: {
-    color: colors.saffron,
-  },
-  verdict: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.md,
   },
   after: {
     marginTop: spacing.xxl,

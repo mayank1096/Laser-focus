@@ -288,10 +288,8 @@ export const en = {
 
   mark: {
     title: (n: number, what: string) => `Session ${n} · ${what}`,
-    howTo: 'Hold the card to fill it. Swipe across it for the zig-zag.',
     full: 'Done, the whole outcome',
     half: 'Zig-zag, at least 10 minutes',
-    empty: 'Didn’t happen',
     finished: 'What did you finish?',
     wentWrong: 'What went wrong?',
     reasons: {
@@ -303,11 +301,7 @@ export const en = {
     },
     meta: (start: string, planned: string) =>
       `started ${start} · planned ${planned}`,
-    next: (n: number) => `Next: Session ${n}`,
-    tapFull: 'Fill it',
     hold: 'Hold',
-    tapHalf: 'Zig-zag',
-    change: 'Change',
   },
 
   dayDone: {

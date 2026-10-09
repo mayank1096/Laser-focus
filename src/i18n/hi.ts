@@ -283,10 +283,8 @@ export const hi: Strings = {
 
   mark: {
     title: (n: number, what: string) => `सत्र ${n} · ${what}`,
-    howTo: 'कार्ड भरने के लिए दबाकर रखें। ज़िग-ज़ैग के लिए उस पर स्वाइप करें।',
     full: 'हो गया, पूरा नतीजा',
     half: 'ज़िग-ज़ैग, कम से कम 10 मिनट',
-    empty: 'नहीं हुआ',
     finished: 'आपने क्या पूरा किया?',
     wentWrong: 'क्या गलत हुआ?',
     reasons: {
@@ -298,11 +296,7 @@ export const hi: Strings = {
     },
     meta: (start: string, planned: string) =>
       `${start} पर शुरू · योजना ${planned}`,
-    next: (n: number) => `आगे: सत्र ${n}`,
     hold: 'दबाएँ',
-    tapFull: 'भरें',
-    tapHalf: 'ज़िग-ज़ैग',
-    change: 'बदलें',
   },
 
   dayDone: {

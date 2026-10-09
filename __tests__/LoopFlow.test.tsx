@@ -117,7 +117,16 @@ describe('the daily loop', () => {
     await press(tree, 'im-done');
 
     // 15 Mark
-    await press(tree, 'mark-full');
+    await act(async () => {
+      tree.root
+        .findAll(
+          n => n.props.testID === 'mark-pad' && n.props.onAccessibilityAction,
+        )
+        .at(-1)!
+        .props.onAccessibilityAction({
+          nativeEvent: { actionName: 'activate' },
+        });
+    });
     await type(tree, 'finished', 'Reel 1 and half of reel 2');
     await press(tree, 'mark-next');
     expect(useBook.getState().sessions[0]).toMatchObject({

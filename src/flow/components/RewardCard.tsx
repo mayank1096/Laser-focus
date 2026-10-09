@@ -43,6 +43,8 @@ export function RewardCard({
   fill,
   zig,
   locked,
+  fullLabel,
+  halfLabel,
   onMark,
 }: {
   width: number;
@@ -56,6 +58,9 @@ export function RewardCard({
   fill: SharedValue<number>;
   zig: SharedValue<number>;
   locked: boolean;
+  /** What a screen reader offers in place of the hold and the swipe. */
+  fullLabel: string;
+  halfLabel: string;
   onMark: (mark: Exclude<Mark, 'empty'>) => void;
 }) {
   const height = Math.round(width * 1.32);
@@ -284,7 +289,27 @@ export function RewardCard({
         <Animated.View
           collapsable={false}
           testID="mark-pad"
-          accessibilityRole="adjustable"
+          accessibilityRole="button"
+          accessibilityLabel={`${eyebrow}, ${title}`}
+          accessibilityActions={
+            locked
+              ? []
+              : [
+                  { name: 'activate', label: fullLabel },
+                  { name: 'half', label: halfLabel },
+                ]
+          }
+          onAccessibilityAction={e => {
+            if (done.current) {
+              return;
+            }
+            const full = e.nativeEvent.actionName === 'activate';
+            fill.value = withTiming(full ? 1 : 0, { duration: 400 });
+            zig.value = withTiming(full ? 0 : 1, { duration: 400 });
+            haptics.success();
+            celebrate();
+            onMark(full ? 'full' : 'half');
+          }}
           style={[{ width, height }, cardStyle]}
         >
           {/* Back: shown only while the card spins in. */}
