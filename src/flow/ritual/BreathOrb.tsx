@@ -24,9 +24,9 @@ const TONES = {
     label: 'rgba(255, 255, 255, 0.86)',
     sub: 'rgba(255, 255, 255, 0.45)',
   },
-  /** On the saffron haze: a white orb in a pale glow, so it reads. */
+  /** On the saffron haze: white dots in a deeper glow, so they read. */
   mist: {
-    glow: ['#B04A18', '#D9824E', '#EDB48C'],
+    glow: ['#7E300E', '#A9481A', '#CF7440'],
     label: 'rgba(255, 255, 255, 0.92)',
     sub: 'rgba(255, 255, 255, 0.6)',
   },
@@ -77,27 +77,19 @@ export function BreathOrb({
           />
         </Animated.View>
         <Animated.View style={orbStyle}>
-          {tone === 'mist' ? (
-            // The dotted orb mixes its faint dots towards black, which
-            // reads grey on the haze; a plain white ring stays clear.
-            <View
-              style={styles.ring}
-              accessibilityRole="image"
-              accessibilityLabel={label}
-            >
-              <View style={styles.core} />
-            </View>
-          ) : (
+          <View>
             <ThinkingOrb
               state={state}
               size={64}
               displaySize={ORB}
               speed={speed}
-              theme={tone}
-              tint={tint}
+              // Light ink ramps towards white, so a white tint keeps every
+              // dot pure white on the haze; dark ink would ramp to black.
+              theme={tone === 'dark' ? 'dark' : 'light'}
+              tint={tone === 'mist' ? colors.white : tint}
               accessibilityLabel={label}
             />
-          )}
+          </View>
         </Animated.View>
       </View>
       <Text style={[styles.label, { color: t.label }]}>{label}</Text>
@@ -118,24 +110,6 @@ const styles = StyleSheet.create({
   },
   glow: {
     position: 'absolute',
-  },
-  ring: {
-    width: ORB,
-    height: ORB,
-    borderRadius: ORB / 2,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.9)',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  core: {
-    width: ORB * 0.62,
-    height: ORB * 0.62,
-    borderRadius: ORB * 0.31,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   label: {
     marginTop: 8,
