@@ -1,6 +1,11 @@
 import React from 'react';
-import { Text, type TextProps } from 'react-native';
-import { typography, type TypographyVariant } from '../theme';
+import { StyleSheet, Text, type TextProps } from 'react-native';
+import {
+  fonts,
+  SMALL_TEXT,
+  typography,
+  type TypographyVariant,
+} from '../theme';
 import { isSerif, sansDigits } from './Numerals';
 
 export interface AppTextProps extends TextProps {
@@ -14,6 +19,16 @@ const hasDevanagari = (node: React.ReactNode): boolean =>
     : Array.isArray(node) && node.some(hasDevanagari);
 /** Tracking pulls Devanagari's joined letters apart. */
 const noTracking = { letterSpacing: 0 };
+/** Small text is never medium or bold, whatever a screen asks for. */
+const regular = { fontFamily: fonts.sans };
+const tooHeavy = (style: TextProps['style']) => {
+  const flat = StyleSheet.flatten(style);
+  return (
+    (flat?.fontSize ?? 15) <= SMALL_TEXT &&
+    (flat?.fontFamily === fonts.sansMedium ||
+      flat?.fontFamily === fonts.sansBold)
+  );
+};
 
 /**
  * Text that always uses a typography token from the design system. Numbers
@@ -25,9 +40,10 @@ export function AppText({
   children,
   ...rest
 }: AppTextProps) {
+  const base = [typography[variant], style];
   const resolved = [
-    typography[variant],
-    style,
+    ...base,
+    tooHeavy(base) ? regular : null,
     hasDevanagari(children) ? noTracking : null,
   ];
   return (

@@ -16,7 +16,7 @@ import type { Milestone } from '../../core/model';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { monthLabel } from '../../i18n/format';
-import { colors, fonts, motion, spacing } from '../../theme';
+import { colors, fonts, motion, spacing, SMALL_TEXT } from '../../theme';
 import { haptics } from '../../utils/haptics';
 
 const INK_50 = 'rgba(0, 0, 0, 0.5)';
@@ -197,8 +197,11 @@ export function MilestoneList({
 }
 
 const sans = (size: number, weight: 'regular' | 'medium' | 'bold') => ({
+  // Small text is never heavier than regular.
   fontFamily:
-    weight === 'bold'
+    size <= SMALL_TEXT
+      ? fonts.sans
+      : weight === 'bold'
       ? fonts.sansBold
       : weight === 'medium'
       ? fonts.sansMedium

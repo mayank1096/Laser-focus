@@ -13,6 +13,9 @@ export const fonts = {
   sansItalic: 'GoogleSans-Italic',
 } as const;
 
+/** Text this size or smaller is never medium or bold, anywhere. */
+export const SMALL_TEXT = 13;
+
 /** Figma letter-spacing is -2% on most styles. */
 const tight = (size: number) => size * -0.02;
 /** Small text reads better with a little air between letters. */
@@ -65,7 +68,7 @@ export const typography = {
     color: colors.ink,
   }),
   eyebrow: style({
-    fontFamily: fonts.sansMedium,
+    fontFamily: fonts.sans,
     fontSize: 11,
     lineHeight: 11 * 1.3,
     letterSpacing: 2.4,
@@ -94,7 +97,7 @@ export const typography = {
     color: colors.ink,
   }),
   label: style({
-    fontFamily: fonts.sansMedium,
+    fontFamily: fonts.sans,
     fontSize: 13,
     lineHeight: 13 * 1.45,
     letterSpacing: open(13),

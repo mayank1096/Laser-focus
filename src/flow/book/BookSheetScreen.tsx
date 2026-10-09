@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   cardSub: {
-    fontFamily: fonts.sansMedium,
+    fontFamily: fonts.sans,
     fontSize: 12,
     lineHeight: 15.6,
     letterSpacing: 0.24,

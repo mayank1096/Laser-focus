@@ -204,11 +204,11 @@ const styles = StyleSheet.create({
   label: {
     paddingLeft: 8,
     color: CAPSULE,
-    fontFamily: typography.bodyBold.fontFamily,
+    fontFamily: typography.body.fontFamily,
   },
   measure: {
     position: 'absolute',
     opacity: 0,
-    fontFamily: typography.bodyBold.fontFamily,
+    fontFamily: typography.body.fontFamily,
   },
 });

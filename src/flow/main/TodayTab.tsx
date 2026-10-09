@@ -28,7 +28,7 @@ import { useBook } from '../../core/store';
 import { useT, type Strings } from '../../i18n';
 import { clock, dayDate, shortDate } from '../../i18n/format';
 import type { RootStackParamList } from '../../navigation/types';
-import { colors, fonts, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography, SMALL_TEXT } from '../../theme';
 import { addDays } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 
@@ -378,8 +378,11 @@ function DaySquare({ mark }: { mark: Mark | null }) {
 }
 
 const sans = (size: number, weight: 'regular' | 'medium' | 'bold') => ({
+  // Small text is never heavier than regular.
   fontFamily:
-    weight === 'bold'
+    size <= SMALL_TEXT
+      ? fonts.sans
+      : weight === 'bold'
       ? fonts.sansBold
       : weight === 'medium'
       ? fonts.sansMedium
