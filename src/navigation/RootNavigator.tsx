@@ -7,7 +7,6 @@ import { useProfile } from '../features/account/store';
 import { BookScreen } from '../flow/book/BookScreen';
 import { BookSheetScreen } from '../flow/book/BookSheetScreen';
 import { SettingsScreen } from '../flow/book/SettingsScreen';
-import { DayDoneScreen } from '../flow/loop/DayDoneScreen';
 import { MainScreen } from '../flow/main/MainScreen';
 import { EndEarlyScreen } from '../flow/loop/EndEarlyScreen';
 import { InProgressScreen } from '../flow/loop/InProgressScreen';
@@ -142,7 +141,6 @@ export function RootNavigator() {
           />
           <Stack.Screen name="EndEarly" component={EndEarlyScreen} />
           <Stack.Screen name="Mark" component={MarkScreen} />
-          <Stack.Screen name="DayDone" component={DayDoneScreen} />
           <Stack.Screen name="GoalDone" component={GoalDoneScreen} />
           <Stack.Screen name="Rest" component={RestScreen} />
         </Stack.Group>

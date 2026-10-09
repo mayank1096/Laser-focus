@@ -300,15 +300,9 @@ export const hi: Strings = {
   },
 
   dayDone: {
-    title: (done: number, total: number) => `${total} में से ${done} पूरे।`,
-    pierced: 'लक्ष्य भेद।',
-    piercedSub: 'निशाना लगा। आज हर डिब्बा भरा।',
-    dayOver: 'दिन पूरा हुआ।',
-    dayOverSub: 'हर तीर निशाने पर नहीं लगा। कल फिर।',
     plan: 'कल की योजना',
-    review: 'हफ़्ते की समीक्षा',
-    planFirst: 'पहले योजना',
   },
+
 
   review: {
     title: 'हफ़्ते की समीक्षा',

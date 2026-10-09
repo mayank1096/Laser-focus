@@ -33,7 +33,6 @@ export type RootStackParamList = {
   InProgress: { id: Id };
   EndEarly: { id: Id };
   Mark: { id: Id };
-  DayDone: { date: ISODate };
   // Part 3 · Weekly and sprint
   Review: { week: ISODate };
   GoalDone: undefined;

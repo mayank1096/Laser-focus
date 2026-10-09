@@ -128,15 +128,14 @@ describe('the daily loop', () => {
         });
     });
     await type(tree, 'finished', 'Reel 1 and half of reel 2');
+    expect(textContent(tree)).toContain('Plan tomorrow');
     await press(tree, 'mark-next');
     expect(useBook.getState().sessions[0]).toMatchObject({
       mark: 'full',
       finished: 'Reel 1 and half of reel 2',
     });
 
-    // 16 Day done → 12 Plan tomorrow
-    expect(textContent(tree)).toContain('1 of 1');
-    await press(tree, 'day-plan');
+    // 16 The day's last box → 12 Plan tomorrow
     await press(tree, 'pick-0-t1');
     await type(tree, 'outcome-0', 'Reel 2 exported');
     await press(tree, 'plan-save');

@@ -305,15 +305,9 @@ export const en = {
   },
 
   dayDone: {
-    title: (done: number, total: number) => `${done} of ${total} done.`,
-    pierced: 'Lakshya bhed.',
-    piercedSub: 'The target, pierced. Every box full today.',
-    dayOver: 'The day is done.',
-    dayOverSub: 'Not every arrow landed. Tomorrow, again.',
     plan: 'Plan tomorrow',
-    review: 'Review the week',
-    planFirst: 'Plan first',
   },
+
 
   review: {
     title: 'Review the week',

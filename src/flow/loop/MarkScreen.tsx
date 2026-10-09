@@ -24,6 +24,7 @@ import { clockOf } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
+import { addDays } from '../../utils/date';
 import { WeekRow } from '../components/MarkBox';
 import { MarigoldShower } from '../components/MarigoldShower';
 import { RewardCard } from '../components/RewardCard';
@@ -71,6 +72,8 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
     sessionsOn(state, today).some(
       s => s.order > session.order && !s.mark && !s.startedAt,
     );
+  // Today's last box is in: straight on to planning tomorrow.
+  const lastToday = session.date === today && !more;
 
   const proceed = () => {
     if (!mark) {
@@ -86,10 +89,10 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
           : { wentWrong: [...wrong] },
       );
     haptics.tap();
-    if (more) {
-      navigation.replace('Home', { tab: 'today' });
+    if (lastToday) {
+      navigation.replace('Plan', { date: addDays(today, 1) });
     } else {
-      navigation.replace('DayDone', { date: session.date });
+      navigation.replace('Home', { tab: 'today' });
     }
   };
 
@@ -213,7 +216,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
           testID="mark-next"
-          label={t.common.done}
+          label={lastToday ? t.dayDone.plan : t.common.done}
           disabled={!mark}
           onPress={proceed}
         />
