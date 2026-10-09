@@ -40,7 +40,7 @@ const GLOW_HEIGHT = 462;
 const DESIGN_WIDTH = 402;
 
 /** The hero's silk: deep, body, light, and the page it melts into. */
-const SILK = ['#B83E0E', '#F06A1E', '#FFB27A', '#F7F5F4'];
+const SILK = ['#9A3C14', '#D2652A', '#E9A77C', '#F7F5F4'];
 
 const WHITE_80 = 'rgba(255, 255, 255, 0.8)';
 const WHITE_22 = 'rgba(255, 255, 255, 0.22)';

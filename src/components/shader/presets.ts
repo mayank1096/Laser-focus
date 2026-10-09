@@ -62,19 +62,19 @@ vec4 effect(vec2 uv, float aspect, float t) {
   float h = folds(p, t);
   float hx = folds(p + vec2(e, 0.0), t);
   float hy = folds(p + vec2(0.0, e), t);
-  vec3 n = normalize(vec3((h - hx) / e * 0.7, (h - hy) / e * 0.7, 1.0));
+  vec3 n = normalize(vec3((h - hx) / e * 0.45, (h - hy) / e * 0.45, 1.0));
   vec3 l = normalize(vec3(-0.5, 0.55, 0.65));
   float diff = clamp(dot(n, l), 0.0, 1.0);
   float sheen = pow(clamp(dot(reflect(-l, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 10.0);
   vec3 col = mix(c0, c1, smoothstep(0.2, 0.9, diff));
-  col = mix(col, c2, sheen * 0.7 + pow(sheen, 4.0) * 0.3);
+  col = mix(col, c2, sheen * 0.4);
   // Deeper towards the top, where the type sits on it.
   col *= mix(1.0, 0.85, smoothstep(0.5, 1.0, uv.y));
   // Fine grain so the gradients never band.
   col += (hash3(vec3(uv * 900.0, 1.0)) - 0.5) * 0.012;
   float page = 1.0 - smoothstep(0.04, 0.3, uv.y);
   // Through warm light into the page, never through grey.
-  col = mix(col, c2, smoothstep(0.0, 0.6, page) * 0.55);
+  col = mix(col, c2, smoothstep(0.0, 0.6, page) * 0.4);
   return vec4(mix(col, c3, smoothstep(0.35, 1.0, page)), 1.0);
 }
 `,
