@@ -666,6 +666,8 @@ export const en = {
   },
 
   bookSheet: {
+    edit: 'Edit',
+    endSprintSub: 'Close this goal early. Your milestones stay on the sheet.',
     milestonesSub: 'Practical, precise, trackable.',
     editMilestones: 'Edit milestones',
     valuesSub: 'Written in past tense. Read slowly.',

@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import type { SvgProps } from 'react-native-svg';
+import ChevronRight from '../../assets/icons/chevron-right.svg';
+import Flag from '../../assets/icons/flag.svg';
+import Pencil from '../../assets/icons/pencil.svg';
 import { BottomSheet } from '../../components/BottomSheet';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import type { Goal } from '../../core/model';
@@ -120,21 +124,42 @@ export function BookSheetScreen({
         {sheet === 'milestones' ? (
           <>
             {editing ? (
-              <MilestonesEditor />
+              <>
+                <View style={styles.editBar}>
+                  <AppText variant="eyebrow">
+                    {t.bookSheet.editMilestones}
+                  </AppText>
+                  <SmallPill
+                    testID="edit-milestones"
+                    label={t.common.done}
+                    accent
+                    onPress={() => setEditing(false)}
+                  />
+                </View>
+                <MilestonesEditor />
+              </>
             ) : (
               <View style={styles.card} testID="milestones-card">
                 {goal ? (
-                  <View style={styles.cardHead}>
-                    <AppText style={styles.cardTitle}>{goal.text}</AppText>
-                    <AppText style={styles.cardSub}>
-                      {`${t.today.milestones(
-                        progress.milestonesDone,
-                        progress.milestonesTotal,
-                      )} · ${t.today.left(
-                        progress.monthsLeft,
-                        progress.daysLeft,
-                      )}`}
-                    </AppText>
+                  <View style={styles.cardHeadRow}>
+                    <View style={styles.cardHead}>
+                      <AppText style={styles.cardTitle}>{goal.text}</AppText>
+                      <AppText style={styles.cardSub}>
+                        {`${t.today.milestones(
+                          progress.milestonesDone,
+                          progress.milestonesTotal,
+                        )} · ${t.today.left(
+                          progress.monthsLeft,
+                          progress.daysLeft,
+                        )}`}
+                      </AppText>
+                    </View>
+                    <SmallPill
+                      testID="edit-milestones"
+                      label={t.bookSheet.edit}
+                      Icon={Pencil}
+                      onPress={() => setEditing(true)}
+                    />
                   </View>
                 ) : null}
                 <MilestoneList
@@ -143,31 +168,39 @@ export function BookSheetScreen({
                 />
               </View>
             )}
-            <Pressable
-              testID="edit-milestones"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={() => {
-                haptics.selection();
-                setEditing(e => !e);
-              }}
-              style={styles.end}
-            >
-              <AppText variant="label" style={styles.link}>
-                {editing ? t.common.done : t.bookSheet.editMilestones}
-              </AppText>
-            </Pressable>
-            <Pressable
-              testID="end-sprint"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={() => setEndSure(true)}
-              style={styles.end}
-            >
-              <AppText variant="label" style={styles.link}>
-                {t.book.endSprint}
-              </AppText>
-            </Pressable>
+            {editing ? null : (
+              <Pressable
+                testID="end-sprint"
+                accessibilityRole="button"
+                onPress={() => {
+                  haptics.selection();
+                  setEndSure(true);
+                }}
+                style={({ pressed }) => [
+                  styles.endRow,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View style={styles.endIcon}>
+                  <Flag
+                    width={16}
+                    height={16}
+                    color={colors.ink}
+                    strokeWidth={1.75}
+                  />
+                </View>
+                <View style={styles.flex}>
+                  <AppText variant="bodyMedium">{t.book.endSprint}</AppText>
+                  <AppText variant="detail">{t.bookSheet.endSprintSub}</AppText>
+                </View>
+                <ChevronRight
+                  width={16}
+                  height={16}
+                  color={colors.textMuted}
+                  strokeWidth={2}
+                />
+              </Pressable>
+            )}
           </>
         ) : null}
         {sheet === 'week' ? <TasksEditor week={week} /> : null}
@@ -261,6 +294,45 @@ export function BookSheetScreen({
   );
 }
 
+/** A compact action that sits beside a heading: Edit, Done. */
+function SmallPill({
+  label,
+  onPress,
+  Icon,
+  accent = false,
+  testID,
+}: {
+  label: string;
+  onPress: () => void;
+  Icon?: React.FC<SvgProps>;
+  accent?: boolean;
+  testID?: string;
+}) {
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      hitSlop={8}
+      onPress={() => {
+        haptics.selection();
+        onPress();
+      }}
+      style={({ pressed }) => [
+        styles.pill,
+        accent && styles.pillAccent,
+        pressed && styles.pressed,
+      ]}
+    >
+      {Icon ? (
+        <Icon width={13} height={13} color={colors.ink} strokeWidth={1.75} />
+      ) : null}
+      <AppText style={[styles.pillText, accent && styles.pillTextAccent]}>
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   switch: {
     marginTop: spacing.xl,
@@ -280,10 +352,6 @@ const styles = StyleSheet.create({
   link: {
     color: colors.saffron,
   },
-  end: {
-    alignSelf: 'center',
-    marginTop: spacing.xl,
-  },
   // Figma 2.05: a white card, 22 in from the edge, 30 below the panel's top.
   card: {
     marginHorizontal: 4,
@@ -296,7 +364,68 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
     boxShadow: '0px 24px 18px rgba(0, 0, 0, 0.08)',
   },
+  cardHeadRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    height: 30,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    backgroundColor: 'rgba(0, 0, 0, 0.045)',
+  },
+  pillAccent: {
+    backgroundColor: colors.saffronWash,
+    borderWidth: 1,
+    borderColor: colors.saffron,
+  },
+  pillText: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.26,
+    color: colors.ink,
+  },
+  pillTextAccent: {
+    color: colors.saffron,
+  },
+  pressed: {
+    opacity: 0.7,
+  },
+  editBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 4,
+    marginTop: 12,
+    marginBottom: 4,
+  },
+  endRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginHorizontal: 4,
+    marginTop: spacing.group,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: colors.white,
+  },
+  endIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.045)',
+  },
   cardHead: {
+    flex: 1,
     gap: 10,
   },
   cardTitle: {

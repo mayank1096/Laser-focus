@@ -666,6 +666,8 @@ export const hi: Strings = {
   },
 
   bookSheet: {
+    edit: 'बदलें',
+    endSprintSub: 'यह लक्ष्य जल्दी बंद करें। आपके माइलस्टोन शीट पर रहेंगे।',
     milestonesSub: 'व्यावहारिक, सटीक, मापने लायक।',
     editMilestones: 'माइलस्टोन बदलें',
     valuesSub: 'भूतकाल में लिखे हुए। धीरे पढ़ें।',
