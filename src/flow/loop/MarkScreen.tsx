@@ -271,8 +271,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.gutter,
   },
   head: {
-    marginTop: 28,
-    gap: spacing.sm,
+    marginTop: spacing.section,
+    gap: spacing.md,
   },
   muted: {
     color: colors.textMuted,
@@ -294,9 +294,9 @@ const styles = StyleSheet.create({
     color: colors.saffron,
   },
   verdict: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   after: {
     marginTop: 24,

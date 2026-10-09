@@ -258,7 +258,7 @@ export function TasksEditor({
             }}
             style={styles.toggle}
           >
-            <View style={styles.flex}>
+            <View style={styles.toggleText}>
               <AppText variant="bodyMedium">{t.tasks.shallowToggle}</AppText>
               <AppText variant="micro" style={styles.muted}>
                 {t.tasks.shallowSub}
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxl,
   },
   gap: {
-    gap: spacing.lg,
+    gap: spacing.xxl,
   },
   flex: {
     flex: 1,
@@ -398,11 +398,20 @@ const styles = StyleSheet.create({
   toggle: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
+    gap: spacing.xl,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    backgroundColor: colors.white,
+  },
+  toggleText: {
+    flex: 1,
+    gap: spacing.sm,
   },
   shallow: {
-    marginTop: spacing.sm,
+    marginTop: spacing.lg,
   },
   options: {
     gap: spacing.md,

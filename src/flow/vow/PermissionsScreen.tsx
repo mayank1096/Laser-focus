@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-    gap: 2,
+    gap: spacing.xs,
   },
   muted: {
     color: colors.textMuted,

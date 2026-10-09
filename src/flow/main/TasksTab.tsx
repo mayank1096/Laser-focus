@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    gap: 3,
+    gap: spacing.xs,
   },
   meta: {
     color: colors.textMuted,

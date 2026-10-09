@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.lg,
   },
   divider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-    gap: 2,
+    gap: spacing.xs,
   },
   muted: {
     color: colors.textMuted,

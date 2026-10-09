@@ -23,7 +23,7 @@ export function SheetTitle({
 
 const styles = StyleSheet.create({
   title: {
-    gap: spacing.xs,
-    marginBottom: spacing.xl,
+    gap: spacing.sm,
+    marginBottom: spacing.xxl,
   },
 });

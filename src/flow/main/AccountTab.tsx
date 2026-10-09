@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   flex: {
     flex: 1,
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   name: {
     marginTop: spacing.lg,

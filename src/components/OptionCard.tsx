@@ -235,7 +235,7 @@ export function OptionList({
 
 const styles = StyleSheet.create({
   list: {
-    gap: spacing.md,
+    gap: spacing.lg,
   },
   row: {
     flexDirection: 'row',
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   tileText: {
     marginTop: 'auto',
     paddingTop: 24,
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   card: {
     minHeight: layout.fieldHeight,
@@ -268,9 +268,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: radii.field,
     borderWidth: 1,
-    paddingLeft: 14,
-    paddingRight: 12,
-    paddingVertical: 14,
+    paddingLeft: 18,
+    paddingRight: 16,
+    paddingVertical: 18,
     overflow: 'hidden',
   },
   wash: {
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    gap: spacing.sm,
+    gap: spacing.md,
   },
   check: {
     marginLeft: spacing.md,

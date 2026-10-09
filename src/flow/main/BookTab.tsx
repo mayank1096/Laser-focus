@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   card: {
     flex: 1,
-    gap: spacing.xs,
+    gap: spacing.sm,
     paddingVertical: 14,
     paddingHorizontal: spacing.xl,
     borderRadius: 14,
