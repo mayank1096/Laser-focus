@@ -80,6 +80,34 @@ vec4 effect(vec2 uv, float aspect, float t) {
 `,
 
   /**
+   * A full-screen haze: three soft pools of colour drifting through each
+   * other, their edges bent by slow noise, fading to dark at the foot of
+   * the screen. Grain keeps it from banding. c0 dark, c1 ember, c2 body,
+   * c3 the brightest light.
+   */
+  mist: `
+vec4 effect(vec2 uv, float aspect, float t) {
+  vec2 p = vec2(uv.x * aspect, uv.y);
+  vec2 w = vec2(fbm(vec3(p * 1.1, t * 0.03)), fbm(vec3(p * 1.1 + 7.3, t * 0.03)));
+  vec2 q = p + (w - 0.5) * 0.5;
+  vec2 a = vec2(aspect * (0.55 + 0.18 * sin(t * 0.07)), 0.62 + 0.08 * cos(t * 0.05));
+  vec2 b = vec2(aspect * (0.22 + 0.1 * cos(t * 0.06)), 0.86 + 0.05 * sin(t * 0.08));
+  vec2 c = vec2(aspect * (0.85 + 0.08 * sin(t * 0.04)), 0.38 + 0.1 * sin(t * 0.06));
+  float pa = exp(-dot(q - a, q - a) * 5.0);
+  float pb = exp(-dot(q - b, q - b) * 7.0);
+  float pc = exp(-dot(q - c, q - c) * 6.0);
+  vec3 col = c0;
+  col = mix(col, c1, clamp(pa * 0.9 + pc * 0.7, 0.0, 1.0));
+  col = mix(col, c2, clamp(pa * pa * 0.85 + pb * 0.55, 0.0, 1.0));
+  col = mix(col, c3, clamp(pb * pb * 0.35, 0.0, 1.0));
+  // Dark at the foot, where the list runs on.
+  col *= mix(0.45, 1.0, smoothstep(0.0, 0.65, uv.y));
+  col += (hash3(vec3(uv * 900.0, 3.0)) - 0.5) * 0.02;
+  return vec4(col, 1.0);
+}
+`,
+
+  /**
    * A deep saffron field that churns slowly while its light rises and sinks
    * from the bottom like a tide. c0 deep, c1 warm, c2 glow, c3 pale.
    */

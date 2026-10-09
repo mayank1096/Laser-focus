@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Pressable,
   ScrollView,
@@ -6,47 +6,40 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Check from '../../assets/icons/check.svg';
 import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import { AppText } from '../../components/AppText';
 import { IconButton } from '../../components/IconButton';
 import { sansDigits } from '../../components/Numerals';
-import { PrimaryButton } from '../../components/PrimaryButton';
-import { rise } from '../../components/QuestionHeader';
 import { ShaderView } from '../../components/shader';
 import { appDay } from '../../core/days';
-import { activeMilestones, dayMark } from '../../core/home';
-import type { Mark } from '../../core/model';
+import { activeMilestones } from '../../core/home';
 import { circledGoal, useBook } from '../../core/store';
 import { useT } from '../../i18n';
-import { shortDate } from '../../i18n/format';
+import { monthLabel, shortDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, fonts, spacing, typography, SILK } from '../../theme';
-import { addDays, daysBetween } from '../../utils/date';
+import { colors, fonts, motion, typography } from '../../theme';
+import { daysBetween } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { countDays } from '../components/Calendar';
 
 const GUTTER = 22;
-const INK_50 = 'rgba(0, 0, 0, 0.5)';
-const WHITE_70 = 'rgba(255, 255, 255, 0.72)';
-/** The Home silk, melting into this white page. */
-const SKY = [...SILK, '#FFFFFF'];
-/** The same grid as Home: nineteen squares a row, one per day. */
-const PER_ROW = 19;
-const TILE_GAP = 4;
+/** The haze behind the whole screen: dark, ember, body, light. */
+const MIST = ['#140806', '#6E2410', '#C2561E', '#EBA06A'];
+const WHITE_90 = 'rgba(255, 255, 255, 0.9)';
+const WHITE_60 = 'rgba(255, 255, 255, 0.6)';
+const WHITE_45 = 'rgba(255, 255, 255, 0.45)';
+const HAIRLINE = 'rgba(255, 255, 255, 0.12)';
 
 /**
- * A goal reached, or a sprint ended. The goal sits on the same silk it
- * lived on at Home, and under it every day of the run fills in, one box
- * after another, as it happened. Below: the milestones as a thread.
+ * A goal reached, or a sprint ended. One quiet page on a slow haze: the
+ * goal, the run in three numbers, and the milestones as a ruled list.
  */
 export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   const t = useT();
   const insets = useSafeAreaInsets();
-  const { width } = useWindowDimensions();
-  const [heroH, setHeroH] = useState(0);
+  const { width, height } = useWindowDimensions();
   const state = useBook();
   const goal = circledGoal(state);
   const today = appDay();
@@ -54,148 +47,122 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   const { full, half } = countDays(state, from, today);
   const days = Math.max(1, daysBetween(from, today) + 1);
   const milestones = activeMilestones(state);
-  const done = milestones.filter(m => m.done).length;
-  const reached = milestones.length > 0 && done === milestones.length;
-  const tile = (width - GUTTER * 2 - TILE_GAP * (PER_ROW - 1)) / PER_ROW;
-  // A short run plays back box by box; a long one arrives at once.
-  const step = days <= 120 ? Math.min(40, 1100 / days) : 0;
-  const marks: (Mark | null)[] = Array.from({ length: days }, (_, i) =>
-    dayMark(state, addDays(from, i)),
-  );
+  const reached = milestones.length > 0 && milestones.every(m => m.done);
+
+  const rest = () => {
+    haptics.success();
+    useBook.getState().finishGoal();
+    navigation.replace('Rest');
+  };
 
   return (
     <View style={styles.screen} testID="goal-done">
+      <ShaderView
+        preset="mist"
+        width={width}
+        height={height}
+        colours={MIST}
+        style={StyleSheet.absoluteFill}
+      />
       <ScrollView
-        contentContainerStyle={{ paddingBottom: spacing.xxl }}
+        contentContainerStyle={{
+          paddingTop: insets.top + 6,
+          paddingBottom: insets.bottom + 120,
+        }}
         showsVerticalScrollIndicator={false}
       >
-        <View
-          style={[styles.hero, { paddingTop: insets.top + 6 }]}
-          onLayout={e => setHeroH(e.nativeEvent.layout.height)}
-        >
-          {heroH ? (
-            <ShaderView
-              preset="silk"
-              width={width}
-              height={heroH}
-              colours={SKY}
-              style={styles.sky}
-            />
-          ) : null}
-          <View style={styles.back}>
-            <IconButton
-              Icon={ChevronLeft}
-              size={20}
-              color={colors.white}
-              testID="back-button"
-              accessibilityLabel={t.common.back}
-              onPress={() => navigation.goBack()}
-            />
-          </View>
-          <Animated.Text entering={rise(0)} style={styles.eyebrow}>
-            {`${
-              reached ? t.goalDone.reached : t.goalDone.ended
-            } · ${t.goalDone.span(shortDate(t, from), shortDate(t, today))}`}
-          </Animated.Text>
-          <Animated.Text
-            entering={rise(1)}
-            style={styles.goal}
-            accessibilityRole="header"
-          >
-            {sansDigits(goal?.text ?? '')}
-          </Animated.Text>
-          <View
-            style={[styles.field, { gap: TILE_GAP }]}
-            accessibilityLabel={t.goalDone.summary(days, full, half)}
-          >
-            {marks.map((m, i) => (
-              <Animated.View
-                key={i}
-                entering={
-                  step ? FadeIn.delay(500 + i * step).duration(220) : undefined
-                }
-                style={[
-                  styles.tile,
-                  { width: tile, height: tile, borderRadius: tile * 0.28 },
-                ]}
-              >
-                {m === 'full' ? <View style={styles.tileFull} /> : null}
-                {m === 'half' ? (
-                  <View style={[styles.tileHalf, { width: tile / 2 }]} />
-                ) : null}
-              </Animated.View>
-            ))}
-          </View>
-          <Animated.Text
-            entering={FadeIn.delay(600 + days * step).duration(400)}
-            style={styles.summary}
-          >
-            {t.goalDone.summary(days, full, half)}
-          </Animated.Text>
+        <View style={styles.bar}>
+          <IconButton
+            Icon={ChevronLeft}
+            size={20}
+            color={colors.white}
+            testID="back-button"
+            accessibilityLabel={t.common.back}
+            onPress={() => navigation.goBack()}
+          />
+          <AppText style={styles.barTitle}>
+            {reached ? t.goalDone.reached : t.goalDone.ended}
+          </AppText>
+          <View style={styles.barSpace} />
         </View>
 
-        <Animated.View entering={rise(2)} style={styles.section}>
-          <AppText variant="eyebrow">
-            {t.goalDone.milestones(done, milestones.length)}
+        <Animated.View
+          entering={FadeIn.duration(motion.slow)}
+          style={styles.head}
+        >
+          <AppText style={styles.goal} accessibilityRole="header">
+            {sansDigits(goal?.text ?? '')}
           </AppText>
-          <View>
-            {milestones.map((m, i) => (
-              <Pressable
-                key={m.id}
-                testID={`goal-ms-${m.id}`}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: m.done }}
-                onPress={() => {
-                  haptics.selection();
-                  state.toggleMilestone(m.id);
-                }}
-                style={styles.msRow}
+          <AppText style={styles.span}>
+            {t.goalDone.span(shortDate(t, from), shortDate(t, today))}
+          </AppText>
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeIn.delay(200).duration(motion.slow)}
+          style={styles.stats}
+        >
+          <Stat value={days} label={t.goalDone.days} />
+          <Stat value={full} label={t.goalDone.full} />
+          <Stat value={half} label={t.goalDone.half} />
+        </Animated.View>
+
+        <Animated.View
+          entering={FadeIn.delay(400).duration(motion.slow)}
+          style={styles.list}
+        >
+          {milestones.map((m, i) => (
+            <Pressable
+              key={m.id}
+              testID={`goal-ms-${m.id}`}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: m.done }}
+              onPress={() => {
+                haptics.selection();
+                state.toggleMilestone(m.id);
+              }}
+              style={styles.row}
+            >
+              <AppText style={styles.rowLead}>
+                {m.month
+                  ? monthLabel(t, m.month)
+                  : String(i + 1).padStart(2, '0')}
+              </AppText>
+              <AppText
+                style={[styles.rowText, !m.done && styles.rowOpen]}
+                numberOfLines={2}
               >
-                <View style={styles.msRail}>
-                  <View
-                    style={[
-                      styles.thread,
-                      i === 0 && styles.threadFirst,
-                      i === milestones.length - 1 && styles.threadLast,
-                    ]}
-                  />
-                  <View style={[styles.node, m.done && styles.nodeDone]}>
-                    {m.done ? (
-                      <Check
-                        width={12}
-                        height={12}
-                        color={colors.white}
-                        strokeWidth={3}
-                      />
-                    ) : null}
-                  </View>
-                </View>
-                <AppText
-                  style={[styles.msText, !m.done && styles.msOpen]}
-                  numberOfLines={2}
-                >
-                  {m.text}
-                </AppText>
-              </Pressable>
-            ))}
-          </View>
+                {m.text}
+              </AppText>
+              <View style={[styles.tick, m.done && styles.tickDone]} />
+            </Pressable>
+          ))}
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
-        <AppText variant="detail" style={styles.restSub}>
-          {t.goalDone.restSub}
-        </AppText>
-        <PrimaryButton
+      <Animated.View
+        entering={FadeInDown.delay(600).duration(motion.slow)}
+        style={[styles.footer, { bottom: insets.bottom + 24 }]}
+        pointerEvents="box-none"
+      >
+        <Pressable
           testID="rest-now"
-          label={t.goalDone.rest}
-          onPress={() => {
-            haptics.success();
-            useBook.getState().finishGoal();
-            navigation.replace('Rest');
-          }}
-        />
-      </View>
+          accessibilityRole="button"
+          onPress={rest}
+          style={({ pressed }) => [styles.pill, pressed && styles.pressed]}
+        >
+          <AppText style={styles.pillText}>{t.goalDone.rest}</AppText>
+        </Pressable>
+      </Animated.View>
+    </View>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <View style={styles.stat}>
+      <AppText style={styles.statValue}>{value}</AppText>
+      <AppText style={styles.statLabel}>{label}</AppText>
     </View>
   );
 }
@@ -203,122 +170,132 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: MIST[0],
   },
-  hero: {
-    paddingHorizontal: GUTTER,
-    // Room for the silk to melt into the page below the summary.
-    paddingBottom: 110,
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
   },
-  sky: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
+  barTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontFamily: fonts.sans,
+    fontSize: 14,
+    lineHeight: 20,
+    color: WHITE_90,
   },
-  back: {
-    marginLeft: -10,
-    marginBottom: 28,
-    alignSelf: 'flex-start',
+  barSpace: {
+    width: 36,
   },
-  eyebrow: {
-    ...typography.eyebrow,
-    color: WHITE_70,
+  head: {
+    marginTop: 28,
+    paddingHorizontal: 40,
+    alignItems: 'center',
+    gap: 8,
   },
   goal: {
-    ...typography.display,
-    fontSize: 38,
-    lineHeight: 42,
-    marginTop: 12,
+    ...typography.heading,
+    fontSize: 22,
+    lineHeight: 27,
+    textAlign: 'center',
     color: colors.white,
   },
-  field: {
-    marginTop: 36,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  tile: {
-    backgroundColor: 'rgba(255, 255, 255, 0.22)',
-    overflow: 'hidden',
-  },
-  tileFull: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: colors.white,
-  },
-  tileHalf: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-  },
-  summary: {
-    marginTop: 16,
+  span: {
     fontFamily: fonts.sans,
-    fontSize: 15,
-    lineHeight: 21,
-    letterSpacing: -0.3,
-    color: WHITE_70,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.26,
+    color: WHITE_60,
   },
-  section: {
-    marginTop: spacing.lg,
+  stats: {
+    marginTop: 64,
+    flexDirection: 'row',
     paddingHorizontal: GUTTER,
-    gap: 16,
   },
-  msRow: {
+  stat: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 6,
+  },
+  statValue: {
+    fontFamily: fonts.sans,
+    fontSize: 40,
+    lineHeight: 44,
+    letterSpacing: -1,
+    color: colors.white,
+  },
+  statLabel: {
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.26,
+    color: WHITE_60,
+  },
+  list: {
+    marginTop: 56,
+    marginHorizontal: GUTTER,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: HAIRLINE,
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    minHeight: 44,
+    gap: 16,
+    minHeight: 54,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: HAIRLINE,
   },
-  msRail: {
-    width: 22,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    justifyContent: 'center',
+  rowLead: {
+    width: 64,
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.26,
+    color: WHITE_45,
   },
-  thread: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    width: 1.5,
-    backgroundColor: colors.saffronLine,
-  },
-  threadFirst: {
-    top: '50%',
-  },
-  threadLast: {
-    bottom: '50%',
-  },
-  node: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: 'rgba(0, 0, 0, 0.18)',
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  nodeDone: {
-    borderColor: colors.saffron,
-    backgroundColor: colors.saffron,
-  },
-  msText: {
+  rowText: {
     flex: 1,
     fontFamily: fonts.sansMedium,
     fontSize: 15,
     lineHeight: 20,
-    color: colors.ink,
+    color: WHITE_90,
   },
-  msOpen: {
-    color: INK_50,
+  rowOpen: {
+    color: WHITE_45,
+  },
+  tick: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: WHITE_45,
+  },
+  tickDone: {
+    borderColor: colors.white,
+    backgroundColor: colors.white,
   },
   footer: {
-    paddingTop: spacing.md,
-    paddingHorizontal: spacing.gutter,
-    gap: 12,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
-  restSub: {
-    textAlign: 'center',
+  pill: {
+    paddingHorizontal: 28,
+    paddingVertical: 15,
+    borderRadius: 999,
+    backgroundColor: colors.cream,
+    boxShadow: '0px 12px 30px rgba(0, 0, 0, 0.35)',
+  },
+  pressed: {
+    transform: [{ scale: 0.97 }],
+  },
+  pillText: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 15,
+    lineHeight: 20,
+    color: colors.ink,
   },
 });
