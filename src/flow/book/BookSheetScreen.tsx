@@ -8,12 +8,13 @@ import { SheetTitle } from '../components/SheetTitle';
 import { AppText } from '../../components/AppText';
 import { ListField } from '../../components/ListField';
 import { appDay, weekStart } from '../../core/days';
+import { activeMilestones, sprintProgress } from '../../core/home';
 import { circledGoal, useBook } from '../../core/store';
 import { PRATIGYAS, useProfile } from '../../features/account/store';
 import { useT } from '../../i18n';
 import { shortDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography } from '../../theme';
 import { addDays } from '../../utils/date';
 import {
   EditorAppearance,
@@ -22,6 +23,7 @@ import {
   TasksEditor,
   ValuesEditor,
 } from '../components/SheetEditors';
+import { MilestoneList } from '../components/MilestoneList';
 import { SheetPage } from '../components/SheetPage';
 import { vowText } from '../vow/TakeVowScreen';
 
@@ -41,6 +43,8 @@ export function BookSheetScreen({
   const week = weekStart(appDay(), state.rhythm.reviewDay);
   const [switchTo, setSwitchTo] = useState<Goal | null>(null);
   const [endSure, setEndSure] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const progress = sprintProgress(state, appDay());
 
   const head: Record<typeof sheet, { eyebrow: string; sub: string }> = {
     values: { eyebrow: t.bookTab.valuesMeta, sub: t.bookSheet.valuesSub },
@@ -54,7 +58,7 @@ export function BookSheetScreen({
           m => m.goalId === state.circledGoalId && !m.archived,
         ).length,
       ),
-      sub: goal?.text ?? '',
+      sub: t.bookSheet.milestonesSub,
     },
     week: {
       eyebrow: t.bookTab.tasksMeta(
@@ -115,7 +119,44 @@ export function BookSheetScreen({
         ) : null}
         {sheet === 'milestones' ? (
           <>
-            <MilestonesEditor />
+            {editing ? (
+              <MilestonesEditor />
+            ) : (
+              <View style={styles.card} testID="milestones-card">
+                {goal ? (
+                  <View style={styles.cardHead}>
+                    <AppText style={styles.cardTitle}>{goal.text}</AppText>
+                    <AppText style={styles.cardSub}>
+                      {`${t.today.milestones(
+                        progress.milestonesDone,
+                        progress.milestonesTotal,
+                      )} · ${t.today.left(
+                        progress.monthsLeft,
+                        progress.daysLeft,
+                      )}`}
+                    </AppText>
+                  </View>
+                ) : null}
+                <MilestoneList
+                  milestones={activeMilestones(state)}
+                  testIDPrefix="sheet-ms"
+                />
+              </View>
+            )}
+            <Pressable
+              testID="edit-milestones"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => {
+                haptics.selection();
+                setEditing(e => !e);
+              }}
+              style={styles.end}
+            >
+              <AppText variant="label" style={styles.link}>
+                {editing ? t.common.done : t.bookSheet.editMilestones}
+              </AppText>
+            </Pressable>
             <Pressable
               testID="end-sprint"
               accessibilityRole="button"
@@ -242,6 +283,35 @@ const styles = StyleSheet.create({
   end: {
     alignSelf: 'center',
     marginTop: spacing.xl,
+  },
+  // Figma 2.05: a white card, 22 in from the edge, 30 below the panel's top.
+  card: {
+    marginHorizontal: 4,
+    marginTop: 12,
+    padding: 16,
+    gap: 30,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.06)',
+    backgroundColor: colors.white,
+    boxShadow: '0px 24px 18px rgba(0, 0, 0, 0.08)',
+  },
+  cardHead: {
+    gap: 10,
+  },
+  cardTitle: {
+    fontFamily: fonts.serif,
+    fontSize: 16,
+    lineHeight: 17.6,
+    letterSpacing: -0.32,
+    color: colors.ink,
+  },
+  cardSub: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 12,
+    lineHeight: 15.6,
+    letterSpacing: 0.24,
+    color: 'rgba(0, 0, 0, 0.5)',
   },
   gap: {
     gap: spacing.md,

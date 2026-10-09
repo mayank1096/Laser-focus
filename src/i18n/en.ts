@@ -665,6 +665,8 @@ export const en = {
   },
 
   bookSheet: {
+    milestonesSub: 'Practical, precise, trackable.',
+    editMilestones: 'Edit milestones',
     valuesSub: 'Written in past tense. Read slowly.',
     goalsSub: 'One to five goals. The circled one leads.',
     vowSub: 'Read it before every session.',

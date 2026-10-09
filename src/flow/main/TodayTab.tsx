@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   Pressable,
   ScrollView,
@@ -6,17 +6,16 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeIn, LinearTransition } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Svg, { Circle, Line } from 'react-native-svg';
-import Check from '../../assets/icons/check.svg';
-import ChevronDown from '../../assets/icons/chevron-down.svg';
+import Svg, { Line } from 'react-native-svg';
 import { AppText } from '../../components/AppText';
+import { MilestoneList } from '../components/MilestoneList';
 import { AuroraSky } from '../../components/aurora';
 import { GradientPill } from '../../components/GradientPill';
 import { rise } from '../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
-import { appDay, appMinutes, weekStart } from '../../core/days';
+import { appDay, appMinutes } from '../../core/days';
 import {
   activeMilestones,
   dayMark,
@@ -27,9 +26,9 @@ import {
 import type { Mark } from '../../core/model';
 import { useBook } from '../../core/store';
 import { useT, type Strings } from '../../i18n';
-import { clock, dayDate, monthLabel, shortDate } from '../../i18n/format';
+import { clock, dayDate, shortDate } from '../../i18n/format';
 import type { RootStackParamList } from '../../navigation/types';
-import { colors, fonts, motion, spacing, typography } from '../../theme';
+import { colors, fonts, spacing, typography } from '../../theme';
 import { addDays } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 
@@ -70,14 +69,6 @@ export function TodayTab({ go }: { go: Go }) {
   const milestones = allMilestones.some(m => !m.done)
     ? allMilestones.filter(m => !m.done)
     : allMilestones;
-  const current = milestones.findIndex(m => !m.done);
-  const [open, setOpen] = useState(current === -1 ? 0 : current);
-  // The milestone being worked on opens by itself, as in the design.
-  useEffect(() => {
-    setOpen(current === -1 ? 0 : current);
-  }, [current]);
-  const week = weekStart(today, state.rhythm.reviewDay);
-  const deep = state.tasks.filter(x => x.week === week && x.kind === 'deep');
 
   // A user back after days away is asked about the latest day only.
   useEffect(() => {
@@ -240,150 +231,11 @@ export function TodayTab({ go }: { go: Go }) {
           ) : null}
         </Animated.View>
 
-        <View style={styles.milestones}>
-          {milestones.map((m, i) => {
-            const expanded = i === open;
-            const isCurrent = i === current;
-            const linked = deep.filter(x => x.milestoneId === m.id);
-            // The count is every deep task this milestone has had, done of
-            // all; the list below is this week's share of them.
-            const all = state.tasks.filter(
-              x => x.kind === 'deep' && x.milestoneId === m.id,
-            );
-            const done = all.filter(x => x.done).length;
-            return (
-              <Animated.View
-                key={m.id}
-                layout={LinearTransition.duration(motion.base)}
-                style={styles.milestone}
-              >
-                <Pressable
-                  testID={`today-ms-${m.id}`}
-                  accessibilityRole="button"
-                  accessibilityState={{ expanded }}
-                  onPress={() => {
-                    haptics.selection();
-                    setOpen(expanded ? -1 : i);
-                  }}
-                  style={styles.milestoneHead}
-                >
-                  <ChevronDown
-                    width={18}
-                    height={18}
-                    strokeWidth={2}
-                    color={isCurrent ? colors.ink : INK_50}
-                    style={{
-                      transform: [{ rotate: expanded ? '0deg' : '-90deg' }],
-                    }}
-                  />
-                  <AppText
-                    style={[
-                      styles.milestoneName,
-                      isCurrent ? styles.bold : styles.dim,
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {m.text}
-                  </AppText>
-                  {m.done ? (
-                    <Check
-                      width={16}
-                      height={16}
-                      color={colors.saffron}
-                      strokeWidth={2.4}
-                    />
-                  ) : all.length || m.month ? (
-                    <AppText
-                      style={[styles.count, isCurrent && styles.saffronText]}
-                    >
-                      {all.length
-                        ? `${done}/${all.length}`
-                        : monthLabel(t, m.month!)}
-                    </AppText>
-                  ) : null}
-                </Pressable>
-                <View
-                  style={[
-                    styles.track,
-                    (isCurrent || m.done) && styles.trackCurrent,
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.trackFill,
-                      {
-                        width: m.done
-                          ? '100%'
-                          : isCurrent && all.length
-                          ? `${(done / all.length) * 100}%`
-                          : '0%',
-                      },
-                    ]}
-                  />
-                </View>
-                {expanded ? (
-                  <Animated.View
-                    entering={FadeIn.duration(motion.base)}
-                    style={styles.week}
-                  >
-                    <Svg width={1} height="100%" style={styles.weekThread}>
-                      <Line
-                        x1={0.5}
-                        x2={0.5}
-                        y1={0}
-                        y2="100%"
-                        stroke="rgba(0, 0, 0, 0.1)"
-                        strokeDasharray="4 4"
-                      />
-                    </Svg>
-                    <View style={styles.weekList}>
-                      <AppText style={styles.weekEyebrow}>
-                        {t.today.thisWeek}
-                      </AppText>
-                      {linked.length ? (
-                        linked.map((task, ti) => {
-                          const active =
-                            !task.done && ti === linked.findIndex(w => !w.done);
-                          return (
-                            <View key={task.id} style={styles.weekRow}>
-                              <Svg width={14} height={14}>
-                                <Circle
-                                  cx={7}
-                                  cy={7}
-                                  r={6.25}
-                                  stroke={
-                                    task.done || active
-                                      ? colors.saffron
-                                      : 'rgba(0, 0, 0, 0.2)'
-                                  }
-                                  strokeWidth={1.5}
-                                  fill={task.done ? colors.saffron : 'none'}
-                                />
-                              </Svg>
-                              <AppText
-                                style={[
-                                  styles.weekTask,
-                                  active ? styles.bold12 : styles.dim12,
-                                ]}
-                                numberOfLines={1}
-                              >
-                                {task.text}
-                              </AppText>
-                            </View>
-                          );
-                        })
-                      ) : (
-                        <AppText style={styles.dim12}>
-                          {t.today.noTasks}
-                        </AppText>
-                      )}
-                    </View>
-                  </Animated.View>
-                ) : null}
-              </Animated.View>
-            );
-          })}
-        </View>
+        <MilestoneList
+          milestones={milestones}
+          testIDPrefix="today-ms"
+          style={styles.milestones}
+        />
       </ScrollView>
     </View>
   );
@@ -711,83 +563,5 @@ const styles = StyleSheet.create({
   milestones: {
     marginTop: 28,
     marginHorizontal: 22,
-    gap: 24,
-  },
-  milestone: {
-    gap: 10,
-  },
-  milestoneHead: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  milestoneName: {
-    flex: 1,
-  },
-  bold: {
-    ...sans(14, 'bold'),
-    color: colors.ink,
-  },
-  dim: {
-    ...sans(14, 'medium'),
-    color: INK_50,
-  },
-  count: {
-    ...sans(14, 'bold'),
-    color: colors.ink,
-  },
-  saffronText: {
-    color: colors.saffron,
-  },
-  track: {
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: INK_06,
-    overflow: 'hidden',
-  },
-  trackCurrent: {
-    backgroundColor: 'rgba(250, 140, 34, 0.2)',
-  },
-  trackFill: {
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: colors.saffron,
-  },
-  week: {
-    flexDirection: 'row',
-    gap: 12,
-    marginLeft: 10,
-    marginTop: 6,
-  },
-  weekThread: {
-    alignSelf: 'stretch',
-  },
-  weekList: {
-    flex: 1,
-    gap: 18,
-    paddingBottom: spacing.xs,
-  },
-  weekEyebrow: {
-    ...sans(10, 'medium'),
-    letterSpacing: 2.4,
-    textTransform: 'uppercase',
-    color: INK_50,
-    marginBottom: -4,
-  },
-  weekRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  weekTask: {
-    flex: 1,
-  },
-  bold12: {
-    ...sans(12, 'bold'),
-    color: colors.ink,
-  },
-  dim12: {
-    ...sans(12, 'medium'),
-    color: INK_50,
   },
 });

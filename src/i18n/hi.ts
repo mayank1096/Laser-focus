@@ -665,6 +665,8 @@ export const hi: Strings = {
   },
 
   bookSheet: {
+    milestonesSub: 'व्यावहारिक, सटीक, मापने लायक।',
+    editMilestones: 'माइलस्टोन बदलें',
     valuesSub: 'भूतकाल में लिखे हुए। धीरे पढ़ें।',
     goalsSub: 'एक से पाँच लक्ष्य। चुना हुआ लक्ष्य आगे चलता है।',
     vowSub: 'हर सत्र से पहले इसे पढ़ें।',
