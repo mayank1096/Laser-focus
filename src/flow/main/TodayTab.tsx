@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   cardBody: {
-    ...sans(13, 'medium'),
+    ...sans(13, 'regular'),
     color: INK_50,
   },
   start: {

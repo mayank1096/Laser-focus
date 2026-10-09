@@ -99,7 +99,7 @@ export function BookTab({ onOpen }: { onOpen: (to: BookDestination) => void }) {
                 strokeWidth={2}
               />
             </View>
-            <AppText variant="label" style={styles.meta}>
+            <AppText variant="detail" style={styles.meta}>
               {r.meta}
             </AppText>
             {r.bar && r.bar.total ? (

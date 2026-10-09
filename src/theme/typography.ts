@@ -108,11 +108,19 @@ export const typography = {
     color: colors.textFaint,
   }),
   micro: style({
-    fontFamily: fonts.sansMedium,
+    fontFamily: fonts.sans,
     fontSize: 12,
     lineHeight: 12 * 1.45,
     letterSpacing: open(12),
     color: colors.ink,
+  }),
+  /** Descriptions under a heading: regular weight, never bold. */
+  detail: style({
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 13 * 1.45,
+    letterSpacing: open(13),
+    color: colors.textMuted,
   }),
   pickerValue: style({
     fontFamily: fonts.sans,

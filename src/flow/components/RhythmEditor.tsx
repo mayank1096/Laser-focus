@@ -154,7 +154,7 @@ export function RhythmEditor() {
             );
           })}
         </View>
-        <AppText variant="label" style={styles.note}>
+        <AppText variant="detail">
           {t.rhythm.reviewWhy(t.common.days[rhythm.reviewDay])}
         </AppText>
       </View>
@@ -167,7 +167,7 @@ export function RhythmEditor() {
           </View>
           <View style={styles.reminderText}>
             <AppText variant="bodyMedium">{t.rhythm.reminder}</AppText>
-            <AppText variant="label" style={styles.muted}>
+            <AppText variant="detail">
               {t.rhythm.reminderSub}
             </AppText>
           </View>
@@ -471,9 +471,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.sansBold,
     fontSize: 18,
     color: colors.ink,
-  },
-  note: {
-    color: colors.textMuted,
   },
   reminder: {
     flexDirection: 'row',
