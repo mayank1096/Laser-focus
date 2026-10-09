@@ -11,6 +11,9 @@ export const fonts = {
   sansMedium: 'GoogleSans-Medium',
   sansBold: 'GoogleSans-Bold',
   sansItalic: 'GoogleSans-Italic',
+  /** On trial: the goal's headline on Today. */
+  cooper: 'CooperBT-Medium',
+  cooperLight: 'CooperBT-Light',
 } as const;
 
 /** Text this size or smaller is never medium or bold, anywhere. */
