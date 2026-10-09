@@ -21,6 +21,8 @@ export interface Account {
 export interface DistractingApp {
   name: string;
   deleted: boolean;
+  /** Kept because the user's work needs it, e.g. Instagram for a reel editor. */
+  forWork?: boolean;
 }
 
 interface ProfileData {
@@ -46,6 +48,7 @@ interface ProfileActions {
   setPratigya: (pratigya: Pratigya) => void;
   grant: (permission: Permission) => void;
   markAppDeleted: (name: string) => void;
+  setAppForWork: (name: string, forWork: boolean) => void;
   takeVow: (at: string) => void;
   breakVow: (at: string) => void;
   restoreVow: () => void;
@@ -94,6 +97,10 @@ export const useProfile = create<ProfileState>()(
           apps: s.apps.map(a =>
             a.name === name ? { ...a, deleted: true } : a,
           ),
+        })),
+      setAppForWork: (name, forWork) =>
+        set(s => ({
+          apps: s.apps.map(a => (a.name === name ? { ...a, forWork } : a)),
         })),
       takeVow: at => set({ vowTakenAt: at }),
       breakVow: at => set({ brokenAt: at }),

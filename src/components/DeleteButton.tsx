@@ -29,10 +29,13 @@ type Phase = 'idle' | 'tick' | 'done';
 export function DeleteButton({
   deleted,
   onDelete,
+  labels = ['Delete', 'Deleted'],
   testID,
 }: {
   deleted: boolean;
   onDelete: () => void;
+  /** [idle, done] labels, translated by the caller. */
+  labels?: [string, string];
   testID?: string;
 }) {
   const [phase, setPhase] = useState<Phase>(deleted ? 'done' : 'idle');
@@ -66,7 +69,7 @@ export function DeleteButton({
     <Pressable
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={deleted ? 'Deleted' : 'Delete'}
+      accessibilityLabel={deleted ? labels[1] : labels[0]}
       accessibilityState={{ disabled: deleted }}
       disabled={deleted}
       hitSlop={6}
@@ -88,7 +91,7 @@ export function DeleteButton({
           <View style={styles.row}>
             <Trash width={15} height={15} color={colors.danger} />
             <Animated.Text style={[typography.label, styles.red]}>
-              Delete
+              {labels[0]}
             </Animated.Text>
           </View>
         ) : null}
@@ -112,7 +115,7 @@ export function DeleteButton({
             style={[typography.label, styles.red]}
             numberOfLines={1}
           >
-            Deleted
+            {labels[1]}
           </Animated.Text>
         ) : null}
       </Animated.View>

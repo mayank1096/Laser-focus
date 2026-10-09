@@ -6,26 +6,13 @@ import Animated, {
   withSequence,
   withSpring,
 } from 'react-native-reanimated';
-import { AppText } from '../../../components/AppText';
-import { BottomSheet } from '../../../components/BottomSheet';
-import { colors, radii, spacing, springs, typography } from '../../../theme';
-import { haptics } from '../../../utils/haptics';
-import { addMonths } from '../../../utils/time';
+import { AppText } from '../../components/AppText';
+import { BottomSheet } from '../../components/BottomSheet';
+import { colors, radii, spacing, springs, typography } from '../../theme';
+import { haptics } from '../../utils/haptics';
+import { useT } from '../../i18n';
+import { addMonths } from '../../utils/time';
 
-const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
 const CLOSE_AFTER = 260;
 
 /**
@@ -53,6 +40,7 @@ export function MonthPickerSheet({
   taken: string[];
   onPick: (month: string) => void;
 }) {
+  const t = useT();
   const range = useMemo(() => {
     const now = new Date();
     return {
@@ -70,10 +58,10 @@ export function MonthPickerSheet({
     <BottomSheet
       visible={visible}
       onClose={onClose}
-      accessibilityLabel="Choose a month"
+      accessibilityLabel={t.milestones.month}
       testID="month-picker"
     >
-      <AppText variant="eyebrow">Done by</AppText>
+      <AppText variant="eyebrow">{t.milestones.month}</AppText>
       <AppText variant="heading" style={styles.title} numberOfLines={2}>
         {title}
       </AppText>
@@ -88,7 +76,7 @@ export function MonthPickerSheet({
               {year}
             </AppText>
             <View style={styles.grid}>
-              {MONTHS.map((name, i) => {
+              {t.common.months.map((name, i) => {
                 const iso = `${year}-${String(i + 1).padStart(2, '0')}`;
                 const inRange = iso >= range.first && iso <= range.last;
                 return (

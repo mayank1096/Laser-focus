@@ -1,55 +1,43 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { TabId } from '../components/TabBar';
+import type { SetupStep } from '../core/model';
 import type { Id, ISODate } from '../types/models';
 
-export type AuthMode = 'signup' | 'signin';
+export type BookSheet =
+  | 'values'
+  | 'goals'
+  | 'milestones'
+  | 'week'
+  | 'antiGoal'
+  | 'sacrifice';
 
 export type RootStackParamList = {
-  // Start
+  // Part 1 · Set up
+  SignIn: undefined;
   Welcome: undefined;
-  Language: undefined;
-  Name: undefined;
-  GoalSetup: undefined;
-  // Account
-  SaveSheets: undefined;
-  Phone: { mode: AuthMode };
-  Code: { mode: AuthMode; phone: string };
-  WelcomeBack: undefined;
-  // Path & Pratigya
-  Path: undefined;
+  Setup: { step?: SetupStep; returnTo?: 'reassess' | 'reread' } | undefined;
   Pratigya: undefined;
   VowAsks: undefined;
   Permissions: undefined;
   ClearField: undefined;
   TakeVow: undefined;
-  DayOne: undefined;
+  SetupDone: undefined;
   Lockout: undefined;
-  // Planning
-  WeekSetup: undefined;
-  /** The tabbed home of the app. */
-  Main: { tab?: TabId } | undefined;
-  PlanDay: { date: ISODate };
-  SessionSheet: { date: ISODate; slotId: Id };
-  SealDay: { date: ISODate };
-  Sacrifice: undefined;
-  /** Blocks a session that has no sheet until a quick one is written. */
-  MorningGate: { date: ISODate; slotId: Id };
-  // Action Book
-  ValuesSheet: undefined;
-  GoalsSheet: undefined;
-  MilestonesSheet: undefined;
-  AntiGoalsSheet: undefined;
-  SwitchGoal: undefined;
-  PlanNextGoal: undefined;
-  // Session
-  Ritual: { date: ISODate; slotId: Id };
-  InSession: undefined;
-  EmergencyEnd: undefined;
-  SessionDone: { date: ISODate; slotId: Id };
-  ProblemFinder: { date: ISODate; slotId: Id };
-  Fix: { date: ISODate; slotId: Id; reason: string };
-  StreakMark: { date: ISODate };
+  // Part 2 · The daily loop
+  Home: undefined;
+  Plan: { date?: ISODate; first?: boolean } | undefined;
+  Start: { id: Id };
+  InProgress: { id: Id };
+  Mark: { id: Id };
+  DayDone: { date: ISODate };
+  // Part 3 · Weekly and sprint
+  Review: { week: ISODate };
+  GoalDone: undefined;
   Rest: undefined;
+  Reassess: undefined;
+  // Part 4 · Second level
+  Book: undefined;
+  BookSheet: { sheet: BookSheet };
+  Settings: undefined;
 };
 
 export type RootScreenProps<T extends keyof RootStackParamList> =

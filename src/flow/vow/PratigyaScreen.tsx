@@ -5,32 +5,35 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { PRATIGYAS, useProfile, type Pratigya } from '../account/store';
-import { VOW_STEPS } from './PathScreen';
+import { PRATIGYAS, useProfile, type Pratigya } from '../../features/account/store';
+
+export const VOW_STEPS = 5;
+import { useT } from '../../i18n';
 
 const ORDER: Pratigya[] = ['abhimanyu', 'arjun', 'bhishma'];
 
 export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
+  const t = useT();
   const pratigya = useProfile(s => s.pratigya);
   const setPratigya = useProfile(s => s.setPratigya);
   return (
     <SimpleScreen
       testID="pratigya"
       art={art.kneeling}
-      progress={{ total: VOW_STEPS, filled: 2 }}
+      progress={{ total: VOW_STEPS, filled: 1 }}
       onBack={() => navigation.goBack()}
       footer={
         <PrimaryButton
           testID="next-button"
-          label="Next"
+          label={t.common.next}
           disabled={!pratigya}
           onPress={() => navigation.navigate('VowAsks')}
         />
       }
     >
       <QuestionHeader
-        eyebrow="Your pratigya"
-        title="Every warrior took a vow. Which one is yours?"
+        eyebrow={t.vow.pratigyaEyebrow}
+        title={t.vow.pratigyaTitle}
       />
       <QuestionBody gap={26}>
         <OptionList>
@@ -40,8 +43,8 @@ export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
               testID={`pratigya-${p}`}
               title={PRATIGYAS[p].latin}
               note={PRATIGYAS[p].name}
-              tag={PRATIGYAS[p].tag}
-              description={PRATIGYAS[p].short}
+              tag={t.vow.names[p].tag}
+              description={t.vow.names[p].short}
               selected={pratigya === p}
               onPress={() => setPratigya(p)}
             />

@@ -12,31 +12,24 @@ import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme';
-import { useProfile, type Permission } from '../account/store';
-import { VOW_STEPS } from './PathScreen';
+import { useProfile, type Permission } from '../../features/account/store';
+import { useT } from '../../i18n';
+import { VOW_STEPS } from './PratigyaScreen';
 
 const ROWS: {
   id: Permission;
-  label: string;
-  why: string;
   Icon: IconComponent;
 }[] = [
   {
     id: 'screenTime',
-    label: 'Screen Time',
-    why: 'To see if a removed app returns',
     Icon: Hourglass,
   },
   {
     id: 'focus',
-    label: 'Focus & Do Not Disturb',
-    why: 'To silence the phone in session',
     Icon: Moon,
   },
   {
     id: 'notifications',
-    label: 'Notifications',
-    why: 'For the nightly reminder only',
     Icon: BellOn,
   },
 ];
@@ -49,6 +42,7 @@ const ROWS: {
 export function PermissionsScreen({
   navigation,
 }: RootScreenProps<'Permissions'>) {
+  const t = useT();
   const permissions = useProfile(s => s.permissions);
   const grant = useProfile(s => s.grant);
   const pratigya = useProfile(s => s.pratigya);
@@ -58,12 +52,12 @@ export function PermissionsScreen({
     <SimpleScreen
       testID="permissions"
       art={art.bowShoulders}
-      progress={{ total: VOW_STEPS, filled: 4 }}
+      progress={{ total: VOW_STEPS, filled: 3 }}
       onBack={() => navigation.goBack()}
       footer={
         <PrimaryButton
           testID="next-button"
-          label={left ? `${left} left` : 'Next'}
+          label={left ? t.vow.left(left) : t.common.next}
           disabled={left > 0}
           onPress={() =>
             // Abhimanyu only silences; nothing has to be deleted.
@@ -75,9 +69,9 @@ export function PermissionsScreen({
       }
     >
       <QuestionHeader
-        eyebrow="Let us hold you to it"
-        title="A vow needs a witness. Let the app watch."
-        subtitle="Nothing leaves your phone. We only check what you promised."
+        eyebrow={t.vow.permEyebrow}
+        title={t.vow.permTitle}
+        subtitle={t.vow.permSub}
       />
       <QuestionBody gap={26}>
         <View style={styles.list}>
@@ -89,14 +83,15 @@ export function PermissionsScreen({
                   <OptionIcon Icon={r.Icon} active={on} />
                 </View>
                 <View style={styles.flex}>
-                  <AppText variant="bodyMedium">{r.label}</AppText>
+                  <AppText variant="bodyMedium">{t.vow.perms[r.id][0]}</AppText>
                   <AppText variant="micro" style={styles.muted}>
-                    {r.why}
+                    {t.vow.perms[r.id][1]}
                   </AppText>
                 </View>
                 <AllowButton
                   testID={`allow-${r.id}`}
                   granted={on}
+                  label={t.vow.allow}
                   onAllow={() => grant(r.id)}
                 />
               </View>

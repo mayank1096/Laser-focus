@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { BottomSheet } from '../../../components/BottomSheet';
-import { PrimaryButton } from '../../../components/PrimaryButton';
-import { RulerPicker } from '../../../components/RulerPicker';
-import type { ClockTime } from '../../../types/models';
-import { formatClock } from '../../../utils/date';
-import { spacing } from '../../../theme';
+import { BottomSheet } from '../../components/BottomSheet';
+import { PrimaryButton } from '../../components/PrimaryButton';
+import { RulerPicker } from '../../components/RulerPicker';
+import type { ClockTime } from '../../types/models';
+import { useT } from '../../i18n';
+import { clock } from '../../i18n/format';
+import { spacing } from '../../theme';
 import { SheetTitle } from './SheetTitle';
 
 /** Times move in quarter hours. */
@@ -42,6 +43,7 @@ export function ClockSheet({
   footer,
   testID,
 }: ClockSheetProps) {
+  const t = useT();
   const [draft, setDraft] = useState(value);
   // Start from the current value every time the sheet opens.
   useEffect(() => {
@@ -66,7 +68,7 @@ export function ClockSheet({
           min={Math.round(min / STEP)}
           max={Math.round(max / STEP)}
           onChange={v => setDraft(v * STEP)}
-          formatLabel={v => formatClock(v * STEP)}
+          formatLabel={v => clock(t, v * STEP)}
         />
       </View>
       {children ? <View style={styles.extra}>{children}</View> : null}

@@ -325,7 +325,7 @@ export const en = {
     nextTasks: 'Next week’s tasks',
     optional: 'Two optional sheets from the course',
     antiGoal: 'Anti-goal',
-    antiGoalSub: 'Ten things that will happen if you don’t.',
+    antiGoalSub: 'Up to four things that will happen if you don’t.',
     sacrifice: 'Sacrifice',
     sacrificeSub: 'What you will and won’t give up.',
     save: 'Save the review',
@@ -356,6 +356,7 @@ export const en = {
   },
 
   reassess: {
+    ask: 'What did this goal teach you?',
     title: 'Reassess',
     repeat: 'Repeat next time',
     dont: 'Don’t repeat',
@@ -366,6 +367,8 @@ export const en = {
   },
 
   book: {
+    add: 'Add a line',
+    current: 'Circled',
     title: 'My Action Book',
     values: 'Values',
     goals: 'Goals',
@@ -387,6 +390,14 @@ export const en = {
   },
 
   settings: {
+    howSteps: [
+      'Set up once: values, goals, one circled goal, its milestones, this week’s tasks.',
+      'Each evening, plan tomorrow. Up to three sessions.',
+      'Start with the phone outside. When you’re done, mark the box.',
+      'Once a week, review. When every milestone is ticked, the goal is done.',
+      'Rest, reassess, circle the next goal.',
+    ],
+    print: 'Printable Action Book',
     title: 'Settings',
     language: 'Language',
     focus: 'Focus time',

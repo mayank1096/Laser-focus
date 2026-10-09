@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import { AppText } from '../../../components/AppText';
-import { spacing } from '../../../theme';
+import { AppText } from '../../components/AppText';
+import { spacing } from '../../theme';
 
 /** Heading and optional line at the top of a bottom sheet. */
 export function SheetTitle({

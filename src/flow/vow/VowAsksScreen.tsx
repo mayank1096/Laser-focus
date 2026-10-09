@@ -12,34 +12,36 @@ import {
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, fonts, spacing, typography } from '../../theme';
-import { PRATIGYAS, useProfile } from '../account/store';
-import { VOW_STEPS } from './PathScreen';
+import { PRATIGYAS, useProfile } from '../../features/account/store';
+import { useT } from '../../i18n';
+import { VOW_STEPS } from './PratigyaScreen';
 
 export function VowAsksScreen({ navigation }: RootScreenProps<'VowAsks'>) {
+  const t = useT();
   const pratigya = useProfile(s => s.pratigya) ?? 'arjun';
   const vow = PRATIGYAS[pratigya];
   return (
     <SimpleScreen
       testID="vow-asks"
       art={art.drawingBow}
-      progress={{ total: VOW_STEPS, filled: 3 }}
+      progress={{ total: VOW_STEPS, filled: 2 }}
       onBack={() => navigation.goBack()}
       footer={
         <PrimaryButton
           testID="next-button"
-          label="I understand"
+          label={t.vow.understand}
           onPress={() => navigation.navigate('Permissions')}
         />
       }
     >
       <QuestionHeader
         eyebrow={`${vow.name} प्रतिज्ञा`}
-        title="Before you take it, know what it asks of you."
-        subtitle="Break it, and Laser Focus closes until you keep it again."
+        title={t.vow.asksTitle}
+        subtitle={t.vow.asksSub}
       />
       <QuestionBody gap={26}>
         <View style={styles.list}>
-          {vow.asks.map((ask, i) => (
+          {t.vow.names[pratigya].asks.map((ask, i) => (
             <Animated.View key={ask} entering={rise(4 + i)} style={styles.row}>
               <AppText style={styles.n}>{i + 1}</AppText>
               <AppText variant="body" style={styles.flex}>

@@ -288,6 +288,7 @@ export const useBook = create<BookState>()(
           milestones: s.milestones.map(m =>
             m.goalId === s.circledGoalId ? { ...m, archived: true } : m,
           ),
+          sprintStart: appDay(),
         })),
       switchGoal: goalId =>
         set(s => ({
@@ -367,7 +368,8 @@ export const tasksForWeek = (
   );
 
 /** Leaving reassess once the next goal's first plan is saved. */
-export const finishReassess = () => useBook.setState({ reassessing: false });
+export const finishReassess = () =>
+  useBook.setState({ reassessing: false, restUntil: null });
 
 /** Read-only snapshot for non-React code. */
 export const book = () => useBook.getState();

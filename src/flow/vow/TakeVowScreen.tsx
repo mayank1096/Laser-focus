@@ -4,90 +4,70 @@ import Animated from 'react-native-reanimated';
 import { art } from '../../assets/art';
 import { AppText } from '../../components/AppText';
 import { HoldButton } from '../../components/HoldButton';
+import { sansDigits } from '../../components/Numerals';
 import { rise } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
+import { appDay } from '../../core/days';
+import { circledGoal, useBook } from '../../core/store';
+import { useProfile, type Pratigya } from '../../features/account/store';
+import { useT, type Strings } from '../../i18n';
+import { shortDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing, typography } from '../../theme';
 import { now } from '../../utils/clock';
-import { useGoalSetup } from '../onboarding/store';
-import { usePlanning } from '../planning/store';
-import { useProfile, type Pratigya } from '../account/store';
-import { VOW_STEPS } from './PathScreen';
-import { sansDigits } from '../../components/Numerals';
+import { VOW_STEPS } from './PratigyaScreen';
 
-const DATE = new Intl.DateTimeFormat('en-IN', {
-  day: 'numeric',
-  month: 'short',
-  year: 'numeric',
-});
-
-/** "Clear CA Foundation by June 2027" → "clear CA Foundation by June 2027". */
+/** "Clear CA Foundation" → "clear CA Foundation", to sit inside a sentence. */
 const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
-export function vowText(pratigya: Pratigya, goal: string): string {
-  switch (pratigya) {
-    case 'abhimanyu':
-      return 'Before every session, I silence every distraction. If I forget, I stop and set it right before I sit.';
-    case 'bhishma':
-      return `Until I ${lower(
-        goal,
-      )}, my phone is for calls alone. This vow is never taken back.`;
-    default:
-      return `Until I ${lower(
-        goal,
-      )}, no distraction returns to my phone. If one does, I stop and set it right before I sit again.`;
-  }
+export function vowText(t: Strings, pratigya: Pratigya, goal: string): string {
+  const v = t.vow.names[pratigya];
+  return typeof v.text === 'function' ? v.text(lower(goal)) : v.text;
 }
 
 export function TakeVowScreen({ navigation }: RootScreenProps<'TakeVow'>) {
-  const { name, pratigya } = useProfile();
+  const t = useT();
+  const pratigya = useProfile(s => s.pratigya) ?? 'arjun';
   const takeVow = useProfile(s => s.takeVow);
-  const goal = useGoalSetup(
-    s => s.goals.find(g => g.isPrimary)?.text ?? 'my goal',
-  );
+  const goal = useBook(s => circledGoal(s)?.text ?? '');
 
   return (
     <SimpleScreen
       testID="take-vow"
       art={art.kneeling}
-      progress={{ total: VOW_STEPS, filled: 6 }}
+      progress={{ total: VOW_STEPS, filled: 5 }}
       onBack={() => navigation.goBack()}
       footer={
         <HoldButton
           testID="vow-hold"
-          label="Hold to take the vow"
+          label={t.vow.takeHold}
           duration={2400}
           onComplete={() => {
             takeVow(now().toISOString());
+            useBook.getState().setSetup('plan');
             navigation.reset({
               index: 0,
-              routes: [
-                {
-                  name: usePlanning.getState().setupDone
-                    ? 'DayOne'
-                    : 'WeekSetup',
-                },
-              ],
+              routes: [{ name: 'Plan', params: { first: true } }],
             });
           }}
         />
       }
     >
       <Animated.Text entering={rise(0)} style={typography.eyebrow}>
-        The vow
+        {t.vow.takeEyebrow}
       </Animated.Text>
       <Animated.Text entering={rise(1)} style={styles.devanagari}>
         मैं प्रतिज्ञा लेता हूँ।
       </Animated.Text>
       <Animated.Text entering={rise(2)} style={styles.vow}>
-        {sansDigits(vowText(pratigya ?? 'arjun', goal))}
+        {sansDigits(vowText(t, pratigya, goal))}
       </Animated.Text>
       <Animated.View entering={rise(3)} style={styles.signature}>
-        <AppText style={styles.name} numberOfLines={1}>
-          {name.trim() || 'Your name'}
+        <AppText variant="label" style={styles.muted}>
+          {t.vow.signature}
         </AppText>
-        <AppText variant="micro" style={styles.muted}>
-          {DATE.format(now())}
+        <AppText variant="label" style={styles.muted}>
+          {shortDate(t, appDay())}
         </AppText>
       </Animated.View>
     </SimpleScreen>
@@ -108,17 +88,11 @@ const styles = StyleSheet.create({
   signature: {
     marginTop: 36,
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     paddingBottom: spacing.sm,
     borderBottomWidth: 1,
     borderStyle: 'dashed',
     borderBottomColor: colors.border,
-  },
-  name: {
-    ...typography.title,
-    fontSize: 24,
-    color: colors.textMuted,
-    flex: 1,
   },
   muted: {
     color: colors.textMuted,

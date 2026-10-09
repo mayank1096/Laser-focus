@@ -9,7 +9,7 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import Svg, { Defs, Line, RadialGradient, Stop } from 'react-native-svg';
-import { colors } from '../../../theme';
+import { colors } from '../../theme';
 
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 
