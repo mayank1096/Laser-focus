@@ -4,16 +4,16 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import ArrowDown from '../../assets/icons/arrow-down.svg';
 import BookOpen from '../../assets/icons/book-open.svg';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
+import Languages from '../../assets/icons/languages.svg';
 import LogOut from '../../assets/icons/log-out.svg';
 import ScrollText from '../../assets/icons/scroll-text.svg';
 import Trash from '../../assets/icons/trash.svg';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { PrimaryButton } from '../../components/PrimaryButton';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import { SettingsRow, SettingsSection } from '../../components/SettingsList';
 import { useBook } from '../../core/store';
-import { useProfile, type Language } from '../../features/account/store';
+import { useProfile } from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, motion, spacing } from '../../theme';
@@ -55,17 +55,21 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
         subtitle={`${t.settings.language} · ${t.settings.focus} · ${t.settings.review}`}
         onBack={() => navigation.goBack()}
       >
-        <Section title={t.settings.language}>
-          <SegmentedControl<Language>
-            testIDPrefix="settings-language"
-            value={language}
-            segments={[
-              { id: 'en', label: 'English' },
-              { id: 'hi', label: 'हिंदी' },
-            ]}
-            onChange={setLanguage}
+        <SettingsSection title={t.settings.language}>
+          <SettingsRow
+            testID="settings-language"
+            Icon={Languages}
+            title={t.account.language}
+            detail={t.account.languageName}
+            last
+            trailing={
+              <AppText variant="label" style={styles.switchLang}>
+                {language === 'en' ? 'हिंदी' : 'English'}
+              </AppText>
+            }
+            onPress={() => setLanguage(language === 'en' ? 'hi' : 'en')}
           />
-        </Section>
+        </SettingsSection>
 
         <View style={styles.rhythm}>
           <RhythmEditor />
@@ -172,37 +176,12 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
   );
 }
 
-function Section({
-  title,
-  children,
-}: {
-  title?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={styles.section}>
-      {title ? <AppText variant="eyebrow">{title}</AppText> : null}
-      <View style={styles.card}>{children}</View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
+  switchLang: {
+    color: colors.saffron,
+  },
   rhythm: {
-    marginTop: spacing.xl,
-    marginBottom: 40,
-  },
-  section: {
-    marginBottom: spacing.lg,
-    gap: spacing.md,
-  },
-  card: {
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
-    gap: spacing.md,
+    marginVertical: spacing.group,
   },
   flex: {
     flex: 1,
