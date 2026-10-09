@@ -18,6 +18,7 @@ import Animated, {
 import Svg, { Polyline } from 'react-native-svg';
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
+import { GLASS_EDGE, GlassFill } from '../../components/Glass';
 import { ShaderView } from '../../components/shader';
 import type { Mark } from '../../core/model';
 import { colors, fonts, springs, typography } from '../../theme';
@@ -234,14 +235,14 @@ export function RewardCard({
     color: interpolateColor(
       fill.value,
       [0.45, 0.75],
-      [colors.ink, colors.white],
+      [colors.white, colors.white],
     ),
   }));
   const softInkStyle = useAnimatedStyle(() => ({
     color: interpolateColor(
       fill.value,
       [0.15, 0.4],
-      [colors.textMuted, 'rgba(255, 255, 255, 0.85)'],
+      ['rgba(255, 255, 255, 0.55)', 'rgba(255, 255, 255, 0.85)'],
     ),
   }));
   // The invitation: a dashed ring that breathes until the card fills.
@@ -321,6 +322,7 @@ export function RewardCard({
 
           {/* Front */}
           <Animated.View style={[styles.face, styles.front, frontStyle]}>
+            <GlassFill />
             <Animated.View
               style={[StyleSheet.absoluteFill, styles.wash, washStyle]}
             />
@@ -399,8 +401,9 @@ const styles = StyleSheet.create({
   },
   front: {
     justifyContent: 'flex-end',
-    backgroundColor: colors.white,
-    boxShadow: '0px 24px 48px rgba(122, 52, 12, 0.18)',
+    borderWidth: 1,
+    borderColor: GLASS_EDGE,
+    boxShadow: '0px 24px 48px rgba(0, 0, 0, 0.35)',
   },
   back: {
     alignItems: 'center',

@@ -77,11 +77,14 @@ export function Box({
   fill,
   zig,
   today = false,
+  dark = false,
 }: {
   size: number;
   fill: SharedValue<number>;
   zig: SharedValue<number>;
   today?: boolean;
+  /** On the haze: an empty box is a faint white, not a faint black. */
+  dark?: boolean;
 }) {
   const id = useRef(`box-fill-${++boxIds}`).current;
   const r = Math.round(size * 0.3);
@@ -106,6 +109,7 @@ export function Box({
       style={[
         styles.box,
         { width: size, height: size, borderRadius: r },
+        dark && styles.boxDark,
         today && styles.today,
       ]}
     >
@@ -145,11 +149,13 @@ export function DayBox({
   mark,
   today = false,
   delay = 0,
+  dark = false,
 }: {
   size: number;
   mark: Mark | null;
   today?: boolean;
   delay?: number;
+  dark?: boolean;
 }) {
   const fill = useSharedValue(mark === 'full' ? 1 : 0);
   const zig = useSharedValue(mark === 'half' ? 1 : 0);
@@ -178,7 +184,7 @@ export function DayBox({
   }));
   return (
     <Animated.View style={popStyle}>
-      <Box size={size} fill={fill} zig={zig} today={today} />
+      <Box size={size} fill={fill} zig={zig} today={today} dark={dark} />
     </Animated.View>
   );
 }
@@ -191,6 +197,7 @@ export function WeekRow({
   letters,
   size = 34,
   delayFor,
+  dark = false,
 }: {
   days: ISODate[];
   marks: (Mark | null)[];
@@ -199,6 +206,7 @@ export function WeekRow({
   size?: number;
   /** Lets one box animate a beat after something else does. */
   delayFor?: (day: ISODate) => number;
+  dark?: boolean;
 }) {
   return (
     <View style={styles.row} accessibilityRole="summary">
@@ -209,10 +217,17 @@ export function WeekRow({
             mark={marks[i]}
             today={d === today}
             delay={delayFor?.(d) ?? 0}
+            dark={dark}
           />
           <AppText
             variant="micro"
-            style={d === today ? styles.todayLetter : styles.letter}
+            style={
+              d === today
+                ? styles.todayLetter
+                : dark
+                ? styles.letterDark
+                : styles.letter
+            }
           >
             {letters[fromISODate(d).getDay()]}
           </AppText>
@@ -227,6 +242,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'flex-end',
     backgroundColor: EMPTY,
+  },
+  boxDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
   },
   today: {
     borderWidth: 1.5,
@@ -254,6 +272,9 @@ const styles = StyleSheet.create({
   },
   letter: {
     color: colors.textMuted,
+  },
+  letterDark: {
+    color: 'rgba(255, 255, 255, 0.5)',
   },
   todayLetter: {
     color: colors.saffron,

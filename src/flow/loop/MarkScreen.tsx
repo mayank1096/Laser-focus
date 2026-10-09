@@ -13,6 +13,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppText } from '../../components/AppText';
 import { Chip, ChipRow } from '../../components/Chip';
+import { GLASS_EDGE, GlassFill } from '../../components/Glass';
+import { MistBackdrop } from '../../components/MistBackdrop';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { TextField } from '../../components/TextField';
 import { appDay, lastSeven } from '../../core/days';
@@ -22,7 +24,7 @@ import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clockOf } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, spacing } from '../../theme';
+import { MIST, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { addDays } from '../../utils/date';
 import { WeekRow } from '../components/MarkBox';
@@ -110,6 +112,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
 
   return (
     <View style={styles.screen} testID="mark">
+      <MistBackdrop />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -119,7 +122,9 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.week}>
+          <GlassFill />
           <WeekRow
+            dark
             days={days}
             marks={days.map(d => dayMark(state, d))}
             today={today}
@@ -158,7 +163,9 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
           >
             {mark === 'full' ? (
               <>
-                <AppText variant="eyebrow">{t.mark.finished}</AppText>
+                <AppText variant="eyebrow" style={styles.light}>
+                  {t.mark.finished}
+                </AppText>
                 <TextField
                   testID="finished"
                   accessibilityLabel={t.mark.finished}
@@ -168,13 +175,16 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
               </>
             ) : (
               <>
-                <AppText variant="eyebrow">{t.mark.wentWrong}</AppText>
+                <AppText variant="eyebrow" style={styles.light}>
+                  {t.mark.wentWrong}
+                </AppText>
                 <ChipRow>
                   {reasons.map(r => (
                     <Chip
                       key={r}
                       testID={`why-${r}`}
                       role="checkbox"
+                      onColor
                       label={r}
                       selected={wrong.has(r)}
                       onPress={() =>
@@ -215,6 +225,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
+          tone="light"
           testID="mark-next"
           label={lastToday ? t.dayDone.plan : t.common.done}
           disabled={!mark}
@@ -228,7 +239,10 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.stone,
+    backgroundColor: MIST[0],
+  },
+  light: {
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   content: {
     paddingHorizontal: spacing.gutter,
@@ -237,10 +251,12 @@ const styles = StyleSheet.create({
   week: {
     padding: 16,
     borderRadius: 20,
-    backgroundColor: colors.white,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: GLASS_EDGE,
   },
   muted: {
-    color: colors.textMuted,
+    color: 'rgba(255, 255, 255, 0.5)',
   },
   cardWrap: {
     marginTop: 20,
