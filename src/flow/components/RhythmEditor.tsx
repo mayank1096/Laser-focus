@@ -61,7 +61,9 @@ export function RhythmEditor() {
             />
           ))}
         </ChipRow>
-        <AppText variant="caption">{t.common.days[rhythm.reviewDay]}</AppText>
+        <AppText variant="caption">
+          {t.rhythm.reviewWhy(t.common.days[rhythm.reviewDay])}
+        </AppText>
       </View>
 
       <View style={styles.group}>

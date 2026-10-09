@@ -157,7 +157,9 @@ export const en = {
     focus: 'Focus time',
     everyDay: 'Every day',
     length: 'Length',
-    review: 'Review day',
+    review: 'Weekly review day',
+    reviewWhy: (day: string) =>
+      `Every ${day}, look back at the week, tick off milestones and set next week’s tasks. About 20 minutes.`,
     reminder: 'Evening reminder',
     reminderAt: 'Remind me at',
     onlyOne: 'This is the only notification the app will ever send.',
