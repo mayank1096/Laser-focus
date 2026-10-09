@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
@@ -7,22 +7,18 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
 
 /** How long the petals take to burst, hang and settle out of sight. */
 const DURATION = 4400;
 /** Thrown up from the card, and let fall from above the screen. */
-const THROWN = 38;
-const SHOWERED = 34;
+const THROWN = 30;
+const SHOWERED = 26;
 /** How quickly the burst slows, and how fast a petal drifts down after. */
 const DRAG = 2.6;
 
 /** Marigold in three shades, and a few rose petals among them. */
 const MARIGOLD = ['#FFB21E', '#FA8C22', '#F26B0F', '#FFC94D'];
 const ROSE = '#C8102E';
-/** A petal with a frilled tip, drawn in a 10 × 14 box. */
-const PETAL =
-  'M5 14C1.6 10.6 0.2 6.4 1 2.6 1.6 0.6 2.8 1.6 3.4 0.4 4 1.4 4.6 0 5 1 5.4 0 6 1.4 6.6 0.4 7.2 1.6 8.4 0.6 9 2.6 9.8 6.4 8.4 10.6 5 14Z';
 
 /** A fixed scatter, so every shower falls the same way and renders stay pure. */
 function rand(i: number, salt: number) {
@@ -79,7 +75,7 @@ const PETALS: Petal[] = Array.from({ length: THROWN + SHOWERED }, (_, i) => {
  * above. All flutter as they fall, turning over as they go. Each `fire`
  * throws a new handful.
  */
-export function MarigoldShower({
+export const MarigoldShower = memo(function Shower({
   fire,
   x,
   y,
@@ -122,9 +118,9 @@ export function MarigoldShower({
       ))}
     </View>
   );
-}
+});
 
-function PetalView({
+const PetalView = memo(function Petal({
   petal: p,
   t,
   x,
@@ -140,7 +136,10 @@ function PetalView({
     const slowed = (1 - Math.exp(-DRAG * s)) / DRAG;
     const end = DURATION / 1000;
     return {
-      opacity: s <= 0 ? 0 : Math.min(1, s / 0.06, Math.max(0, (end - s) / 0.7)),
+      // Fade on the shower's own clock, so late petals are gone by the end
+      // instead of freezing mid-air when the timing stops.
+      opacity:
+        s <= 0 ? 0 : Math.min(1, s / 0.06, Math.max(0, (end - t.value) / 0.9)),
       transform: [
         {
           translateX:
@@ -158,27 +157,27 @@ function PetalView({
     <Animated.View
       style={[
         styles.petal,
-        { width: p.size, height: p.size * 1.4, marginLeft: -p.size / 2 },
+        {
+          width: p.size,
+          height: p.size * 1.4,
+          marginLeft: -p.size / 2,
+          // A leaf of a petal: two round corners, two pointed.
+          borderTopLeftRadius: p.size,
+          borderBottomRightRadius: p.size,
+          backgroundColor: p.colour,
+        },
         style,
       ]}
-    >
-      <Svg width="100%" height="100%" viewBox="0 0 10 14">
-        <Path d={PETAL} fill={p.colour} />
-        <Path
-          d="M5 13.2V3.2"
-          stroke="rgba(0, 0, 0, 0.12)"
-          strokeWidth={0.5}
-          strokeLinecap="round"
-        />
-      </Svg>
-    </Animated.View>
+    />
   );
-}
+});
 
 const styles = StyleSheet.create({
   petal: {
     position: 'absolute',
     left: 0,
     top: 0,
+    borderTopRightRadius: 2,
+    borderBottomLeftRadius: 2,
   },
 });

@@ -223,15 +223,22 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
         width={width}
       />
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
-        <PrimaryButton
-          tone="light"
-          testID="mark-next"
-          label={lastToday ? t.dayDone.plan : t.common.done}
-          disabled={!mark}
-          onPress={proceed}
-        />
-      </View>
+      {/* Nothing to press until the card is marked. */}
+      {mark ? (
+        <Animated.View
+          entering={FadeInDown.delay(600)
+            .duration(motion.slow)
+            .easing(motion.easeOut)}
+          style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}
+        >
+          <PrimaryButton
+            tone="light"
+            testID="mark-next"
+            label={lastToday ? t.dayDone.plan : t.common.done}
+            onPress={proceed}
+          />
+        </Animated.View>
+      ) : null}
     </View>
   );
 }
