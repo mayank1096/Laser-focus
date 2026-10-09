@@ -1,4 +1,4 @@
-export { colors, MIST, SILK } from './colors';
+export { colors, MIST, MIST_RED, SILK } from './colors';
 export type { ColorToken } from './colors';
 export { fonts, SMALL_TEXT, typography } from './typography';
 export type { TypographyVariant } from './typography';

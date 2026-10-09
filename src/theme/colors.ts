@@ -62,3 +62,6 @@ export const SILK = ['#9A3C14', '#D2652A', '#E9A77C'] as const;
 
 /** The full-screen haze behind the ritual, the session and the goal: dark, ember, body, light. */
 export const MIST = ['#140806', '#6E2410', '#C2561E', '#EBA06A'] as const;
+
+/** The same haze in red, for the broken vow: dark, blood, body, light. */
+export const MIST_RED = ['#120405', '#5A0A10', '#A3141E', '#E2575E'] as const;
