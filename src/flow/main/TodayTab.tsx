@@ -3,7 +3,6 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -142,7 +141,7 @@ export function TodayTab({ go }: { go: Go }) {
           <Animated.View entering={rise(1)} style={styles.goalBlock}>
             <AppText style={styles.eyebrow}>{t.today.goal}</AppText>
             <AppText style={styles.goal} accessibilityRole="header">
-              {withRupee(p.goal?.text ?? '')}
+              {p.goal?.text ?? ''}
             </AppText>
           </Animated.View>
 
@@ -239,19 +238,6 @@ export function TodayTab({ go }: { go: Go }) {
         />
       </ScrollView>
     </View>
-  );
-}
-
-/** Cooper has no ₹, so the sign is set in Google Sans beside it. */
-function withRupee(text: string) {
-  return text.split(/(₹)/).map((part, i) =>
-    part === '₹' ? (
-      <Text key={i} style={styles.rupee}>
-        ₹
-      </Text>
-    ) : (
-      part
-    ),
   );
 }
 
@@ -454,15 +440,11 @@ const styles = StyleSheet.create({
   },
   goal: {
     ...typography.title,
-    fontFamily: fonts.cooper,
     fontSize: 29,
     lineHeight: 32,
     letterSpacing: -0.58,
     color: colors.white,
     textAlign: 'center',
-  },
-  rupee: {
-    fontFamily: fonts.sansMedium,
   },
   stats: {
     alignSelf: 'stretch',
