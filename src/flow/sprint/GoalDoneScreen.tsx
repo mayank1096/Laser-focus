@@ -202,14 +202,14 @@ const styles = StyleSheet.create({
   },
   hero: {
     paddingHorizontal: GUTTER,
-    paddingBottom: 40,
+    paddingBottom: 72,
   },
   light: {
     color: WHITE_70,
   },
   back: {
     marginLeft: -10,
-    marginBottom: 28,
+    marginBottom: 64,
     alignSelf: 'flex-start',
   },
   eyebrow: {
@@ -218,13 +218,13 @@ const styles = StyleSheet.create({
   },
   goal: {
     ...typography.display,
-    fontSize: 38,
+    fontSize: 36,
     lineHeight: 42,
-    marginTop: 12,
+    marginTop: 20,
     color: colors.white,
   },
   field: {
-    marginTop: 36,
+    marginTop: 64,
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   summary: {
-    marginTop: 16,
+    marginTop: 20,
     fontFamily: fonts.sans,
     fontSize: 15,
     lineHeight: 21,
@@ -252,15 +252,14 @@ const styles = StyleSheet.create({
     color: WHITE_70,
   },
   section: {
-    marginTop: spacing.lg,
     paddingHorizontal: GUTTER,
-    gap: 16,
+    gap: 24,
   },
   msRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 14,
-    minHeight: 44,
+    gap: 16,
+    minHeight: 60,
   },
   msRail: {
     width: 22,
