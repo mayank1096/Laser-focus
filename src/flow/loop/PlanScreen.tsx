@@ -7,12 +7,15 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
+import Plus from '../../assets/icons/plus.svg';
+import Target from '../../assets/icons/target.svg';
+import X from '../../assets/icons/x.svg';
 import { AppText } from '../../components/AppText';
-import { Chip, ChipRow } from '../../components/Chip';
 import { ListField } from '../../components/ListField';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
-import { SegmentedControl } from '../../components/SegmentedControl';
+import { Pill, PillRow, SectionHeader } from '../../components/Pill';
+import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import { TextField } from '../../components/TextField';
 import { appDay, appMinutes, weekStart } from '../../core/days';
@@ -161,10 +164,14 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
     setDrafts(load(d));
   };
 
+  // Each session's window, following the focus slot and earlier sessions.
+  const startOf = (i: number) =>
+    Math.max(state.rhythm.focusStart, ...locked.map(l => l.start + l.minutes)) +
+    drafts.slice(0, i).reduce((n, x) => n + x.minutes, 0);
+
   return (
     <SimpleScreen
       testID="plan"
-      tone="parchment"
       hideBack={first}
       onBack={() => navigation.goBack()}
       footer={
@@ -182,18 +189,15 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
         subtitle={t.plan.why}
       />
       <QuestionBody>
-        <View style={styles.group}>
-          <AppText variant="eyebrow">{t.plan.for}</AppText>
-          <SegmentedControl<ISODate>
-            testIDPrefix="plan-for"
-            value={date}
-            segments={[
-              { id: today, label: t.common.today },
-              { id: tomorrow, label: t.common.tomorrow },
-            ]}
-            onChange={switchDate}
-          />
-        </View>
+        <SegmentedControl<ISODate>
+          testIDPrefix="plan-for"
+          value={date}
+          segments={[
+            { id: today, label: t.common.today },
+            { id: tomorrow, label: t.common.tomorrow },
+          ]}
+          onChange={switchDate}
+        />
 
         {weekEmpty ? (
           <Animated.View
@@ -214,41 +218,39 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
             layout={LinearTransition.duration(motion.base)}
             entering={FadeInDown.duration(motion.base)}
             exiting={FadeOut.duration(motion.fast)}
-            style={styles.card}
+            style={styles.session}
           >
-            <View style={styles.cardHead}>
-              <AppText variant="eyebrow">
-                {`${t.common.session(locked.length + i + 1)} · ${clock(
-                  t,
-                  Math.max(
-                    state.rhythm.focusStart,
-                    ...locked.map(l => l.start + l.minutes),
-                  ) + drafts.slice(0, i).reduce((n, x) => n + x.minutes, 0),
-                )}`}
-              </AppText>
-              {drafts.length > 1 ? (
-                <Pressable
-                  testID={`remove-${i}`}
-                  accessibilityRole="button"
-                  hitSlop={8}
-                  onPress={() =>
-                    setDrafts(ds => ds.filter(x => x.key !== d.key))
-                  }
-                >
-                  <AppText variant="label" style={styles.danger}>
-                    {t.plan.removeSession}
-                  </AppText>
-                </Pressable>
-              ) : null}
-            </View>
+            <SectionHeader
+              Icon={Target}
+              title={t.common.session(locked.length + i + 1)}
+              value={t.plan.window(
+                clock(t, startOf(i)),
+                clock(t, startOf(i) + d.minutes),
+              )}
+              right={
+                drafts.length > 1 ? (
+                  <Pressable
+                    testID={`remove-${i}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={t.plan.removeSession}
+                    hitSlop={10}
+                    onPress={() =>
+                      setDrafts(ds => ds.filter(x => x.key !== d.key))
+                    }
+                    style={styles.remove}
+                  >
+                    <X width={16} height={16} color={colors.textMuted} />
+                  </Pressable>
+                ) : null
+              }
+            />
 
             <Field label={t.plan.task}>
-              <ChipRow>
+              <PillRow>
                 {open.map(task => (
-                  <Chip
+                  <Pill
                     key={task.id}
                     testID={`pick-${i}-${task.id}`}
-                    role="radio"
                     label={task.text}
                     selected={!d.other && d.taskId === task.id}
                     onPress={() =>
@@ -260,28 +262,33 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                     }
                   />
                 ))}
-                <Chip
+                <Pill
                   testID={`pick-${i}-other`}
-                  role="radio"
+                  Icon={Plus}
                   label={t.plan.other}
                   selected={d.other}
                   onPress={() =>
                     update(d.key, { other: true, taskId: undefined, what: '' })
                   }
                 />
-              </ChipRow>
+              </PillRow>
             </Field>
 
-            <Field label={t.plan.what}>
-              <TextField
-                testID={`what-${i}`}
-                accessibilityLabel={t.plan.what}
-                value={d.what}
-                onChangeText={what => update(d.key, { what })}
-                placeholder={t.plan.otherPlaceholder}
-                maxLength={70}
-              />
-            </Field>
+            {d.other || d.taskId ? (
+              <Animated.View entering={FadeIn.duration(motion.base)}>
+                <Field label={t.plan.what}>
+                  <TextField
+                    testID={`what-${i}`}
+                    accessibilityLabel={t.plan.what}
+                    value={d.what}
+                    onChangeText={what => update(d.key, { what })}
+                    placeholder={t.plan.otherPlaceholder}
+                    maxLength={70}
+                  />
+                </Field>
+              </Animated.View>
+            ) : null}
+
             <Field label={t.plan.outcome}>
               <TextField
                 testID={`outcome-${i}`}
@@ -292,19 +299,17 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                 maxLength={90}
               />
             </Field>
+
             <Field label={t.plan.time}>
-              <ChipRow>
-                {MINUTE_CHIPS.map(m => (
-                  <Chip
-                    key={m}
-                    testID={`time-${i}-${m}`}
-                    role="radio"
-                    label={t.common.minutes(m)}
-                    selected={d.minutes === m}
-                    onPress={() => update(d.key, { minutes: m })}
-                  />
-                ))}
-              </ChipRow>
+              <SegmentedControl<number>
+                value={d.minutes}
+                segments={MINUTE_CHIPS.map(m => ({
+                  id: m,
+                  label: t.common.minutes(m),
+                  testID: `time-${i}-${m}`,
+                }))}
+                onChange={m => update(d.key, { minutes: m })}
+              />
             </Field>
 
             <Pressable
@@ -315,18 +320,20 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                 haptics.selection();
                 update(d.key, { open: !d.open });
               }}
-              style={styles.more}
+              style={({ pressed }) => [styles.more, pressed && styles.pressed]}
             >
-              <AppText variant="label" style={styles.muted}>
-                {t.plan.more}
-              </AppText>
+              <View style={styles.moreText}>
+                <AppText variant="bodyMedium">{t.plan.more}</AppText>
+                <AppText variant="detail">{t.plan.moreSub}</AppText>
+              </View>
               <ChevronDown
-                width={16}
-                height={16}
+                width={18}
+                height={18}
                 color={colors.textMuted}
                 style={{ transform: [{ rotate: d.open ? '180deg' : '0deg' }] }}
               />
             </Pressable>
+
             {d.open ? (
               <Animated.View
                 entering={FadeIn.duration(motion.base)}
@@ -384,14 +391,15 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
               haptics.tap();
               setDrafts(ds => [...ds, fresh()]);
             }}
-            style={styles.add}
+            style={({ pressed }) => [styles.add, pressed && styles.pressed]}
           >
-            <AppText variant="bodyMedium" style={styles.saffron}>
-              {`+  ${t.plan.addSession(locked.length + drafts.length + 1)}`}
+            <Plus width={18} height={18} color={colors.ink} />
+            <AppText variant="bodyMedium">
+              {t.plan.addSession(locked.length + drafts.length + 1)}
             </AppText>
           </Pressable>
         ) : null}
-        <AppText variant="caption" style={styles.center}>
+        <AppText variant="detail" style={styles.center}>
           {t.plan.oneNight}
         </AppText>
       </QuestionBody>
@@ -415,28 +423,29 @@ function Field({
 }
 
 const styles = StyleSheet.create({
-  group: {
-    gap: spacing.label,
-  },
   week: {
     marginTop: spacing.group,
     gap: spacing.xl,
     padding: 20,
-    borderRadius: 16,
-    backgroundColor: colors.white,
-  },
-  card: {
-    marginTop: spacing.group,
-    padding: 20,
     borderRadius: 18,
-    backgroundColor: colors.white,
-    gap: spacing.xxl,
-    boxShadow: '0px 8px 20px rgba(60, 30, 10, 0.05)',
+    backgroundColor: colors.stone,
   },
-  cardHead: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  // Each session is a section of its own, set off by a hairline.
+  session: {
+    marginTop: 36,
+    paddingTop: 32,
+    gap: spacing.xxl,
+    borderTopWidth: StyleSheet.hairlineWidth * 2,
+    borderTopColor: colors.divider,
+  },
+  remove: {
+    width: 32,
+    height: 32,
+    marginLeft: spacing.sm,
+    borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: TRACK,
   },
   field: {
     gap: spacing.label,
@@ -444,28 +453,33 @@ const styles = StyleSheet.create({
   more: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xl,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 16,
+    backgroundColor: TRACK,
+  },
+  moreText: {
+    flex: 1,
     gap: spacing.xs,
   },
   moreBody: {
     gap: spacing.xxl,
   },
+  pressed: {
+    opacity: 0.7,
+  },
   add: {
-    marginTop: spacing.group,
-    paddingVertical: 16,
+    marginTop: 36,
+    height: 56,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
-    borderWidth: 1,
+    justifyContent: 'center',
+    gap: spacing.md,
+    borderRadius: 28,
+    borderWidth: 1.5,
     borderStyle: 'dashed',
     borderColor: colors.border,
-  },
-  muted: {
-    color: colors.textMuted,
-  },
-  saffron: {
-    color: colors.saffron,
-  },
-  danger: {
-    color: colors.danger,
   },
   center: {
     marginTop: spacing.xxl,

@@ -262,6 +262,8 @@ export const en = {
     removeSession: 'Remove this session',
     saved: 'Saved',
     oneNight: 'The course plans one night at a time.',
+    moreSub: 'Challenge, steps, what could go wrong',
+    window: (from: string, to: string) => `${from} – ${to}`,
   },
 
   start: {

@@ -259,6 +259,8 @@ export const hi: Strings = {
     removeSession: 'यह सत्र हटाएँ',
     saved: 'सहेजा गया',
     oneNight: 'कोर्स एक बार में एक ही रात की योजना बनाता है।',
+    moreSub: 'चुनौती, कदम, क्या गलत हो सकता है',
+    window: (from: string, to: string) => `${from} – ${to}`,
   },
 
   start: {

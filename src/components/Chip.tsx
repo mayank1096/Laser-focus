@@ -7,7 +7,8 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { colors, motion, radii, spacing, typography } from '../theme';
+import { colors, fonts, motion, radii } from '../theme';
+import { TRACK } from './SegmentedControl';
 import { haptics } from '../utils/haptics';
 
 /** Text on a chosen chip over the end-early red. */
@@ -56,14 +57,14 @@ export function Chip({
       [0, 1],
       onColor
         ? ['rgba(255, 255, 255, 0.22)', 'rgba(255, 255, 255, 1)']
-        : [colors.hairline, colors.saffron],
+        : ['rgba(0, 0, 0, 0)', colors.saffron],
     ),
     backgroundColor: interpolateColor(
       active.value,
       [0, 1],
       onColor
         ? ['rgba(255, 255, 255, 0.06)', 'rgba(255, 255, 255, 1)']
-        : [colors.white, colors.saffronWash],
+        : [TRACK, colors.saffronWash],
     ),
     transform: [{ scale: scale.value }],
   }));
@@ -96,7 +97,7 @@ export function Chip({
       >
         <Animated.Text
           style={[
-            typography.label,
+            styles.label,
             onColor && { color: selected ? DEEP_RED : colors.white },
           ]}
           numberOfLines={1}
@@ -128,19 +129,25 @@ export function ChipRow({
 
 const styles = StyleSheet.create({
   chip: {
-    minHeight: 36,
+    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     borderRadius: radii.pill,
-    borderWidth: 1,
+    borderWidth: 1.5,
+  },
+  label: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    letterSpacing: 0.1,
+    color: colors.ink,
   },
   square: {
     paddingHorizontal: 0,
   },
   row: {
     flexDirection: 'row',
-    gap: spacing.md,
+    gap: 10,
   },
   wrap: {
     flexWrap: 'wrap',

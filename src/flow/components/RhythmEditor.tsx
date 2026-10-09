@@ -1,18 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import {
-  LayoutChangeEvent,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  View,
-} from 'react-native';
-import Animated, {
-  FadeIn,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import React, { useState } from 'react';
+import { Pressable, StyleSheet, Switch, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import type { SvgProps } from 'react-native-svg';
 import Bell from '../../assets/icons/bell.svg';
 import CalendarCheck from '../../assets/icons/calendar-check.svg';
@@ -22,12 +10,14 @@ import Sun from '../../assets/icons/sun.svg';
 import Sunrise from '../../assets/icons/sunrise.svg';
 import Sunset from '../../assets/icons/sunset.svg';
 import { AppText } from '../../components/AppText';
+import { Pill, PillRow, SectionHeader } from '../../components/Pill';
+import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
 import { appDay } from '../../core/days';
 import type { ClockTime } from '../../types/models';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clock } from '../../i18n/format';
-import { colors, fonts, motion, spacing, springs } from '../../theme';
+import { colors, fonts, motion, spacing } from '../../theme';
 import { addDays, fromISODate } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { ClockSheet } from './ClockSheet';
@@ -36,8 +26,6 @@ const LENGTHS = [60, 90, 120, 180];
 /** Common deep-work starts: early, morning, evening, night. */
 const FOCUS_TIMES = [300, 360, 420, 480, 1080, 1200, 1320];
 const REMINDER_TIMES = [1200, 1260, 1320];
-
-const TRACK = 'rgba(0, 0, 0, 0.045)';
 
 /** The sky at that hour: sunrise, sun, sunset or moon. */
 function skyIcon(at: ClockTime): React.FC<SvgProps> {
@@ -83,7 +71,7 @@ export function RhythmEditor() {
     <View style={styles.wrap}>
       {/* Focus time */}
       <View style={styles.section}>
-        <Header
+        <SectionHeader
           Icon={Clock}
           title={t.rhythm.focus}
           value={t.rhythm.window(
@@ -93,24 +81,26 @@ export function RhythmEditor() {
         />
         <PillRow>
           {focusTimes.map(at => (
-            <TimePill
+            <Pill
               key={at}
               testID={`focus-at-${at}`}
-              at={at}
+              Icon={skyIcon(at)}
               label={clock(t, at)}
               selected={rhythm.focusStart === at}
               onPress={() => setRhythm({ focusStart: at })}
             />
           ))}
-          <TimePill
+          <Pill
+            Icon={Clock}
+            role="button"
             testID="rhythm-focus"
             label={t.rhythm.other}
             selected={false}
             onPress={() => setPicking('focus')}
           />
         </PillRow>
-        <Segmented
-          options={LENGTHS.map(m => ({
+        <SegmentedControl
+          segments={LENGTHS.map(m => ({
             id: m,
             label: t.common.minutes(m),
             testID: `rhythm-length-${m}`,
@@ -122,7 +112,7 @@ export function RhythmEditor() {
 
       {/* Weekly review */}
       <View style={styles.section}>
-        <Header Icon={CalendarCheck} title={t.rhythm.reviewShort} />
+        <SectionHeader Icon={CalendarCheck} title={t.rhythm.reviewShort} />
         <View style={styles.days}>
           {week.map(({ day, date }) => {
             const on = rhythm.reviewDay === day;
@@ -167,9 +157,7 @@ export function RhythmEditor() {
           </View>
           <View style={styles.reminderText}>
             <AppText variant="bodyMedium">{t.rhythm.reminder}</AppText>
-            <AppText variant="detail">
-              {t.rhythm.reminderSub}
-            </AppText>
+            <AppText variant="detail">{t.rhythm.reminderSub}</AppText>
           </View>
           <Switch
             testID="rhythm-reminder"
@@ -186,16 +174,18 @@ export function RhythmEditor() {
           <Animated.View entering={FadeIn.duration(motion.base)}>
             <PillRow>
               {reminderTimes.map(at => (
-                <TimePill
+                <Pill
                   key={at}
                   testID={`reminder-at-${at}`}
-                  at={at}
+                  Icon={skyIcon(at)}
                   label={clock(t, at)}
                   selected={rhythm.reminderAt === at}
                   onPress={() => setRhythm({ reminderAt: at })}
                 />
               ))}
-              <TimePill
+              <Pill
+                Icon={Clock}
+                role="button"
                 testID="rhythm-reminder-time"
                 label={t.rhythm.other}
                 selected={false}
@@ -223,190 +213,12 @@ export function RhythmEditor() {
   );
 }
 
-function Header({
-  Icon,
-  title,
-  value,
-}: {
-  Icon: React.FC<SvgProps>;
-  title: string;
-  value?: string;
-}) {
-  return (
-    <View style={styles.header}>
-      <Icon width={20} height={20} color={colors.ink} />
-      <AppText variant="bodyBold" style={styles.headerTitle}>
-        {title}
-      </AppText>
-      {value ? (
-        <AppText variant="label" style={styles.headerValue}>
-          {value}
-        </AppText>
-      ) : null}
-    </View>
-  );
-}
-
-/** A row of pills that scrolls sideways when it runs out of room. */
-function PillRow({ children }: { children: React.ReactNode }) {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.bleed}
-      contentContainerStyle={styles.pills}
-      keyboardShouldPersistTaps="handled"
-    >
-      {children}
-    </ScrollView>
-  );
-}
-
-function TimePill({
-  at,
-  label,
-  selected,
-  onPress,
-  testID,
-}: {
-  at?: ClockTime;
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-  testID?: string;
-}) {
-  const Icon = at === undefined ? Clock : skyIcon(at);
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole={at === undefined ? 'button' : 'radio'}
-      accessibilityState={{ selected }}
-      accessibilityLabel={label}
-      onPress={() => {
-        haptics.selection();
-        onPress();
-      }}
-      style={({ pressed }) => [
-        styles.pill,
-        selected && styles.picked,
-        pressed && !selected && styles.pressed,
-      ]}
-    >
-      <Icon
-        width={18}
-        height={18}
-        color={selected ? colors.saffron : colors.ink}
-      />
-      <AppText style={[styles.pillText, selected && styles.pickedText]}>
-        {label}
-      </AppText>
-    </Pressable>
-  );
-}
-
-/** A soft track with a dark thumb that slides to the chosen option. */
-function Segmented<T extends number>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { id: T; label: string; testID?: string }[];
-  value: T;
-  onChange: (id: T) => void;
-}) {
-  const [width, setWidth] = useState(0);
-  const index = Math.max(
-    0,
-    options.findIndex(o => o.id === value),
-  );
-  const segment = width ? (width - 8) / options.length : 0;
-  const x = useSharedValue(index * segment);
-  useEffect(() => {
-    x.value = withSpring(index * segment, springs.snappy);
-  }, [index, segment, x]);
-  const thumb = useAnimatedStyle(() => ({
-    width: segment,
-    transform: [{ translateX: x.value }],
-  }));
-
-  return (
-    <View
-      style={styles.track}
-      onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
-      accessibilityRole="radiogroup"
-    >
-      {segment ? <Animated.View style={[styles.thumb, thumb]} /> : null}
-      {options.map(o => {
-        const on = o.id === value;
-        return (
-          <Pressable
-            key={o.id}
-            testID={o.testID}
-            accessibilityRole="radio"
-            accessibilityState={{ selected: on }}
-            onPress={() => {
-              if (!on) {
-                haptics.selection();
-                onChange(o.id);
-              }
-            }}
-            style={styles.segment}
-          >
-            <AppText style={[styles.segmentText, !on && styles.segmentOff]}>
-              {o.label}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   wrap: {
     gap: 40,
   },
   section: {
     gap: spacing.xl,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 16,
-  },
-  headerValue: {
-    color: colors.saffron,
-  },
-  // Pills run to the screen's edge, so a cut-off one says "scroll".
-  bleed: {
-    marginRight: -spacing.gutter,
-  },
-  pills: {
-    gap: 10,
-    paddingRight: spacing.gutter,
-  },
-  pill: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 18,
-    borderRadius: 26,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-    backgroundColor: TRACK,
-  },
-  pillText: {
-    fontFamily: fonts.sansMedium,
-    fontSize: 15,
-    color: colors.ink,
-  },
-  pressed: {
-    backgroundColor: 'rgba(0, 0, 0, 0.08)',
   },
   // Chosen, not pressable-looking: a saffron tint and outline. Only the
   // screen's main button is dark.
@@ -419,35 +231,6 @@ const styles = StyleSheet.create({
   },
   pickedSoft: {
     color: colors.saffron,
-  },
-  segmentOff: {
-    color: colors.textMuted,
-  },
-  track: {
-    flexDirection: 'row',
-    height: 56,
-    padding: 4,
-    borderRadius: 28,
-    backgroundColor: TRACK,
-  },
-  thumb: {
-    position: 'absolute',
-    top: 4,
-    left: 4,
-    bottom: 4,
-    borderRadius: 24,
-    backgroundColor: colors.white,
-    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
-  },
-  segment: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  segmentText: {
-    fontFamily: fonts.sansMedium,
-    fontSize: 15,
-    color: colors.ink,
   },
   days: {
     flexDirection: 'row',
@@ -488,8 +271,5 @@ const styles = StyleSheet.create({
   reminderText: {
     flex: 1,
     gap: 4,
-  },
-  muted: {
-    color: colors.textMuted,
   },
 });

@@ -5,29 +5,31 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { colors, radii, springs, typography } from '../theme';
+import { colors, fonts, springs } from '../theme';
 import { haptics } from '../utils/haptics';
 
-export interface Segment<T extends string> {
+export interface Segment<T extends string | number> {
   id: T;
   label: string;
+  testID?: string;
 }
 
+/** The soft grey every control in the app sits on. */
+export const TRACK = 'rgba(0, 0, 0, 0.045)';
+
 /**
- * A row of choices with one thumb that slides to the chosen segment on a
- * morph spring, so the eye follows the change instead of seeing a jump.
+ * One choice from a few, on a soft track. A white thumb slides to the
+ * chosen segment, so it reads as "chosen", never as a button.
  */
-export function SegmentedControl<T extends string>({
+export function SegmentedControl<T extends string | number>({
   segments,
   value,
   onChange,
-  thumbColor = colors.night,
   testIDPrefix,
 }: {
   segments: Segment<T>[];
   value: T | null;
   onChange: (id: T) => void;
-  thumbColor?: string;
   testIDPrefix?: string;
 }) {
   const [width, setWidth] = useState(0);
@@ -45,7 +47,7 @@ export function SegmentedControl<T extends string>({
       // First choice appears in place; later choices slide.
       x.value = index * segWidth;
     } else {
-      x.value = withSpring(index * segWidth, springs.morph);
+      x.value = withSpring(index * segWidth, springs.snappy);
     }
     shown.value = withSpring(1, springs.snappy);
   }, [index, segWidth, x, shown]);
@@ -53,7 +55,7 @@ export function SegmentedControl<T extends string>({
   const thumbStyle = useAnimatedStyle(() => ({
     width: segWidth,
     opacity: shown.value,
-    transform: [{ translateX: x.value }, { scale: 0.9 + shown.value * 0.1 }],
+    transform: [{ translateX: x.value }],
   }));
 
   return (
@@ -62,16 +64,15 @@ export function SegmentedControl<T extends string>({
       accessibilityRole="radiogroup"
       onLayout={e => setWidth(e.nativeEvent.layout.width - 8)}
     >
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.thumb, { backgroundColor: thumbColor }, thumbStyle]}
-      />
+      <Animated.View pointerEvents="none" style={[styles.thumb, thumbStyle]} />
       {segments.map(s => {
         const on = s.id === value;
         return (
           <Pressable
-            key={s.id}
-            testID={testIDPrefix ? `${testIDPrefix}-${s.id}` : undefined}
+            key={String(s.id)}
+            testID={
+              s.testID ?? (testIDPrefix ? `${testIDPrefix}-${s.id}` : undefined)
+            }
             accessibilityRole="radio"
             accessibilityState={{ selected: on }}
             onPress={() => {
@@ -83,10 +84,8 @@ export function SegmentedControl<T extends string>({
             style={styles.item}
           >
             <Animated.Text
-              style={[
-                typography.bodyMedium,
-                { color: on ? colors.white : colors.textMuted },
-              ]}
+              numberOfLines={1}
+              style={[styles.label, !on && styles.off]}
             >
               {s.label}
             </Animated.Text>
@@ -100,22 +99,32 @@ export function SegmentedControl<T extends string>({
 const styles = StyleSheet.create({
   track: {
     flexDirection: 'row',
+    height: 56,
     padding: 4,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    backgroundColor: colors.white,
+    borderRadius: 28,
+    backgroundColor: TRACK,
   },
   thumb: {
     position: 'absolute',
     top: 4,
     bottom: 4,
     left: 4,
-    borderRadius: radii.pill,
+    borderRadius: 24,
+    backgroundColor: colors.white,
+    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
   },
   item: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 11,
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  label: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 15,
+    color: colors.ink,
+  },
+  off: {
+    color: colors.textMuted,
   },
 });
