@@ -271,6 +271,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     bottom: 0,
+    // Centred on the 22pt nodes.
+    left: (22 - 1.5) / 2,
     width: 1.5,
     backgroundColor: 'rgba(255, 255, 255, 0.18)',
   },

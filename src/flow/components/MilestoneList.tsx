@@ -259,7 +259,8 @@ const styles = StyleSheet.create({
   week: {
     flexDirection: 'row',
     gap: 12,
-    marginLeft: 10,
+    // The 1pt thread hangs from the centre of the 18pt chevron above.
+    marginLeft: 8.5,
     marginTop: 6,
   },
   weekThread: {

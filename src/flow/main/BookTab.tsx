@@ -125,10 +125,16 @@ export function BookTab({ onOpen }: { onOpen: (to: BookDestination) => void }) {
   );
 }
 
+/** The sheet's content inset, and the knot's size and offset inside it. */
+const PAD = spacing.xl + 2;
+const KNOT = 9;
+const KNOT_INSET = 2;
+
 const styles = StyleSheet.create({
   thread: {
     position: 'absolute',
-    left: spacing.xl + 6,
+    // Through the knots' centres: the 1pt line sits half a point left of it.
+    left: PAD + KNOT_INSET + KNOT / 2 - 0.5,
     top: 40,
     bottom: 60,
     borderLeftWidth: 1,
@@ -141,13 +147,13 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   knot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
+    width: KNOT,
+    height: KNOT,
+    borderRadius: KNOT / 2,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.parchment,
-    marginLeft: 2,
+    marginLeft: KNOT_INSET,
   },
   card: {
     flex: 1,
