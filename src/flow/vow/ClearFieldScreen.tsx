@@ -47,7 +47,7 @@ export function ClearFieldScreen({
         title={t.vow.clearTitle(left)}
         subtitle={t.vow.clearSub}
       />
-      <QuestionBody gap={26}>
+      <QuestionBody>
         <View style={styles.list}>
           {apps.map((a, i) => (
             <View key={a.name} style={[styles.row, i > 0 && styles.divided]}>

@@ -71,7 +71,7 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
         title={t.review.title}
         subtitle={t.review.why}
       />
-      <QuestionBody gap={24}>
+      <QuestionBody>
         <Section title={t.review.week}>
           <WeekRow
             days={days}
@@ -277,14 +277,14 @@ function Row({
 
 const styles = StyleSheet.create({
   section: {
-    marginTop: 24,
-    gap: spacing.md,
+    marginBottom: spacing.group,
+    gap: spacing.label,
   },
   card: {
-    padding: 16,
+    padding: 20,
     borderRadius: 16,
     backgroundColor: colors.white,
-    gap: spacing.md,
+    gap: spacing.xl,
   },
   check: {
     flexDirection: 'row',

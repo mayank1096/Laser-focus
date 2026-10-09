@@ -113,7 +113,7 @@ export function ContactScreen({
           title={title}
           subtitle={subtitle}
         />
-        <QuestionBody gap={24}>
+        <QuestionBody>
           {!sent ? (
             <Animated.View key="entry" entering={FadeIn.duration(motion.base)}>
               {phone ? (

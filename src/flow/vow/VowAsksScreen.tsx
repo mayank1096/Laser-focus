@@ -39,7 +39,7 @@ export function VowAsksScreen({ navigation }: RootScreenProps<'VowAsks'>) {
         title={t.vow.asksTitle}
         subtitle={t.vow.asksSub}
       />
-      <QuestionBody gap={26}>
+      <QuestionBody>
         <View style={styles.list}>
           {t.vow.names[pratigya].asks.map((ask, i) => (
             <Animated.View key={ask} entering={rise(4 + i)} style={styles.row}>

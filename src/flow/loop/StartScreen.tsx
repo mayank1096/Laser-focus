@@ -220,17 +220,17 @@ function Fold({
 
 const styles = StyleSheet.create({
   what: {
-    marginTop: spacing.md,
+    marginTop: spacing.xl,
   },
   outcome: {
-    marginTop: spacing.xl,
-    gap: spacing.xs,
-    padding: 14,
+    marginTop: spacing.section,
+    gap: spacing.sm,
+    padding: 18,
     borderRadius: 14,
     backgroundColor: colors.parchment,
   },
   ticks: {
-    marginTop: 24,
+    marginTop: spacing.group,
     borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.hairline,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fold: {
-    marginTop: spacing.lg,
+    marginTop: spacing.xl,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.divider,
   },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   },
   notFeeling: {
     alignSelf: 'center',
-    marginTop: 24,
+    marginTop: spacing.group,
   },
   muted: {
     color: colors.textMuted,

@@ -46,51 +46,53 @@ export function RestScreen({ navigation }: RootScreenProps<'Rest'>) {
         title={t.rest.valley}
         subtitle={t.rest.why}
       />
-      <QuestionBody gap={24}>
-        <ChipRow wrap>
-          {CHIPS.map(n => (
+      <QuestionBody>
+        <View style={styles.body}>
+          <ChipRow wrap>
+            {CHIPS.map(n => (
+              <Chip
+                key={n}
+                testID={`rest-${n}`}
+                role="radio"
+                label={t.rest.days(n)}
+                selected={!custom && days === n}
+                onPress={() => {
+                  setCustom(false);
+                  setDays(n);
+                }}
+              />
+            ))}
             <Chip
-              key={n}
-              testID={`rest-${n}`}
+              testID="rest-pick"
               role="radio"
-              label={t.rest.days(n)}
-              selected={!custom && days === n}
-              onPress={() => {
-                setCustom(false);
-                setDays(n);
-              }}
+              label={t.rest.pickDate}
+              selected={custom}
+              onPress={() => setCustom(true)}
             />
-          ))}
-          <Chip
-            testID="rest-pick"
-            role="radio"
-            label={t.rest.pickDate}
-            selected={custom}
-            onPress={() => setCustom(true)}
-          />
-        </ChipRow>
-        {custom ? (
-          <Animated.View
-            entering={FadeIn.duration(motion.base)}
-            style={styles.stepper}
-          >
-            <Stepper
-              testID="rest-days"
-              value={days}
-              min={1}
-              max={30}
-              onChange={setDays}
-              accessibilityLabel={t.rest.pickDate}
-            />
-            <AppText variant="bodyMedium">{dayDate(t, until)}</AppText>
-          </Animated.View>
-        ) : null}
-        <View style={styles.list}>
-          {t.rest.list.map(item => (
-            <AppText key={item} variant="body" style={styles.item}>
-              {`·  ${item}`}
-            </AppText>
-          ))}
+          </ChipRow>
+          {custom ? (
+            <Animated.View
+              entering={FadeIn.duration(motion.base)}
+              style={styles.stepper}
+            >
+              <Stepper
+                testID="rest-days"
+                value={days}
+                min={1}
+                max={30}
+                onChange={setDays}
+                accessibilityLabel={t.rest.pickDate}
+              />
+              <AppText variant="bodyMedium">{dayDate(t, until)}</AppText>
+            </Animated.View>
+          ) : null}
+          <View style={styles.list}>
+            {t.rest.list.map(item => (
+              <AppText key={item} variant="body" style={styles.item}>
+                {`·  ${item}`}
+              </AppText>
+            ))}
+          </View>
         </View>
       </QuestionBody>
     </SimpleScreen>
@@ -98,16 +100,19 @@ export function RestScreen({ navigation }: RootScreenProps<'Rest'>) {
 }
 
 const styles = StyleSheet.create({
+  body: {
+    gap: spacing.group,
+  },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
   },
   list: {
-    padding: 16,
+    padding: 20,
     borderRadius: 16,
     backgroundColor: colors.parchment,
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
   item: {
     color: colors.textMuted,

@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     gap: 28,
   },
   group: {
-    gap: spacing.md,
+    gap: spacing.label,
   },
   row: {
     flexDirection: 'row',

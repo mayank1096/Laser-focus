@@ -73,7 +73,7 @@ export function PermissionsScreen({
         title={t.vow.permTitle}
         subtitle={t.vow.permSub}
       />
-      <QuestionBody gap={26}>
+      <QuestionBody>
         <View style={styles.list}>
           {ROWS.map((r, i) => {
             const on = permissions[r.id];

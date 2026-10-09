@@ -11,6 +11,10 @@ export const spacing = {
   gutter: 26,
   /** Gap between a question header and its answer fields. */
   section: 34,
+  /** Between groups inside a screen's body (Figma: 28pt). */
+  group: 28,
+  /** From a small caps label to the field or options it names. */
+  label: 12,
   /**
    * Pickers sit at a fixed height below the top of the question (Figma: 170pt),
    * so the header reserves this much before the usual section gap.

@@ -73,51 +73,53 @@ export function ReassessScreen({ navigation }: RootScreenProps<'Reassess'>) {
       }
     >
       <QuestionHeader eyebrow={t.reassess.title} title={t.reassess.ask} />
-      <QuestionBody gap={24}>
-        <View style={styles.field}>
-          <AppText variant="eyebrow">{t.reassess.repeat}</AppText>
-          <TextField
-            testID="lesson-repeat"
-            accessibilityLabel={t.reassess.repeat}
-            value={repeat}
-            onChangeText={setRepeat}
-            multiline
-          />
-        </View>
-        <View style={styles.field}>
-          <AppText variant="eyebrow">{t.reassess.dont}</AppText>
-          <TextField
-            testID="lesson-dont"
-            accessibilityLabel={t.reassess.dont}
-            value={dont}
-            onChangeText={setDont}
-            multiline
-          />
-        </View>
-        <View style={styles.field}>
-          <AppText variant="eyebrow">{t.reassess.goals}</AppText>
-          <View style={styles.card}>
-            {goals.map(g => (
-              <View key={g.id} style={styles.goal}>
-                <AppText
-                  variant="body"
-                  style={[styles.flex, g.doneAt ? styles.muted : null]}
-                >
-                  {g.text}
-                </AppText>
-                {g.doneAt ? (
-                  <View style={styles.tag}>
-                    <AppText variant="micro" style={styles.tagText}>
-                      {t.reassess.reached}
-                    </AppText>
-                  </View>
-                ) : (
-                  <AppText variant="micro" style={styles.muted}>
-                    {t.goals.term(g.term)}
+      <QuestionBody>
+        <View style={styles.body}>
+          <View style={styles.field}>
+            <AppText variant="eyebrow">{t.reassess.repeat}</AppText>
+            <TextField
+              testID="lesson-repeat"
+              accessibilityLabel={t.reassess.repeat}
+              value={repeat}
+              onChangeText={setRepeat}
+              multiline
+            />
+          </View>
+          <View style={styles.field}>
+            <AppText variant="eyebrow">{t.reassess.dont}</AppText>
+            <TextField
+              testID="lesson-dont"
+              accessibilityLabel={t.reassess.dont}
+              value={dont}
+              onChangeText={setDont}
+              multiline
+            />
+          </View>
+          <View style={styles.field}>
+            <AppText variant="eyebrow">{t.reassess.goals}</AppText>
+            <View style={styles.card}>
+              {goals.map(g => (
+                <View key={g.id} style={styles.goal}>
+                  <AppText
+                    variant="body"
+                    style={[styles.flex, g.doneAt ? styles.muted : null]}
+                  >
+                    {g.text}
                   </AppText>
-                )}
-              </View>
-            ))}
+                  {g.doneAt ? (
+                    <View style={styles.tag}>
+                      <AppText variant="micro" style={styles.tagText}>
+                        {t.reassess.reached}
+                      </AppText>
+                    </View>
+                  ) : (
+                    <AppText variant="micro" style={styles.muted}>
+                      {t.goals.term(g.term)}
+                    </AppText>
+                  )}
+                </View>
+              ))}
+            </View>
           </View>
         </View>
       </QuestionBody>
@@ -126,6 +128,9 @@ export function ReassessScreen({ navigation }: RootScreenProps<'Reassess'>) {
 }
 
 const styles = StyleSheet.create({
+  body: {
+    gap: spacing.group,
+  },
   footer: {
     gap: spacing.lg,
   },
@@ -136,13 +141,13 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
   field: {
-    gap: spacing.sm,
+    gap: spacing.label,
   },
   card: {
-    padding: 16,
+    padding: 20,
     borderRadius: 16,
     backgroundColor: colors.white,
-    gap: spacing.md,
+    gap: spacing.xl,
   },
   goal: {
     flexDirection: 'row',

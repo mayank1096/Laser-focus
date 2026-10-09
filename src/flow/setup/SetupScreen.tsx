@@ -188,7 +188,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             title={t.values.title}
             subtitle={`${t.values.sub} ${t.values.hint}`}
           />
-          <QuestionBody gap={24}>
+          <QuestionBody>
             <ValuesEditor />
           </QuestionBody>
         </>
@@ -201,7 +201,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             title={t.goals.title}
             subtitle={t.goals.sub}
           />
-          <QuestionBody gap={24}>
+          <QuestionBody>
             <GoalsEditor />
           </QuestionBody>
         </>
@@ -214,7 +214,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             title={t.circle.title}
             subtitle={t.circle.sub}
           />
-          <QuestionBody gap={24}>
+          <QuestionBody>
             <OptionList>
               {state.goals.map(g => (
                 <OptionCard
@@ -238,7 +238,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             eyebrow={t.milestones.eyebrow}
             title={circledGoal(state)?.text ?? ''}
           />
-          <QuestionBody gap={20}>
+          <QuestionBody>
             <View style={styles.rule}>
               <AppText variant="bodyMedium">{t.milestones.rule}</AppText>
               <AppText variant="caption">{t.milestones.example}</AppText>
@@ -260,7 +260,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             title={t.tasks.title}
             subtitle={t.tasks.sub}
           />
-          <QuestionBody gap={24}>
+          <QuestionBody>
             <TasksEditor week={thisWeek(state)} />
           </QuestionBody>
         </>
@@ -273,7 +273,7 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             title={t.rhythm.title}
             subtitle={t.rhythm.sub}
           />
-          <QuestionBody gap={24}>
+          <QuestionBody>
             <RhythmEditor />
           </QuestionBody>
         </>
@@ -283,13 +283,13 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
 
 const styles = StyleSheet.create({
   rule: {
-    gap: spacing.xs,
-    padding: 14,
+    gap: spacing.sm,
+    padding: 18,
     borderRadius: 12,
     backgroundColor: colors.parchment,
   },
   list: {
-    marginTop: 20,
+    marginTop: spacing.group,
     gap: spacing.md,
   },
   hint: {

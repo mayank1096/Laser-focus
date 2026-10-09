@@ -181,7 +181,7 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
         title={t.plan.title}
         subtitle={t.plan.why}
       />
-      <QuestionBody gap={24}>
+      <QuestionBody>
         <View style={styles.group}>
           <AppText variant="eyebrow">{t.plan.for}</AppText>
           <SegmentedControl<ISODate>
@@ -242,36 +242,35 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
               ) : null}
             </View>
 
-            <AppText variant="eyebrow" style={styles.label}>
-              {t.plan.task}
-            </AppText>
-            <ChipRow>
-              {open.map(task => (
+            <Field label={t.plan.task}>
+              <ChipRow>
+                {open.map(task => (
+                  <Chip
+                    key={task.id}
+                    testID={`pick-${i}-${task.id}`}
+                    role="radio"
+                    label={task.text}
+                    selected={!d.other && d.taskId === task.id}
+                    onPress={() =>
+                      update(d.key, {
+                        taskId: task.id,
+                        other: false,
+                        what: task.text,
+                      })
+                    }
+                  />
+                ))}
                 <Chip
-                  key={task.id}
-                  testID={`pick-${i}-${task.id}`}
+                  testID={`pick-${i}-other`}
                   role="radio"
-                  label={task.text}
-                  selected={!d.other && d.taskId === task.id}
+                  label={t.plan.other}
+                  selected={d.other}
                   onPress={() =>
-                    update(d.key, {
-                      taskId: task.id,
-                      other: false,
-                      what: task.text,
-                    })
+                    update(d.key, { other: true, taskId: undefined, what: '' })
                   }
                 />
-              ))}
-              <Chip
-                testID={`pick-${i}-other`}
-                role="radio"
-                label={t.plan.other}
-                selected={d.other}
-                onPress={() =>
-                  update(d.key, { other: true, taskId: undefined, what: '' })
-                }
-              />
-            </ChipRow>
+              </ChipRow>
+            </Field>
 
             <Field label={t.plan.what}>
               <TextField
@@ -417,21 +416,21 @@ function Field({
 
 const styles = StyleSheet.create({
   group: {
-    gap: spacing.md,
+    gap: spacing.label,
   },
   week: {
-    marginTop: 24,
-    gap: spacing.lg,
-    padding: 16,
+    marginTop: spacing.group,
+    gap: spacing.xl,
+    padding: 20,
     borderRadius: 16,
     backgroundColor: colors.white,
   },
   card: {
-    marginTop: 24,
-    padding: 18,
+    marginTop: spacing.group,
+    padding: 20,
     borderRadius: 18,
     backgroundColor: colors.white,
-    gap: spacing.md,
+    gap: spacing.xxl,
     boxShadow: '0px 8px 20px rgba(60, 30, 10, 0.05)',
   },
   cardHead: {
@@ -439,24 +438,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  label: {
-    marginTop: spacing.sm,
-  },
   field: {
-    gap: spacing.sm,
-    marginTop: spacing.sm,
+    gap: spacing.label,
   },
   more: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    marginTop: spacing.sm,
   },
   moreBody: {
-    gap: spacing.sm,
+    gap: spacing.xxl,
   },
   add: {
-    marginTop: 18,
+    marginTop: spacing.group,
     paddingVertical: 16,
     alignItems: 'center',
     borderRadius: 16,
@@ -474,7 +468,7 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
   center: {
-    marginTop: 18,
+    marginTop: spacing.xxl,
     textAlign: 'center',
   },
 });

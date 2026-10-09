@@ -39,7 +39,7 @@ export function PratigyaScreen({ navigation }: RootScreenProps<'Pratigya'>) {
         eyebrow={t.vow.pratigyaEyebrow}
         title={t.vow.pratigyaTitle}
       />
-      <QuestionBody gap={26}>
+      <QuestionBody>
         <OptionList>
           {ORDER.map(p => (
             <OptionCard
