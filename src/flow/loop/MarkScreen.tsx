@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -18,20 +24,21 @@ import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clockOf } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, motion, spacing, typography } from '../../theme';
+import { colors, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
-import { MarkPad, WeekRow } from '../components/MarkBox';
-
-const PAD = 196;
+import { WeekRow } from '../components/MarkBox';
+import { RewardCard } from '../components/RewardCard';
 
 /**
- * Fill the box with your own hand. Hold for ●, swipe across for the
- * zig-zag, or say it didn't happen. As it fills, the same day's box in the
- * row above fills too. That is the whole reward.
+ * The reward. A card spins in; hold it and it fills (●), swipe across it
+ * for the zig-zag, or say it didn't happen. A beat after the card fills,
+ * the same day's box in the week above fills too.
  */
 export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   const t = useT();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const cardWidth = Math.min(280, width - spacing.gutter * 2 - 40);
   const state = useBook();
   const session = state.sessions.find(x => x.id === route.params.id);
   const [mark, setMark] = useState<Mark | null>(session?.mark ?? null);
@@ -101,128 +108,136 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   ];
 
   return (
-    <View
-      style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
-      testID="mark"
-    >
-      <WeekRow
-        days={days}
-        marks={days.map(d => dayMark(state, d))}
-        today={today}
-        letters={t.common.dayLetter}
-        size={30}
-        delayFor={d => (d === session.date ? 250 : 0)}
-      />
+    <View style={styles.screen} testID="mark">
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + spacing.xl },
+        ]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.week}>
+          <WeekRow
+            days={days}
+            marks={days.map(d => dayMark(state, d))}
+            today={today}
+            letters={t.common.dayLetter}
+            size={32}
+            delayFor={d => (d === session.date ? 700 : 0)}
+          />
+        </View>
 
-      <View style={styles.head}>
-        <AppText style={typography.heading} numberOfLines={2}>
-          {t.mark.title(session.order + 1, session.what)}
-        </AppText>
-        <AppText variant="body" style={styles.muted}>
-          {session.outcome}
-        </AppText>
-      </View>
-
-      <View style={styles.padWrap}>
-        <MarkPad
-          size={PAD}
-          fill={fill}
-          zig={zig}
-          locked={mark !== null}
-          onMark={choose}
-        />
-        {mark === null ? (
-          <>
-            <AppText variant="caption" style={styles.howTo}>
-              {t.mark.howTo}
-            </AppText>
-            <View style={styles.alt}>
-              <Link
-                testID="mark-full"
-                label={t.mark.tapFull}
-                onPress={() => choose('full')}
-              />
-              <Link
-                testID="mark-half"
-                label={t.mark.tapHalf}
-                onPress={() => choose('half')}
-              />
-              <Link
-                testID="mark-empty"
-                label={t.mark.empty}
-                onPress={() => choose('empty')}
-              />
-            </View>
-          </>
-        ) : (
-          <Animated.View
-            entering={FadeIn.duration(motion.base)}
-            style={styles.verdict}
-          >
-            <AppText variant="bodyMedium">
-              {mark === 'full'
-                ? t.mark.full
-                : mark === 'half'
-                ? t.mark.half
-                : t.mark.empty}
-            </AppText>
-            <Link testID="mark-change" label={t.mark.change} onPress={reset} />
-          </Animated.View>
-        )}
-      </View>
-
-      {mark ? (
-        <Animated.View
-          entering={FadeInDown.duration(motion.slow).easing(motion.easeOut)}
-          style={styles.after}
-        >
-          {mark === 'full' ? (
+        <View style={styles.cardWrap}>
+          <RewardCard
+            width={cardWidth}
+            eyebrow={t.common.session(session.order + 1)}
+            title={session.what}
+            outcome={session.outcome}
+            brand={t.signIn.eyebrow}
+            holdLabel={t.mark.hold}
+            fill={fill}
+            zig={zig}
+            locked={mark !== null}
+            onMark={choose}
+          />
+          {mark === null ? (
             <>
-              <AppText variant="eyebrow">{t.mark.finished}</AppText>
-              <TextField
-                testID="finished"
-                accessibilityLabel={t.mark.finished}
-                value={finished}
-                onChangeText={setFinished}
-              />
+              <AppText variant="detail" style={styles.howTo}>
+                {t.mark.howTo}
+              </AppText>
+              <View style={styles.alt}>
+                <Link
+                  testID="mark-full"
+                  label={t.mark.tapFull}
+                  onPress={() => choose('full')}
+                />
+                <Link
+                  testID="mark-half"
+                  label={t.mark.tapHalf}
+                  onPress={() => choose('half')}
+                />
+                <Link
+                  testID="mark-empty"
+                  label={t.mark.empty}
+                  onPress={() => choose('empty')}
+                />
+              </View>
             </>
           ) : (
-            <>
-              <AppText variant="eyebrow">{t.mark.wentWrong}</AppText>
-              <ChipRow>
-                {reasons.map(r => (
-                  <Chip
-                    key={r}
-                    testID={`why-${r}`}
-                    role="checkbox"
-                    label={r}
-                    selected={wrong.has(r)}
-                    onPress={() =>
-                      setWrong(prev => {
-                        const next = new Set(prev);
-                        if (next.has(r)) {
-                          next.delete(r);
-                        } else {
-                          next.add(r);
-                        }
-                        return next;
-                      })
-                    }
-                  />
-                ))}
-              </ChipRow>
-            </>
+            <Animated.View
+              entering={FadeIn.duration(motion.base)}
+              style={styles.verdict}
+            >
+              <AppText variant="bodyMedium">
+                {mark === 'full'
+                  ? t.mark.full
+                  : mark === 'half'
+                  ? t.mark.half
+                  : t.mark.empty}
+              </AppText>
+              <Link
+                testID="mark-change"
+                label={t.mark.change}
+                onPress={reset}
+              />
+            </Animated.View>
           )}
-          {session.startedAt ? (
-            <AppText variant="micro" style={styles.muted}>
-              {t.mark.meta(
-                clockOf(t, new Date(session.startedAt)),
-                t.common.minutes(session.minutes),
-              )}
-            </AppText>
-          ) : null}
-        </Animated.View>
-      ) : null}
+        </View>
+
+        {mark ? (
+          <Animated.View
+            entering={FadeInDown.duration(motion.slow).easing(motion.easeOut)}
+            style={styles.after}
+          >
+            {mark === 'full' ? (
+              <>
+                <AppText variant="eyebrow">{t.mark.finished}</AppText>
+                <TextField
+                  testID="finished"
+                  accessibilityLabel={t.mark.finished}
+                  value={finished}
+                  onChangeText={setFinished}
+                />
+              </>
+            ) : (
+              <>
+                <AppText variant="eyebrow">{t.mark.wentWrong}</AppText>
+                <ChipRow>
+                  {reasons.map(r => (
+                    <Chip
+                      key={r}
+                      testID={`why-${r}`}
+                      role="checkbox"
+                      label={r}
+                      selected={wrong.has(r)}
+                      onPress={() =>
+                        setWrong(prev => {
+                          const next = new Set(prev);
+                          if (next.has(r)) {
+                            next.delete(r);
+                          } else {
+                            next.add(r);
+                          }
+                          return next;
+                        })
+                      }
+                    />
+                  ))}
+                </ChipRow>
+              </>
+            )}
+            {session.startedAt ? (
+              <AppText variant="micro" style={styles.muted}>
+                {t.mark.meta(
+                  clockOf(t, new Date(session.startedAt)),
+                  t.common.minutes(session.minutes),
+                )}
+              </AppText>
+            ) : null}
+          </Animated.View>
+        ) : null}
+      </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
@@ -268,17 +283,21 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.stone,
-    paddingHorizontal: spacing.gutter,
   },
-  head: {
-    marginTop: spacing.section,
-    gap: spacing.md,
+  content: {
+    paddingHorizontal: spacing.gutter,
+    paddingBottom: spacing.xxl,
+  },
+  week: {
+    padding: 16,
+    borderRadius: 20,
+    backgroundColor: colors.white,
   },
   muted: {
     color: colors.textMuted,
   },
-  padWrap: {
-    marginTop: 28,
+  cardWrap: {
+    marginTop: 20,
     alignItems: 'center',
   },
   howTo: {
@@ -294,15 +313,16 @@ const styles = StyleSheet.create({
     color: colors.saffron,
   },
   verdict: {
-    marginTop: spacing.xl,
+    marginTop: spacing.lg,
     alignItems: 'center',
     gap: spacing.md,
   },
   after: {
-    marginTop: 24,
+    marginTop: spacing.xxl,
     gap: spacing.md,
   },
   footer: {
-    marginTop: 'auto',
+    paddingTop: spacing.md,
+    paddingHorizontal: spacing.gutter,
   },
 });

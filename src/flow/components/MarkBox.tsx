@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   Easing,
+  interpolate,
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
@@ -11,25 +11,37 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Polyline } from 'react-native-svg';
+import Svg, {
+  Defs,
+  LinearGradient,
+  Polyline,
+  Rect,
+  Stop,
+} from 'react-native-svg';
+import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import type { Mark } from '../../core/model';
 import { colors, springs } from '../../theme';
 import type { ISODate } from '../../types/models';
 import { fromISODate } from '../../utils/date';
-import { haptics } from '../../utils/haptics';
 
 const AnimatedPolyline = Animated.createAnimatedComponent(Polyline);
 
 /** A full fill takes this long to hold. */
 export const FILL_MS = 1500;
 
-/** The zig-zag across a box of `size`, and its length for drawing it in. */
-function zigzag(size: number) {
-  const pad = size * 0.17;
-  const top = size * 0.34;
-  const bottom = size * 0.66;
-  const step = (size - pad * 2) / 4;
+/** The two ends of the saffron fill: lit at the top, deep at the bottom. */
+export const FILL_TOP = '#FFB45E';
+export const FILL_BOTTOM = '#F27A10';
+const EMPTY = 'rgba(0, 0, 0, 0.05)';
+const WASH = 'rgba(250, 140, 34, 0.14)';
+
+/** The zig-zag across a box of `w × h`, and its length for drawing it in. */
+export function zigzag(w: number, h = w) {
+  const pad = w * 0.2;
+  const top = h * 0.36;
+  const bottom = h * 0.64;
+  const step = (w - pad * 2) / 4;
   const pts = Array.from({ length: 5 }, (_, i) => [
     pad + step * i,
     i % 2 === 0 ? bottom : top,
@@ -38,28 +50,52 @@ function zigzag(size: number) {
   return { points: pts.map(p => p.join(',')).join(' '), length: seg * 4 };
 }
 
+/** The saffron that rises inside a box or card, lit from above. */
+export function SaffronFill({ id }: { id: string }) {
+  return (
+    <Svg width="100%" height="100%" style={StyleSheet.absoluteFill}>
+      <Defs>
+        <LinearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={FILL_TOP} />
+          <Stop offset="1" stopColor={FILL_BOTTOM} />
+        </LinearGradient>
+      </Defs>
+      <Rect width="100%" height="100%" fill={`url(#${id})`} />
+    </Svg>
+  );
+}
+
+let boxIds = 0;
+
 /**
- * One box, like the paper calendar's. `fill` (0–1) raises saffron from the
- * bottom; `zig` (0–1) draws the zig-zag in from the left.
+ * One day's box. Empty is a faint tile; `fill` (0–1) raises saffron from
+ * the bottom and a white tick settles in once it's full; `zig` (0–1) tints
+ * the tile and draws a saffron zig-zag in from the left. Today wears a ring.
  */
 export function Box({
   size,
   fill,
   zig,
-  ring = colors.border,
-  radius,
+  today = false,
 }: {
   size: number;
   fill: SharedValue<number>;
   zig: SharedValue<number>;
-  ring?: string;
-  radius?: number;
+  today?: boolean;
 }) {
-  const r = radius ?? Math.max(4, size * 0.16);
+  const id = useRef(`box-fill-${++boxIds}`).current;
+  const r = Math.round(size * 0.3);
   const { points, length } = zigzag(size);
   const fillStyle = useAnimatedStyle(() => ({
     height: `${fill.value * 100}%`,
   }));
+  const tickStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(fill.value, [0.85, 1], [0, 1], 'clamp'),
+    transform: [
+      { scale: interpolate(fill.value, [0.85, 1], [0.5, 1], 'clamp') },
+    ],
+  }));
+  const washStyle = useAnimatedStyle(() => ({ opacity: zig.value }));
   const zigProps = useAnimatedProps(() => ({
     strokeDashoffset: length * (1 - zig.value),
     // A round cap would leave a dot where the line starts.
@@ -69,22 +105,36 @@ export function Box({
     <View
       style={[
         styles.box,
-        { width: size, height: size, borderRadius: r, borderColor: ring },
+        { width: size, height: size, borderRadius: r },
+        today && styles.today,
       ]}
     >
-      <Animated.View style={[styles.fill, fillStyle]} />
+      <Animated.View
+        style={[StyleSheet.absoluteFill, styles.wash, washStyle]}
+      />
+      <Animated.View style={[styles.fill, fillStyle]}>
+        <SaffronFill id={id} />
+      </Animated.View>
       <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
         <AnimatedPolyline
           points={points}
           fill="none"
-          stroke={colors.ink}
-          strokeWidth={Math.max(1.6, size * 0.06)}
+          stroke={colors.saffron}
+          strokeWidth={Math.max(1.8, size * 0.075)}
           strokeLinejoin="round"
           strokeLinecap="round"
           strokeDasharray={`${length} ${length}`}
           animatedProps={zigProps}
         />
       </Svg>
+      <Animated.View style={[styles.tick, tickStyle]} pointerEvents="none">
+        <Check
+          width={size * 0.5}
+          height={size * 0.5}
+          color={colors.white}
+          strokeWidth={2.6}
+        />
+      </Animated.View>
     </View>
   );
 }
@@ -112,12 +162,12 @@ export function DayBox({
     }
     const t = setTimeout(() => {
       fill.value = withTiming(mark === 'full' ? 1 : 0, {
-        duration: 600,
+        duration: 700,
         easing: Easing.bezier(0.16, 1, 0.3, 1),
       });
       zig.value = withTiming(mark === 'half' ? 1 : 0, { duration: 600 });
       pop.value = withSequence(
-        withTiming(1.2, { duration: 200 }),
+        withTiming(1.25, { duration: 220 }),
         withSpring(1, springs.morph),
       );
     }, delay);
@@ -128,12 +178,7 @@ export function DayBox({
   }));
   return (
     <Animated.View style={popStyle}>
-      <Box
-        size={size}
-        fill={fill}
-        zig={zig}
-        ring={today ? colors.saffron : colors.border}
-      />
+      <Box size={size} fill={fill} zig={zig} today={today} />
     </Animated.View>
   );
 }
@@ -177,125 +222,27 @@ export function WeekRow({
   );
 }
 
-/**
- * The big box on the Mark screen. Hold to fill it to ●; swipe across to
- * draw the zig-zag. Letting go early drains it.
- */
-export function MarkPad({
-  size,
-  onMark,
-  locked,
-  fill,
-  zig,
-}: {
-  size: number;
-  onMark: (mark: Exclude<Mark, 'empty'>) => void;
-  locked: boolean;
-  fill: SharedValue<number>;
-  zig: SharedValue<number>;
-}) {
-  const done = useRef(locked);
-  done.current = locked;
-  const ticks = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const stopTicks = () => {
-    if (ticks.current) {
-      clearInterval(ticks.current);
-      ticks.current = null;
-    }
-  };
-  useEffect(() => stopTicks, []);
-
-  const hold = Gesture.LongPress()
-    .runOnJS(true)
-    .minDuration(FILL_MS)
-    .maxDistance(14)
-    .onBegin(() => {
-      if (done.current) {
-        return;
-      }
-      haptics.tap();
-      zig.value = withTiming(0, { duration: 150 });
-      fill.value = withTiming(1, {
-        duration: FILL_MS * (1 - fill.value),
-        easing: Easing.bezier(0.33, 0, 0.67, 1),
-      });
-      stopTicks();
-      ticks.current = setInterval(() => haptics.selection(), 300);
-    })
-    .onStart(() => {
-      if (done.current) {
-        return;
-      }
-      stopTicks();
-      fill.value = 1;
-      haptics.success();
-      onMark('full');
-    })
-    .onFinalize((_e, success) => {
-      stopTicks();
-      if (!success && !done.current) {
-        fill.value = withTiming(0, { duration: 400 });
-      }
-    });
-
-  const swipe = Gesture.Pan()
-    .runOnJS(true)
-    .activeOffsetX([-12, 12])
-    .onUpdate(e => {
-      if (done.current) {
-        return;
-      }
-      fill.value = 0;
-      zig.value = Math.min(1, Math.abs(e.translationX) / (size * 0.75));
-    })
-    .onEnd(() => {
-      if (done.current) {
-        return;
-      }
-      if (zig.value > 0.6) {
-        zig.value = withTiming(1, { duration: 150 });
-        haptics.success();
-        onMark('half');
-      } else {
-        zig.value = withTiming(0, { duration: 250 });
-      }
-    });
-
-  return (
-    <GestureDetector gesture={Gesture.Race(swipe, hold)}>
-      <View
-        collapsable={false}
-        testID="mark-pad"
-        accessibilityRole="adjustable"
-        style={styles.pad}
-      >
-        <Box
-          size={size}
-          fill={fill}
-          zig={zig}
-          ring={colors.saffronLine}
-          radius={28}
-        />
-      </View>
-    </GestureDetector>
-  );
-}
-
 const styles = StyleSheet.create({
-  pad: {
-    borderRadius: 28,
-    boxShadow: '0px 18px 36px rgba(120, 60, 10, 0.12)',
-  },
   box: {
-    borderWidth: 1.5,
     overflow: 'hidden',
     justifyContent: 'flex-end',
-    backgroundColor: colors.white,
+    backgroundColor: EMPTY,
+  },
+  today: {
+    borderWidth: 1.5,
+    borderColor: colors.saffron,
+  },
+  wash: {
+    backgroundColor: WASH,
   },
   fill: {
     alignSelf: 'stretch',
-    backgroundColor: colors.saffron,
+    overflow: 'hidden',
+  },
+  tick: {
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   row: {
     flexDirection: 'row',
@@ -303,7 +250,7 @@ const styles = StyleSheet.create({
   },
   day: {
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   letter: {
     color: colors.textMuted,
