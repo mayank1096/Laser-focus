@@ -62,9 +62,9 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
           />
         </Section>
 
-        <Section>
+        <View style={styles.rhythm}>
           <RhythmEditor />
-        </Section>
+        </View>
 
         <Section>
           <Pressable
@@ -201,6 +201,10 @@ function Row({
 }
 
 const styles = StyleSheet.create({
+  rhythm: {
+    marginTop: spacing.xl,
+    marginBottom: 40,
+  },
   section: {
     marginBottom: spacing.lg,
     gap: spacing.md,

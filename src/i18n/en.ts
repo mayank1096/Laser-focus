@@ -187,6 +187,10 @@ export const en = {
     reminderAt: 'Remind me at',
     onlyOne: 'This is the only notification the app will ever send.',
     pickTime: 'Focus starts',
+    other: 'Other',
+    window: (from: string, to: string) => `${from} – ${to}`,
+    reviewShort: 'Weekly review',
+    reminderSub: 'Only to plan tomorrow. Nothing else, ever.',
     pickReminder: 'Evening reminder',
   },
 

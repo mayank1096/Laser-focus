@@ -185,6 +185,10 @@ export const hi: Strings = {
     reminderAt: 'याद दिलाएँ',
     onlyOne: 'ऐप इसके अलावा कभी कोई नोटिफ़िकेशन नहीं भेजेगा।',
     pickTime: 'फ़ोकस शुरू',
+    other: 'दूसरा समय',
+    window: (from: string, to: string) => `${from} – ${to}`,
+    reviewShort: 'हफ़्ते की समीक्षा',
+    reminderSub: 'सिर्फ़ कल की योजना के लिए। इसके अलावा कभी कुछ नहीं।',
     pickReminder: 'शाम का रिमाइंडर',
   },
 
