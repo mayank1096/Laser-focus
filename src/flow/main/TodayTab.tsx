@@ -64,9 +64,18 @@ export function TodayTab({ go }: { go: Go }) {
   const today = appDay();
   const action = homeAction(state, today, appMinutes());
   const p = sprintProgress(state, today);
-  const milestones = activeMilestones(state);
+  const allMilestones = activeMilestones(state);
+  // Like the design: the list starts at the milestone being worked on;
+  // finished ones live on the Milestones sheet.
+  const milestones = allMilestones.some(m => !m.done)
+    ? allMilestones.filter(m => !m.done)
+    : allMilestones;
   const current = milestones.findIndex(m => !m.done);
   const [open, setOpen] = useState(current === -1 ? 0 : current);
+  // The milestone being worked on opens by itself, as in the design.
+  useEffect(() => {
+    setOpen(current === -1 ? 0 : current);
+  }, [current]);
   const week = weekStart(today, state.rhythm.reviewDay);
   const deep = state.tasks.filter(x => x.week === week && x.kind === 'deep');
 
@@ -236,7 +245,12 @@ export function TodayTab({ go }: { go: Go }) {
             const expanded = i === open;
             const isCurrent = i === current;
             const linked = deep.filter(x => x.milestoneId === m.id);
-            const done = linked.filter(x => x.done).length;
+            // The count is every deep task this milestone has had, done of
+            // all; the list below is this week's share of them.
+            const all = state.tasks.filter(
+              x => x.kind === 'deep' && x.milestoneId === m.id,
+            );
+            const done = all.filter(x => x.done).length;
             return (
               <Animated.View
                 key={m.id}
@@ -278,13 +292,13 @@ export function TodayTab({ go }: { go: Go }) {
                       color={colors.saffron}
                       strokeWidth={2.4}
                     />
-                  ) : isCurrent && linked.length ? (
-                    <AppText style={[styles.count, styles.saffronText]}>
-                      {`${done}/${linked.length}`}
-                    </AppText>
-                  ) : m.month ? (
-                    <AppText style={styles.monthText}>
-                      {monthLabel(t, m.month)}
+                  ) : all.length || m.month ? (
+                    <AppText
+                      style={[styles.count, isCurrent && styles.saffronText]}
+                    >
+                      {all.length
+                        ? `${done}/${all.length}`
+                        : monthLabel(t, m.month!)}
                     </AppText>
                   ) : null}
                 </Pressable>
@@ -300,8 +314,8 @@ export function TodayTab({ go }: { go: Go }) {
                       {
                         width: m.done
                           ? '100%'
-                          : isCurrent && linked.length
-                          ? `${(done / linked.length) * 100}%`
+                          : isCurrent && all.length
+                          ? `${(done / all.length) * 100}%`
                           : '0%',
                       },
                     ]}
@@ -722,10 +736,6 @@ const styles = StyleSheet.create({
     ...sans(14, 'bold'),
     color: colors.ink,
   },
-  monthText: {
-    ...sans(12, 'medium'),
-    color: INK_50,
-  },
   saffronText: {
     color: colors.saffron,
   },
@@ -758,7 +768,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xs,
   },
   weekEyebrow: {
-    ...sans(11, 'medium'),
+    ...sans(10, 'medium'),
     letterSpacing: 2.4,
     textTransform: 'uppercase',
     color: INK_50,
@@ -773,11 +783,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bold12: {
-    ...sans(13, 'bold'),
+    ...sans(12, 'bold'),
     color: colors.ink,
   },
   dim12: {
-    ...sans(13, 'medium'),
+    ...sans(12, 'medium'),
     color: INK_50,
   },
 });
