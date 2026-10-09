@@ -6,7 +6,8 @@ import { FlowFrame, type FlowDirection } from '../../components/FlowFrame';
 import { OptionCard, OptionList } from '../../components/OptionCard';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
-import { appDay, weekStart } from '../../core/days';
+import { appDay, appMinutes, weekStart } from '../../core/days';
+import { planDateFor } from '../../core/home';
 import { activeMilestones } from '../../core/home';
 import { LIMITS, type SetupStep } from '../../core/model';
 import { circledGoal, useBook, type BookState } from '../../core/store';
@@ -46,7 +47,9 @@ const ART = {
   rhythm: undefined,
 };
 
-const thisWeek = (s: BookState) => weekStart(appDay(), s.rhythm.reviewDay);
+/** The week the first plan lands in: on a review-day evening, next week. */
+const thisWeek = (s: BookState) =>
+  weekStart(planDateFor(s, appDay(), appMinutes()), s.rhythm.reviewDay);
 
 /** The minimum each sheet needs before Next opens. */
 function ready(step: SheetStep, s: BookState): boolean {

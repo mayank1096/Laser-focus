@@ -11,15 +11,14 @@ plugged in behind typed interfaces, so they can be built without touching the UI
 
 | Area | State |
 | --- | --- |
-| Welcome screen | Done |
-| Goal setup — 9 questions (Values → Anti-goal) | Done |
-| Planning — week setup, Tasks tab, plan tomorrow, session sheet, seal, Sacrifice, morning gate (Figma row 6) | Done |
-| Language, name, sign-in (phone code / Google / Apple, mocked in `src/services/auth.ts`) | Done |
-| Path & Pratigya — path, vow, asks, permissions, clear the field, take the vow, Day 1, lockout | Done (app detection mocked) |
-| Home — Lakshya "Today" sun-path dial, goal flight | Done |
-| Action Book — Values, Goals (queue + switch), Milestones, Anti-goals, Account | Done |
-| Session — ritual (clear, breathe, pray, values, tratak, 5…1), in session aperture, end early, done, problem finder, fix, streak mark, rest | Done, with vibration |
-| Reminders (nightly / weekly) | Interface only — see `src/services/reminders.ts` |
+| Sign in (language, phone, code — mocked in `src/services/auth.ts`) | Done |
+| Setup — Values, Goals, Circle, Milestones, This week, Rhythm, the vow, first plan | Done |
+| Daily loop — Home, Plan, Start, In progress, Mark, Day done | Done |
+| Weekly and sprint — Review, Goal done, Rest, Reassess | Done |
+| Action Book, Settings | Done |
+| English and Hindi (chosen at sign-in, changeable in Settings) | Done |
+| Evening reminder (the only notification) | Interface only — `src/services/reminders.ts` |
+| Printable pack, data export | Print is a note for now; export uses the share sheet |
 | Persistence | On device (`zustand` + AsyncStorage) |
 | API | Not started |
 
@@ -59,31 +58,25 @@ projects. If you add a font, run `npm run link-assets`.
 
 ```
 src/
-  theme/            Design tokens: colors, typography, spacing, motion
-  components/       Reusable UI: FlowFrame (every step-by-step flow),
-                    PrimaryButton/OutlineButton, HoldButton, BottomSheet,
-                    ListField, TextField, SelectField, OptionCard, Chip,
-                    Stepper, RulerPicker, ProgressSegments, TabBar,
-                    QuestionHeader, StepArt, AppText
-  features/
-    onboarding/
-      screens/      WelcomeScreen, GoalSetupScreen (hosts the 9 steps),
-                    SetupCompleteScreen
-      steps/        One file per question + steps/index.ts (order, rules, art)
-      store.ts      Goal-setup draft state and limits
-    planning/
-      setup/        WeekSetupScreen: session times, shallow window, rhythm
-      screens/      MainScreen (tabs), TasksScreen, TodayScreen, PlanDayScreen,
-                    SealDayScreen, SacrificeScreen, MorningGateScreen,
-                    SessionStartScreen (stand-in until the session is built)
-      sheet/        SessionSheetScreen + its 4 steps and draft context
-      components/   TaskSheet, TaskPickerSheet, SlotSheet, ClockSheet, rows
-      store.ts      Planning state, limits and selectors
-  services/         reminders (to be wired to a notification library)
-  navigation/       Root stack + typed route params
-  types/models.ts   Domain types — the backend should mirror these
-  utils/            date & clock, haptics, time formatting, ids, text helpers
-  assets/           images, icons (svg), fonts
+  core/             The book: model.ts (types, limits), store.ts (one
+                    persisted store), days.ts (3 AM day, weeks), home.ts
+                    (day marks and the Home state machine)
+  flow/
+    setup/          SignIn, Welcome, Setup (all sheets), SetupDone
+    vow/            Pratigya, VowAsks, Permissions, ClearField, TakeVow, Lockout
+    loop/           Home, Plan, Start, InProgress, Mark, DayDone
+    sprint/         Review, GoalDone, Rest, Reassess
+    book/           Book, BookSheet, Settings
+    components/     Sheet editors, RhythmEditor, MarkBox (the boxes and the
+                    hold/swipe pad), Calendar, FocusDial, pickers
+  i18n/             en.ts, hi.ts (type-checked against en), date/time format
+  components/       Shared UI: FlowFrame, PrimaryButton, HoldButton,
+                    BottomSheet, ListField, TextField, Chip, AuroraSky,
+                    shader, orb, …
+  features/account/ Profile store: language, account, vow, mocked app list
+  services/         auth (mocked), reminders (to be wired)
+  navigation/       Root stack, typed params, resume on launch
+  theme/ utils/ assets/
 ```
 
 ## Conventions
@@ -97,72 +90,37 @@ src/
 - One component per file, named exports, `PascalCase` files for components.
 - Prettier + ESLint (`@react-native` config) are the source of truth for style.
 
-## Goal-setup flow
+## The flow
 
-`src/features/onboarding/steps/index.ts` lists the steps in order. Each step has
-the illustration to show, a `canContinue` rule (the Next button stays locked
-until it passes) and an optional `skip` rule.
+Set up → Plan → Start → Mark → Review → Goal done → Rest → Reassess.
 
-1. Values (1–3 lines)
-2. Goals (1–3)
-3. Magic Circle: pick the primary goal (auto-picked if there is only one)
-4. Action: the controllable action behind the goal
-5. Shape of the work: repeated vs. stages
-6. How many (repeated work only — skipped for stages)
-7. By when (months)
-8. Milestones, each dated automatically up to the deadline; for repeated work
-   they are pre-filled as even batches ("Mock tests 1–8", …)
-9. Anti-goal
+- **Home** is one button whose label and target come from `homeAction()` in
+  `src/core/home.ts`, highest precedence first: continue setup, resting,
+  reassess, session in progress, mark a past session, finish the goal,
+  review, re-read after a week away, start, tomorrow's plan, plan. Under it:
+  the last 7 days and a link to the Action Book. No streak counter.
+- **Day** turns over at 3 AM. A **week** starts the day after the review day.
+- **Day mark:** ● only if every session that day is ●; zig-zag if any session
+  reached at least ten minutes; empty otherwise.
+- **Plan:** today or tomorrow, up to 3 sessions; each needs what, outcome and
+  time. Challenge, steps, risks and don't-do are optional under "More clarity".
+- **Start:** three ticks; the full checklist and ritual are folded away.
+- **Mark:** hold the box to fill it (●), swipe across for zig-zag, or "Didn't
+  happen". Unmarked past sessions come back on Home.
+- **Review:** milestones, last week's tasks (done / carry), next week's tasks.
+  When every milestone is ticked, the goal is done.
 
-The finished result is available as a typed `GoalPlan` from
-`useGoalSetup.getState().toPlan()` — that is the payload to send to the API.
-
-### Interaction details
-
-- Steps slide forward and back, and the illustration cross-fades between them.
-- The progress bar fills segment by segment; tapping a completed segment
-  jumps back to that question. Android's back button steps back too.
-- A locked Next button shakes and gives a warning haptic instead of doing nothing.
-- Lists: tap the dashed row to add a line; pressing return saves it and opens
-  the next one. Tap a line to edit it; clear it to delete it.
-- Rulers: drag or fling; they snap to whole values, ticks swell under the
-  centre line, and each value change gives a haptic tick.
-
-## Planning flow
-
-All rules live in `src/features/planning/store.ts` (`PLANNING_LIMITS` and the
-selectors below it), so screens stay thin and the rules are unit-tested.
-
-1. **Week setup** (once, after goal setup): up to **3** deep-work sessions a
-   day at fixed times (clashing times block Next), one shallow-work hour, and
-   the planning rhythm — weekly plan day and time, nightly sheet time.
-2. **Tasks tab**: this week's tasks. Deep tasks have a priority (●●● / ●●○ /
-   ●○○) and a number of sessions; shallow tasks are a tick list for the
-   shallow window. Unfinished work carries into the next week.
-3. **Plan tomorrow**: each session gets one task, then a **session sheet**.
-4. **Session sheet** — 4 short screens: outcome, one step harder than last
-   time (with the last sheet shown), how + how long, and what would guarantee
-   failure. A new sheet starts from the last one's steps and failure modes.
-5. **Seal**: once every planned session has a sheet, hold to seal the day.
-   Changing anything afterwards opens it again.
-6. **Morning gate**: a session without a sheet cannot start; a two-minute
-   sheet on one screen unlocks it.
-7. **Sacrifice sheet**: offered once the first week is over — what you give
-   up, what you keep, then the twist ("whoever beats you is giving up what
-   you kept"), with the choice to redo it or keep it.
-
-All dates use the device's local calendar day (`src/utils/date.ts`); "now"
-comes from `src/utils/clock.ts` so tests can move time.
+All dates use the device's local calendar day; "now" comes from
+`src/utils/clock.ts` so tests and the preview can move time.
 
 ## For the native / backend team
 
-- **Data shapes:** `src/types/models.ts`.
-- **Reminders:** `src/services/reminders.ts` says exactly which notifications
-  to schedule and when to cancel them (we suggest `@notifee/react-native`).
-- **Stand-ins:** search for `TODO(devs)` — each one names the Figma frames
-  that replace it.
+- **Data shapes:** `src/core/model.ts` (`BookData` is the payload to sync).
+- **Reminder:** `src/services/reminders.ts` describes the one evening
+  notification (we suggest `@notifee/react-native`).
+- **Stand-ins:** search for `TODO(devs)`.
 - **Native features** (app blocking, permissions, reinstall detection) are
-  mocked: `MOCK_DISTRACTING_APPS` and `grant()` in
+  mocked: the app list and `grant()` in
   `src/features/account/store.ts`, `breakVow()` for reinstalls. Sign-in is
   mocked in `src/services/auth.ts` (any 6 digits pass).
 - **iOS caveat:** iOS does not let apps list other installed apps. App blocking

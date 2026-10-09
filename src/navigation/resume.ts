@@ -1,34 +1,41 @@
+import { inProgress } from '../core/home';
+import { useBook } from '../core/store';
 import { useProfile } from '../features/account/store';
-import { useGoalSetup } from '../features/onboarding/store';
-import { usePlanning } from '../features/planning/store';
-import { useSessions } from '../features/session/store';
 import type { RootStackParamList } from './types';
 
+type Resume = {
+  [K in keyof RootStackParamList]: { name: K; params?: RootStackParamList[K] };
+}[keyof RootStackParamList];
+
 /**
- * Where someone should be, from what they have finished. Used when the app
- * opens and whenever a flow ends, so every path converges on the same order:
- * goals → account → vow → week → home.
+ * Where someone should land when the app opens: a broken vow first, then
+ * sign-in, a running session, and an unfinished setup. Everything else is
+ * Home, which works out the one next thing itself.
  */
-export function resumeRoute(): keyof RootStackParamList {
+export function resumeRoute(): Resume {
   const profile = useProfile.getState();
-  const goals = useGoalSetup.getState();
+  const book = useBook.getState();
   if (profile.brokenAt) {
-    return 'Lockout';
-  }
-  if (useSessions.getState().active) {
-    return 'InSession';
-  }
-  if (!goals.completed) {
-    return goals.stepId ? 'GoalSetup' : 'Welcome';
+    return { name: 'Lockout' };
   }
   if (!profile.account) {
-    return 'SaveSheets';
+    return { name: 'SignIn' };
   }
-  if (!profile.vowTakenAt) {
-    return 'Path';
+  const running = inProgress(book);
+  if (running) {
+    return { name: 'InProgress', params: { id: running.id } };
   }
-  if (!usePlanning.getState().setupDone) {
-    return 'WeekSetup';
+  if (!book.welcomed) {
+    return { name: 'Welcome' };
   }
-  return 'Main';
+  if (book.setup === 'vow') {
+    return { name: 'Pratigya' };
+  }
+  if (book.setup === 'plan') {
+    return { name: 'Plan', params: { first: true } };
+  }
+  if (book.setup !== 'done') {
+    return { name: 'Setup', params: { step: book.setup } };
+  }
+  return { name: 'Home' };
 }

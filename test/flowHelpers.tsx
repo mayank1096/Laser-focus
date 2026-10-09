@@ -72,3 +72,14 @@ export async function tick(ms: number) {
     jest.advanceTimersByTime(ms);
   });
 }
+
+/** Types a new line into a ListField's add row and submits it. */
+export async function addLine(tree: ReactTestRenderer, list: string, text: string) {
+  await act(async () => {
+    host(tree, `${list}-input`).props.onChangeText(text);
+  });
+  await act(async () => {
+    host(tree, `${list}-input`).props.onSubmitEditing();
+    jest.runOnlyPendingTimers();
+  });
+}

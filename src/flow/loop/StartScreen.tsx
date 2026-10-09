@@ -24,7 +24,9 @@ type Tick = 'phone' | 'desk' | 'ready';
 export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
   const t = useT();
   const session = useBook(s => s.sessions.find(x => x.id === route.params.id));
-  const day = useBook(s => (session ? sessionsOn(s, session.date) : []));
+  const dayCount = useBook(s =>
+    session ? sessionsOn(s, session.date).length : 0,
+  );
   const [ticks, setTicks] = useState<Set<Tick>>(new Set());
   const [open, setOpen] = useState<'list' | 'ritual' | null>(null);
   const [notFeeling, setNotFeeling] = useState(false);
@@ -65,7 +67,7 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
         }
       >
         <AppText variant="eyebrow">
-          {t.start.header(session.order + 1, day.length)}
+          {t.start.header(session.order + 1, dayCount)}
         </AppText>
         <AppText style={[typography.title, styles.what]}>{session.what}</AppText>
         <View style={styles.outcome}>
