@@ -11,7 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import { AppText } from '../../components/AppText';
 import { MilestoneList } from '../components/MilestoneList';
-import { AuroraSky } from '../../components/aurora';
+import { ShaderView } from '../../components/shader';
 import { GradientPill } from '../../components/GradientPill';
 import { rise } from '../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
@@ -38,6 +38,9 @@ const ROWS = 3;
 /** Where the stone panel cuts the sky. */
 const GLOW_HEIGHT = 462;
 const DESIGN_WIDTH = 402;
+
+/** The hero's silk: deep, body, light, and the page it melts into. */
+const SILK = ['#B83E0E', '#F06A1E', '#FFB27A', '#F7F5F4'];
 
 const WHITE_80 = 'rgba(255, 255, 255, 0.8)';
 const WHITE_22 = 'rgba(255, 255, 255, 0.22)';
@@ -101,9 +104,11 @@ export function TodayTab({ go }: { go: Go }) {
           style={[styles.glow, { height: GLOW_HEIGHT * scale }]}
           pointerEvents="none"
         >
-          <AuroraSky
+          <ShaderView
+            preset="silk"
             width={width}
             height={GLOW_HEIGHT * scale}
+            colours={SILK}
             style={styles.aurora}
           />
         </View>

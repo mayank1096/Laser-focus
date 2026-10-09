@@ -1,5 +1,3 @@
-import { AURORA_BODY } from '../aurora/shader';
-
 /**
  * GPU shader looks, each a GLSL body defining
  * `vec4 effect(vec2 uv, float aspect, float t)` that returns a
@@ -40,11 +38,44 @@ float fbm(vec3 p) {
 `;
 
 export const PRESETS = {
-  /** Today's sky: warm aurora curtains (c0–c3 unused; colours are baked in). */
-  aurora: `
-${AURORA_BODY}
+  /**
+   * Today's sky: saffron silk. A sheet of cloth whose folds drift slowly,
+   * bent by noise, lit from the upper left so each ridge catches a soft
+   * sheen. Darker at the top so white type reads; melts into the page at
+   * the bottom. c0 deep, c1 body, c2 light, c3 the page.
+   */
+  silk: `
+float folds(vec2 p, float t) {
+  // Smooth sine warps only: noise would mottle the cloth.
+  vec2 q = p;
+  for (int i = 1; i < 5; i++) {
+    float k = float(i);
+    q += vec2(sin(k * 0.9 * q.y + t * 0.11 + k * 1.3),
+              cos(k * 0.7 * q.x + t * 0.08 + k * 2.1)) * (0.55 / k);
+  }
+  return sin(q.x * 1.1 + q.y * 0.8);
+}
+
 vec4 effect(vec2 uv, float aspect, float t) {
-  return aurora(uv, aspect, t * 3.0);
+  vec2 p = vec2(uv.x * aspect, uv.y) * 3.2;
+  float e = 0.01;
+  float h = folds(p, t);
+  float hx = folds(p + vec2(e, 0.0), t);
+  float hy = folds(p + vec2(0.0, e), t);
+  vec3 n = normalize(vec3((h - hx) / e * 0.7, (h - hy) / e * 0.7, 1.0));
+  vec3 l = normalize(vec3(-0.5, 0.55, 0.65));
+  float diff = clamp(dot(n, l), 0.0, 1.0);
+  float sheen = pow(clamp(dot(reflect(-l, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 10.0);
+  vec3 col = mix(c0, c1, smoothstep(0.2, 0.9, diff));
+  col = mix(col, c2, sheen * 0.7 + pow(sheen, 4.0) * 0.3);
+  // Deeper towards the top, where the type sits on it.
+  col *= mix(1.0, 0.85, smoothstep(0.5, 1.0, uv.y));
+  // Fine grain so the gradients never band.
+  col += (hash3(vec3(uv * 900.0, 1.0)) - 0.5) * 0.012;
+  float page = 1.0 - smoothstep(0.04, 0.3, uv.y);
+  // Through warm light into the page, never through grey.
+  col = mix(col, c2, smoothstep(0.0, 0.6, page) * 0.55);
+  return vec4(mix(col, c3, smoothstep(0.35, 1.0, page)), 1.0);
 }
 `,
 
