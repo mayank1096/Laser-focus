@@ -706,7 +706,6 @@ export const hi: Strings = {
     ],
     left: (n: number) => `${n} बाकी`,
     allClear: 'सब साफ़',
-    breathe: (i: number, n: number) => `श्वास · ${n} में से ${i}`,
     breatheIn: 'साँस लें',
     hold: 'रोकें',
     breatheOut: 'साँस छोड़ें',

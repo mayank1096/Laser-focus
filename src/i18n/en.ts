@@ -706,7 +706,6 @@ export const en = {
     ],
     left: (n: number) => `${n} left`,
     allClear: 'All clear',
-    breathe: (i: number, n: number) => `Breathe · ${i} of ${n}`,
     breatheIn: 'Breathe in',
     hold: 'Hold',
     breatheOut: 'Breathe out',

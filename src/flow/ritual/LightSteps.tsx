@@ -215,9 +215,6 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
 
   return (
     <>
-      <Animated.Text entering={rise(0)} style={typography.eyebrow}>
-        {t.ritual.breathe(breath + 1, BREATHS)}
-      </Animated.Text>
       <Animated.View
         entering={FadeIn.delay(200).duration(motion.cinematic)}
         style={styles.breath}
