@@ -9,11 +9,12 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
+import { MistBackdrop } from '../../components/MistBackdrop';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clock } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, fonts, motion, spacing, typography } from '../../theme';
+import { colors, MIST, fonts, motion, spacing, typography } from '../../theme';
 import { now } from '../../utils/clock';
 import { haptics } from '../../utils/haptics';
 import { FocusDial } from '../components/FocusDial';
@@ -120,6 +121,7 @@ export function InProgressScreen({
       accessibilityActions={[{ name: 'longpress', label: t.endEarly.title }]}
       onAccessibilityAction={endEarly}
     >
+      <MistBackdrop />
       <View style={[styles.top, { paddingTop: insets.top + spacing.xxl }]}>
         <AppText variant="label" style={styles.soft} numberOfLines={2}>
           {session.what}
@@ -220,7 +222,7 @@ function StageBox({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.night,
+    backgroundColor: MIST[0],
     alignItems: 'center',
   },
   top: {

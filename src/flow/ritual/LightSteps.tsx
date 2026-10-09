@@ -173,7 +173,13 @@ const PHASES = [
 ] as const;
 const BREATHS = 3;
 
-export function BreatheStep({ onDone }: { onDone: () => void }) {
+export function BreatheStep({
+  onDone,
+  dark = false,
+}: {
+  onDone: () => void;
+  dark?: boolean;
+}) {
   const t = useT();
   const [breath, setBreath] = useState(0);
   const [phase, setPhase] = useState(0);
@@ -221,6 +227,7 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
         accessibilityLiveRegion="polite"
       >
         <BreathOrb
+          tone={dark ? 'dark' : 'light'}
           level={level}
           label={t.ritual[PHASES[phase].word]}
           sub={String(left)}
@@ -234,37 +241,58 @@ export function BreatheStep({ onDone }: { onDone: () => void }) {
 /* 7.04 Prayer                                                               */
 /* ------------------------------------------------------------------------ */
 
-export function PrayStep({ index }: { index: number }) {
+export function PrayStep({
+  index,
+  dark = false,
+}: {
+  index: number;
+  dark?: boolean;
+}) {
   const t = useT();
   const prayers = t.ritual.prayers;
   const p = prayers[index];
   return (
     <>
-      <Animated.Text entering={rise(0)} style={typography.eyebrow}>
+      <Animated.Text
+        entering={rise(0)}
+        style={[typography.eyebrow, dark && styles.onDarkFaint]}
+      >
         {t.ritual.pray(index + 1, prayers.length)}
       </Animated.Text>
       <Animated.Text
         entering={rise(1)}
-        style={[typography.title, styles.title]}
+        style={[typography.title, styles.title, dark && styles.white]}
       >
         {t.ritual.prayTitle}
       </Animated.Text>
       <Animated.View
         key={index}
         entering={FadeInDown.duration(motion.slow)}
-        style={styles.prayer}
+        style={[styles.prayer, dark && styles.prayerDark]}
       >
         <AppText variant="eyebrow" style={styles.saffron}>
           {p.name}
         </AppText>
-        <AppText style={styles.shloka}>{p.text}</AppText>
-        <AppText variant="caption" style={styles.center}>
+        <AppText style={[styles.shloka, dark && styles.white]}>
+          {p.text}
+        </AppText>
+        <AppText
+          variant="caption"
+          style={[styles.center, dark && styles.onDarkSoft]}
+        >
           {p.meaning}
         </AppText>
       </Animated.View>
       <View style={styles.dots}>
         {prayers.map((_, i) => (
-          <View key={i} style={[styles.dot, i === index && styles.dotOn]} />
+          <View
+            key={i}
+            style={[
+              styles.dot,
+              dark && styles.dotDark,
+              i === index && styles.dotOn,
+            ]}
+          />
         ))}
       </View>
     </>
@@ -451,6 +479,20 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: colors.border,
+  },
+  dotDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  prayerDark: {
+    backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  onDarkFaint: {
+    color: 'rgba(255, 255, 255, 0.55)',
+  },
+  onDarkSoft: {
+    color: 'rgba(255, 255, 255, 0.7)',
   },
   dotOn: {
     width: 18,

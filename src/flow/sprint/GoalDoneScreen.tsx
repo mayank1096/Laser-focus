@@ -15,7 +15,7 @@ import { IconButton } from '../../components/IconButton';
 import { sansDigits } from '../../components/Numerals';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { rise } from '../../components/QuestionHeader';
-import { ShaderView } from '../../components/shader';
+import { MistBackdrop } from '../../components/MistBackdrop';
 import { appDay } from '../../core/days';
 import { activeMilestones, dayMark } from '../../core/home';
 import type { Mark } from '../../core/model';
@@ -23,7 +23,7 @@ import { circledGoal, useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { shortDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
-import { colors, fonts, spacing, typography } from '../../theme';
+import { colors, fonts, MIST, spacing, typography } from '../../theme';
 import { addDays, daysBetween } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
 import { countDays } from '../components/Calendar';
@@ -31,8 +31,6 @@ import { countDays } from '../components/Calendar';
 const GUTTER = 22;
 const WHITE_45 = 'rgba(255, 255, 255, 0.45)';
 const WHITE_70 = 'rgba(255, 255, 255, 0.72)';
-/** The haze behind the whole screen: dark, ember, body, light. */
-const MIST = ['#140806', '#6E2410', '#C2561E', '#EBA06A'];
 /** The same grid as Home: nineteen squares a row, one per day. */
 const PER_ROW = 19;
 const TILE_GAP = 4;
@@ -45,7 +43,7 @@ const TILE_GAP = 4;
 export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
   const t = useT();
   const insets = useSafeAreaInsets();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const state = useBook();
   const goal = circledGoal(state);
   const today = appDay();
@@ -64,13 +62,7 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
 
   return (
     <View style={styles.screen} testID="goal-done">
-      <ShaderView
-        preset="mist"
-        width={width}
-        height={height}
-        colours={MIST}
-        style={StyleSheet.absoluteFill}
-      />
+      <MistBackdrop />
       <ScrollView
         contentContainerStyle={{ paddingBottom: spacing.xxl }}
         showsVerticalScrollIndicator={false}

@@ -14,7 +14,7 @@ import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { SheetTitle } from '../components/SheetTitle';
-import { CountdownStep, TratakStep } from '../ritual/DarkSteps';
+import { CountdownStep, DarkFrame, TratakStep } from '../ritual/DarkSteps';
 import {
   BreatheStep,
   checklistCount,
@@ -82,6 +82,66 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
   }
   if (step === 'countdown') {
     return <CountdownStep onDone={begin} />;
+  }
+
+  const back = () => (i === 0 ? navigation.goBack() : go(ORDER[i - 1], 'back'));
+
+  if (step === 'breathe') {
+    return (
+      <DarkFrame
+        testID="ritual-breathe"
+        step={i}
+        onBack={back}
+        footer={
+          <Pressable
+            testID="breathe-skip"
+            accessibilityRole="button"
+            hitSlop={10}
+            onPress={next}
+            style={styles.link}
+          >
+            <AppText variant="label" style={styles.onDark}>
+              {t.ritual.skipBreathing}
+            </AppText>
+          </Pressable>
+        }
+      >
+        <BreatheStep dark onDone={next} />
+      </DarkFrame>
+    );
+  }
+  if (step === 'pray') {
+    const last = t.ritual.prayers.length - 1;
+    return (
+      <DarkFrame
+        testID="ritual-pray"
+        step={i}
+        onBack={back}
+        footer={
+          <>
+            <PrimaryButton
+              testID="next-button"
+              tone="light"
+              label={prayer < last ? t.ritual.nextPrayer : t.ritual.continue}
+              onPress={() => (prayer < last ? setPrayer(prayer + 1) : next())}
+            />
+            <Pressable
+              testID="pray-skip"
+              accessibilityRole="button"
+              hitSlop={10}
+              onPress={next}
+              style={styles.link}
+            >
+              <AppText variant="label" style={styles.onDark}>
+                {t.ritual.skipPrayers}
+              </AppText>
+            </Pressable>
+          </>
+        }
+      >
+        <PrayStep dark index={prayer} />
+      </DarkFrame>
+    );
   }
 
   let footer: React.ReactNode = null;
@@ -153,48 +213,6 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
       );
       break;
     }
-    case 'breathe':
-      tone = 'parchment';
-      body = <BreatheStep onDone={next} />;
-      footer = (
-        <Pressable
-          testID="breathe-skip"
-          accessibilityRole="button"
-          hitSlop={10}
-          onPress={next}
-          style={styles.link}
-        >
-          <AppText variant="label" style={styles.muted}>
-            {t.ritual.skipBreathing}
-          </AppText>
-        </Pressable>
-      );
-      break;
-    case 'pray': {
-      const last = t.ritual.prayers.length - 1;
-      body = <PrayStep index={prayer} />;
-      footer = (
-        <>
-          <PrimaryButton
-            testID="next-button"
-            label={prayer < last ? t.ritual.nextPrayer : t.ritual.continue}
-            onPress={() => (prayer < last ? setPrayer(prayer + 1) : next())}
-          />
-          <Pressable
-            testID="pray-skip"
-            accessibilityRole="button"
-            hitSlop={10}
-            onPress={next}
-            style={styles.link}
-          >
-            <AppText variant="label" style={styles.muted}>
-              {t.ritual.skipPrayers}
-            </AppText>
-          </Pressable>
-        </>
-      );
-      break;
-    }
     case 'values':
       artwork = art.standing;
       body = (
@@ -228,9 +246,7 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
         tone={tone}
         art={artwork}
         progress={step === 'enter' ? undefined : { total: 6, filled: i }}
-        onBack={() =>
-          i === 0 ? navigation.goBack() : go(ORDER[i - 1], 'back')
-        }
+        onBack={back}
         footer={footer}
       >
         {body}
@@ -263,6 +279,9 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.textMuted,
+  },
+  onDark: {
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   answers: {
     gap: spacing.lg,

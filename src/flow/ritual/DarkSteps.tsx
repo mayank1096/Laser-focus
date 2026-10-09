@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -10,12 +10,68 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import ChevronLeft from '../../assets/icons/chevron-left.svg';
 import { AppText } from '../../components/AppText';
-import { colors, fonts, motion, spacing, typography } from '../../theme';
+import { IconButton } from '../../components/IconButton';
+import { MistBackdrop } from '../../components/MistBackdrop';
+import { colors, fonts, MIST, motion, spacing, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { BreathOrb } from './BreathOrb';
 import { useT } from '../../i18n';
 import { RitualBar } from './RitualBar';
+
+/* ------------------------------------------------------------------------ */
+/* The dark frame for breathing and prayer                                  */
+/* ------------------------------------------------------------------------ */
+
+/**
+ * Breathing and prayer happen on the haze too: the ritual bar and a way
+ * back on top, the step in the middle, its buttons pinned below.
+ */
+export function DarkFrame({
+  step,
+  onBack,
+  footer,
+  children,
+  testID,
+}: {
+  step: number;
+  onBack: () => void;
+  footer: React.ReactNode;
+  children: React.ReactNode;
+  testID?: string;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <View style={styles.dark} testID={testID}>
+      <MistBackdrop />
+      <View style={[styles.frameTop, { paddingTop: insets.top + 4 }]}>
+        <IconButton
+          Icon={ChevronLeft}
+          size={20}
+          color={colors.white}
+          testID="back-button"
+          accessibilityLabel={useT().common.back}
+          onPress={onBack}
+        />
+        <View style={styles.flex}>
+          <RitualBar step={step} dark />
+        </View>
+      </View>
+      <ScrollView
+        contentContainerStyle={styles.frameBody}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View key={step} entering={FadeIn.duration(motion.slow)}>
+          {children}
+        </Animated.View>
+      </ScrollView>
+      <View style={[styles.frameFoot, { paddingBottom: insets.bottom + 20 }]}>
+        {footer}
+      </View>
+    </View>
+  );
+}
 
 /* ------------------------------------------------------------------------ */
 /* 7.06 Tratak                                                               */
@@ -59,6 +115,7 @@ export function TratakStep({ onDone }: { onDone: () => void }) {
 
   return (
     <View style={[styles.dark, { paddingTop: insets.top + spacing.lg }]}>
+      <MistBackdrop />
       <View style={styles.pad}>
         <RitualBar step={5} dark />
         <Animated.Text
@@ -167,6 +224,7 @@ export function CountdownStep({ onDone }: { onDone: () => void }) {
       style={[styles.dark, styles.centre]}
       accessibilityLiveRegion="assertive"
     >
+      <MistBackdrop />
       <Animated.Text style={[styles.word, last && styles.phrase, style]}>
         {WORDS[i]}
       </Animated.Text>
@@ -177,7 +235,28 @@ export function CountdownStep({ onDone }: { onDone: () => void }) {
 const styles = StyleSheet.create({
   dark: {
     flex: 1,
-    backgroundColor: colors.night,
+    backgroundColor: MIST[0],
+  },
+  flex: {
+    flex: 1,
+  },
+  frameTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingLeft: 12,
+    paddingRight: spacing.gutter,
+  },
+  frameBody: {
+    flexGrow: 1,
+    paddingHorizontal: spacing.gutter,
+    paddingTop: 36,
+    paddingBottom: spacing.xxl,
+  },
+  frameFoot: {
+    paddingHorizontal: spacing.gutter,
+    paddingTop: spacing.md,
+    gap: 14,
   },
   pad: {
     paddingHorizontal: spacing.gutter,
