@@ -15,6 +15,8 @@ export const fonts = {
 
 /** Figma letter-spacing is -2% on most styles. */
 const tight = (size: number) => size * -0.02;
+/** Small text reads better with a little air between letters. */
+const open = (size: number) => size * 0.02;
 
 const style = (s: TextStyle) => s;
 
@@ -95,21 +97,21 @@ export const typography = {
     fontFamily: fonts.sansMedium,
     fontSize: 13,
     lineHeight: 13 * 1.45,
-    letterSpacing: tight(13),
+    letterSpacing: open(13),
     color: colors.ink,
   }),
   caption: style({
     fontFamily: fonts.sansItalic,
     fontSize: 14,
     lineHeight: 14 * 1.45,
-    letterSpacing: tight(14),
+    letterSpacing: open(14),
     color: colors.textFaint,
   }),
   micro: style({
     fontFamily: fonts.sansMedium,
     fontSize: 12,
     lineHeight: 12 * 1.45,
-    letterSpacing: tight(12),
+    letterSpacing: open(12),
     color: colors.ink,
   }),
   pickerValue: style({

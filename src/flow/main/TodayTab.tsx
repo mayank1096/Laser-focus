@@ -520,7 +520,8 @@ const sans = (size: number, weight: 'regular' | 'medium' | 'bold') => ({
       : fonts.sans,
   fontSize: size,
   lineHeight: size * 1.3,
-  letterSpacing: size * -0.02,
+  // Small text gets a little air; larger text stays tight.
+  letterSpacing: size <= 13 ? size * 0.02 : size * -0.02,
 });
 
 const styles = StyleSheet.create({
