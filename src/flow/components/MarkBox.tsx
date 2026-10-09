@@ -262,7 +262,11 @@ export function MarkPad({
 
   return (
     <GestureDetector gesture={Gesture.Race(swipe, hold)}>
-      <View collapsable={false} testID="mark-pad" accessibilityRole="adjustable">
+      <View
+        collapsable={false}
+        testID="mark-pad"
+        accessibilityRole="adjustable"
+      >
         <Box size={size} fill={fill} zig={zig} ring={colors.ink} radius={22} />
       </View>
     </GestureDetector>

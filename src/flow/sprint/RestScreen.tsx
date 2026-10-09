@@ -66,7 +66,10 @@ export function RestScreen({ navigation }: RootScreenProps<'Rest'>) {
           />
         </ChipRow>
         {custom ? (
-          <Animated.View entering={FadeIn.duration(motion.base)} style={styles.stepper}>
+          <Animated.View
+            entering={FadeIn.duration(motion.base)}
+            style={styles.stepper}
+          >
             <Stepper
               testID="rest-days"
               value={days}

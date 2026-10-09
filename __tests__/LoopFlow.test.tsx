@@ -9,7 +9,11 @@ import { addLine, press, textContent, tick, type } from '../test/flowHelpers';
 jest.useFakeTimers();
 jest.setTimeout(20000);
 
-const account = { method: 'phone' as const, phone: '919876543210', signedInAt: 'x' };
+const account = {
+  method: 'phone' as const,
+  phone: '919876543210',
+  signedInAt: 'x',
+};
 const book = {
   setup: 'done' as const,
   welcomed: true,
@@ -25,7 +29,14 @@ const book = {
     { id: 'm3', goalId: 'g1', text: '₹1 lakh month', done: false },
   ],
   tasks: [
-    { id: 't1', text: 'Cut 3 client reels', kind: 'deep' as const, milestoneId: 'm3', week: '2026-10-05', done: false },
+    {
+      id: 't1',
+      text: 'Cut 3 client reels',
+      kind: 'deep' as const,
+      milestoneId: 'm3',
+      week: '2026-10-05',
+      done: false,
+    },
   ],
   rhythm: DEFAULT_RHYTHM,
   sprintStart: '2026-10-05',
@@ -48,7 +59,16 @@ describe('the daily loop', () => {
     useBook.setState({
       ...book,
       sessions: [
-        { id: 's1', date: '2026-10-07', order: 0, taskId: 't1', what: 'Cut 3 client reels', outcome: 'Reel 1 exported', minutes: 60, start: 360 },
+        {
+          id: 's1',
+          date: '2026-10-07',
+          order: 0,
+          taskId: 't1',
+          what: 'Cut 3 client reels',
+          outcome: 'Reel 1 exported',
+          minutes: 60,
+          start: 360,
+        },
       ],
     });
     await act(async () => {
@@ -87,7 +107,9 @@ describe('the daily loop', () => {
     await press(tree, 'pick-0-t1');
     await type(tree, 'outcome-0', 'Reel 2 exported');
     await press(tree, 'plan-save');
-    expect(useBook.getState().sessions.find(s => s.date === '2026-10-08')).toMatchObject({
+    expect(
+      useBook.getState().sessions.find(s => s.date === '2026-10-08'),
+    ).toMatchObject({
       what: 'Cut 3 client reels',
       outcome: 'Reel 2 exported',
     });
@@ -98,7 +120,18 @@ describe('the daily loop', () => {
     useBook.setState({
       ...book,
       sessions: [
-        { id: 's1', date: '2026-10-08', order: 0, taskId: 't1', what: 'Cut 3 client reels', outcome: 'Reel 1', minutes: 60, start: 360, startedAt: 'x', mark: 'full' },
+        {
+          id: 's1',
+          date: '2026-10-08',
+          order: 0,
+          taskId: 't1',
+          what: 'Cut 3 client reels',
+          outcome: 'Reel 1',
+          minutes: 60,
+          start: 360,
+          startedAt: 'x',
+          mark: 'full',
+        },
       ],
     });
     await act(async () => {

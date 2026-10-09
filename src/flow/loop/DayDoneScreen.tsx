@@ -15,7 +15,10 @@ import { addDays } from '../../utils/date';
 import { WeekRow } from '../components/MarkBox';
 
 /** The day's row, the count, and the one next thing: plan tomorrow. */
-export function DayDoneScreen({ navigation, route }: RootScreenProps<'DayDone'>) {
+export function DayDoneScreen({
+  navigation,
+  route,
+}: RootScreenProps<'DayDone'>) {
   const t = useT();
   const insets = useSafeAreaInsets();
   const state = useBook();
@@ -24,13 +27,15 @@ export function DayDoneScreen({ navigation, route }: RootScreenProps<'DayDone'>)
   const done = day.filter(s => s.mark === 'full').length;
   const review = reviewDue(state, today);
   const days = lastSeven(today);
-  const plan = () =>
-    navigation.replace('Plan', { date: addDays(today, 1) });
+  const plan = () => navigation.replace('Plan', { date: addDays(today, 1) });
 
   return (
     <View
       testID="day-done"
-      style={[styles.screen, { paddingTop: insets.top + 56, paddingBottom: insets.bottom + 24 }]}
+      style={[
+        styles.screen,
+        { paddingTop: insets.top + 56, paddingBottom: insets.bottom + 24 },
+      ]}
     >
       <Animated.View entering={rise(0)}>
         <WeekRow
@@ -40,7 +45,10 @@ export function DayDoneScreen({ navigation, route }: RootScreenProps<'DayDone'>)
           letters={t.common.dayLetter}
         />
       </Animated.View>
-      <Animated.Text entering={rise(1)} style={[typography.display, styles.title]}>
+      <Animated.Text
+        entering={rise(1)}
+        style={[typography.display, styles.title]}
+      >
         {t.dayDone.title(done, day.length)}
       </Animated.Text>
       <View style={styles.footer}>
@@ -64,7 +72,11 @@ export function DayDoneScreen({ navigation, route }: RootScreenProps<'DayDone'>)
             </Pressable>
           </>
         ) : (
-          <PrimaryButton testID="day-plan" label={t.dayDone.plan} onPress={plan} />
+          <PrimaryButton
+            testID="day-plan"
+            label={t.dayDone.plan}
+            onPress={plan}
+          />
         )}
       </View>
     </View>

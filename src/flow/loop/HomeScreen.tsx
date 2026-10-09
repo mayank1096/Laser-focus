@@ -1,10 +1,5 @@
 import React, { useEffect } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Settings from '../../assets/icons/settings.svg';
@@ -16,7 +11,10 @@ import { dayMark, homeAction, type HomeAction } from '../../core/home';
 import { circledGoal, useBook } from '../../core/store';
 import { useT, type Strings } from '../../i18n';
 import { dayDate, shortDate } from '../../i18n/format';
-import type { RootScreenProps, RootStackParamList } from '../../navigation/types';
+import type {
+  RootScreenProps,
+  RootStackParamList,
+} from '../../navigation/types';
 import { colors, motion, spacing, typography } from '../../theme';
 import { addDays } from '../../utils/date';
 import { haptics } from '../../utils/haptics';
@@ -153,14 +151,16 @@ function describe(
   today: string,
   navigation: Nav,
 ): Described {
-  const nav = <K extends keyof RootStackParamList>(
-    name: K,
-    params?: RootStackParamList[K],
-  ) => () =>
-    (navigation.navigate as (n: K, p?: RootStackParamList[K]) => void)(
-      name,
-      params,
-    );
+  const nav =
+    <K extends keyof RootStackParamList>(
+      name: K,
+      params?: RootStackParamList[K],
+    ) =>
+    () =>
+      (navigation.navigate as (n: K, p?: RootStackParamList[K]) => void)(
+        name,
+        params,
+      );
   switch (a.kind) {
     case 'setup': {
       const target =

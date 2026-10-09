@@ -84,7 +84,10 @@ export function InProgressScreen({
         </AppText>
       </View>
 
-      <Animated.View entering={FadeIn.duration(motion.cinematic)} style={styles.middle}>
+      <Animated.View
+        entering={FadeIn.duration(motion.cinematic)}
+        style={styles.middle}
+      >
         <FocusDial elapsed={Math.min(elapsed, total)} total={total}>
           <AppText style={styles.time} testID="time-left">
             {`${left < 0 ? '+' : ''}${mm}:${String(ss).padStart(2, '0')}`}
@@ -93,7 +96,11 @@ export function InProgressScreen({
             {left >= 0 ? t.progress.left(planned) : t.progress.over(planned)}
           </AppText>
         </FocusDial>
-        <AppText variant="label" style={[styles.soft, styles.what]} numberOfLines={2}>
+        <AppText
+          variant="label"
+          style={[styles.soft, styles.what]}
+          numberOfLines={2}
+        >
           {session.what}
         </AppText>
       </Animated.View>

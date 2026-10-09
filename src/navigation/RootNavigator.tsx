@@ -97,8 +97,16 @@ export function RootNavigator() {
         <Stack.Screen name="Permissions" component={PermissionsScreen} />
         <Stack.Screen name="ClearField" component={ClearFieldScreen} />
         <Stack.Screen name="TakeVow" component={TakeVowScreen} />
-        <Stack.Screen name="SetupDone" component={SetupDoneScreen} options={noSwipe} />
-        <Stack.Screen name="Lockout" component={LockoutScreen} options={noSwipe} />
+        <Stack.Screen
+          name="SetupDone"
+          component={SetupDoneScreen}
+          options={noSwipe}
+        />
+        <Stack.Screen
+          name="Lockout"
+          component={LockoutScreen}
+          options={noSwipe}
+        />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Group screenOptions={{ animation: 'slide_from_right' }}>
           <Stack.Screen
@@ -113,11 +121,15 @@ export function RootNavigator() {
           <Stack.Screen name="BookSheet" component={BookSheetScreen} />
           <Stack.Screen name="Settings" component={SettingsScreen} />
         </Stack.Group>
-        <Stack.Group screenOptions={{ animation: 'fade', gestureEnabled: false }}>
+        <Stack.Group
+          screenOptions={{ animation: 'fade', gestureEnabled: false }}
+        >
           <Stack.Screen
             name="InProgress"
             component={InProgressScreen}
-            initialParams={first.name === 'InProgress' ? first.params : undefined}
+            initialParams={
+              first.name === 'InProgress' ? first.params : undefined
+            }
           />
           <Stack.Screen name="Mark" component={MarkScreen} />
           <Stack.Screen name="DayDone" component={DayDoneScreen} />

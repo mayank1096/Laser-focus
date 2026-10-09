@@ -69,7 +69,9 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
         <AppText variant="eyebrow">
           {t.start.header(session.order + 1, dayCount)}
         </AppText>
-        <AppText style={[typography.title, styles.what]}>{session.what}</AppText>
+        <AppText style={[typography.title, styles.what]}>
+          {session.what}
+        </AppText>
         <View style={styles.outcome}>
           <AppText variant="eyebrow">{t.start.outcome}</AppText>
           <AppText variant="bodyMedium">{session.outcome}</AppText>
@@ -96,7 +98,12 @@ export function StartScreen({ navigation, route }: RootScreenProps<'Start'>) {
             >
               <View style={[styles.box, ticks.has(k) && styles.boxOn]}>
                 {ticks.has(k) ? (
-                  <Check width={14} height={14} color={colors.white} strokeWidth={2.4} />
+                  <Check
+                    width={14}
+                    height={14}
+                    color={colors.white}
+                    strokeWidth={2.4}
+                  />
                 ) : null}
               </View>
               <AppText variant="body" style={styles.flex}>
@@ -200,7 +207,10 @@ function Fold({
         />
       </Pressable>
       {open ? (
-        <Animated.View entering={FadeIn.duration(motion.base)} style={styles.foldBody}>
+        <Animated.View
+          entering={FadeIn.duration(motion.base)}
+          style={styles.foldBody}
+        >
           {children}
         </Animated.View>
       ) : null}

@@ -39,12 +39,19 @@ export function Calendar({
   const size = width ? Math.min(32, Math.floor((width - 6 * GAP) / 7)) : 0;
 
   return (
-    <View onLayout={e => setWidth(e.nativeEvent.layout.width)} style={styles.grid}>
+    <View
+      onLayout={e => setWidth(e.nativeEvent.layout.width)}
+      style={styles.grid}
+    >
       {size ? (
         <>
           <View style={styles.row}>
             {t.common.dayLetter.map((l, i) => (
-              <AppText key={i} variant="micro" style={[styles.letter, { width: size }]}>
+              <AppText
+                key={i}
+                variant="micro"
+                style={[styles.letter, { width: size }]}
+              >
                 {l}
               </AppText>
             ))}
@@ -56,7 +63,12 @@ export function Calendar({
                 return d < from || d > to ? (
                   <View key={d} style={{ width: size, height: size }} />
                 ) : (
-                  <DayBox key={d} size={size} mark={dayMark(book, d)} today={d === to} />
+                  <DayBox
+                    key={d}
+                    size={size}
+                    mark={dayMark(book, d)}
+                    today={d === to}
+                  />
                 );
               })}
             </View>

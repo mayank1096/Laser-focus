@@ -52,10 +52,7 @@ export function ClearFieldScreen({
           {apps.map((a, i) => (
             <View key={a.name} style={[styles.row, i > 0 && styles.divided]}>
               <View style={styles.flex}>
-                <AppText
-                  variant="body"
-                  style={a.deleted ? styles.muted : null}
-                >
+                <AppText variant="body" style={a.deleted ? styles.muted : null}>
                   {a.name}
                 </AppText>
                 {a.forWork ? (

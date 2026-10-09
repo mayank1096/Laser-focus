@@ -21,7 +21,10 @@ const ANTI_GOAL_MAX = 4;
 const SACRIFICE_MAX = 5;
 
 /** One sheet of the book, open to edit. Everything saves as you type. */
-export function BookSheetScreen({ navigation, route }: RootScreenProps<'BookSheet'>) {
+export function BookSheetScreen({
+  navigation,
+  route,
+}: RootScreenProps<'BookSheet'>) {
   const t = useT();
   const { sheet } = route.params;
   const state = useBook();
@@ -46,7 +49,11 @@ export function BookSheetScreen({ navigation, route }: RootScreenProps<'BookShee
         />
       }
     >
-      <QuestionHeader eyebrow={t.book.title} title={t.book[sheet]} subtitle={sub} />
+      <QuestionHeader
+        eyebrow={t.book.title}
+        title={t.book[sheet]}
+        subtitle={sub}
+      />
       <QuestionBody>
         {sheet === 'values' ? <ValuesEditor /> : null}
         {sheet === 'goals' ? <GoalsEditor /> : null}

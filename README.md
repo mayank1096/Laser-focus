@@ -1,7 +1,7 @@
 # Laser Focus — mobile app (frontend)
 
 React Native (CLI, **not Expo**) + TypeScript app for the Laser Focus method:
-*Life → Values → Goals → Milestones → Tasks → Focused Sessions.*
+_Life → Values → Goals → Milestones → Tasks → Focused Sessions._
 
 This repo is the UI layer: screens, navigation, animations and the design
 system. Native features (app blocking, permissions) and the backend will be
@@ -9,31 +9,31 @@ plugged in behind typed interfaces, so they can be built without touching the UI
 
 ## Status
 
-| Area | State |
-| --- | --- |
-| Sign in (language, phone, code — mocked in `src/services/auth.ts`) | Done |
-| Setup — Values, Goals, Circle, Milestones, This week, Rhythm, the vow, first plan | Done |
-| Daily loop — Home, Plan, Start, In progress, Mark, Day done | Done |
-| Weekly and sprint — Review, Goal done, Rest, Reassess | Done |
-| Action Book, Settings | Done |
-| English and Hindi (chosen at sign-in, changeable in Settings) | Done |
-| Evening reminder (the only notification) | Interface only — `src/services/reminders.ts` |
-| Printable pack, data export | Print is a note for now; export uses the share sheet |
-| Persistence | On device (`zustand` + AsyncStorage) |
-| API | Not started |
+| Area                                                                              | State                                                |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Sign in (language, phone, code — mocked in `src/services/auth.ts`)                | Done                                                 |
+| Setup — Values, Goals, Circle, Milestones, This week, Rhythm, the vow, first plan | Done                                                 |
+| Daily loop — Home, Plan, Start, In progress, Mark, Day done                       | Done                                                 |
+| Weekly and sprint — Review, Goal done, Rest, Reassess                             | Done                                                 |
+| Action Book, Settings                                                             | Done                                                 |
+| English and Hindi (chosen at sign-in, changeable in Settings)                     | Done                                                 |
+| Evening reminder (the only notification)                                          | Interface only — `src/services/reminders.ts`         |
+| Printable pack, data export                                                       | Print is a note for now; export uses the share sheet |
+| Persistence                                                                       | On device (`zustand` + AsyncStorage)                 |
+| API                                                                               | Not started                                          |
 
 ## Stack
 
-| Concern | Library |
-| --- | --- |
-| Framework | React Native 0.87 (New Architecture), TypeScript `strict` |
-| Navigation | `@react-navigation/native-stack` |
-| Animation | `react-native-reanimated` 4 + `react-native-worklets` |
-| Gestures | `react-native-gesture-handler` 3 (hook API) |
-| Vector icons | `react-native-svg` + `react-native-svg-transformer` |
-| Haptics | `react-native-haptic-feedback` (wrapped in `src/utils/haptics.ts`) |
-| State | `zustand` |
-| Tests | Jest + `react-test-renderer` |
+| Concern      | Library                                                            |
+| ------------ | ------------------------------------------------------------------ |
+| Framework    | React Native 0.87 (New Architecture), TypeScript `strict`          |
+| Navigation   | `@react-navigation/native-stack`                                   |
+| Animation    | `react-native-reanimated` 4 + `react-native-worklets`              |
+| Gestures     | `react-native-gesture-handler` 3 (hook API)                        |
+| Vector icons | `react-native-svg` + `react-native-svg-transformer`                |
+| Haptics      | `react-native-haptic-feedback` (wrapped in `src/utils/haptics.ts`) |
+| State        | `zustand`                                                          |
+| Tests        | Jest + `react-test-renderer`                                       |
 
 ## Getting started
 

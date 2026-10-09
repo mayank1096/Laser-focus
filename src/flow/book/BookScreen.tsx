@@ -44,7 +44,8 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
   const [switchTo, setSwitchTo] = useState<Goal | null>(null);
   const [endSure, setEndSure] = useState(false);
   const [printNote, setPrintNote] = useState(false);
-  const edit = (sheet: BookSheet) => () => navigation.navigate('BookSheet', { sheet });
+  const edit = (sheet: BookSheet) => () =>
+    navigation.navigate('BookSheet', { sheet });
 
   return (
     <>
@@ -56,10 +57,16 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
       >
         <AppText variant="eyebrow">{t.book.title}</AppText>
         {goal ? (
-          <AppText style={[typography.display, styles.goal]}>{goal.text}</AppText>
+          <AppText style={[typography.display, styles.goal]}>
+            {goal.text}
+          </AppText>
         ) : null}
 
-        <Card title={t.book.values} onEdit={edit('values')} testID="book-values">
+        <Card
+          title={t.book.values}
+          onEdit={edit('values')}
+          testID="book-values"
+        >
           {state.values.map(v => (
             <AppText key={v.id} variant="body">
               {v.text}
@@ -91,7 +98,11 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
           ))}
         </Card>
 
-        <Card title={t.book.milestones} onEdit={edit('milestones')} testID="book-milestones">
+        <Card
+          title={t.book.milestones}
+          onEdit={edit('milestones')}
+          testID="book-milestones"
+        >
           {milestones.map(m => (
             <CheckRow
               key={m.id}
@@ -101,7 +112,11 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
               onPress={() => state.toggleMilestone(m.id)}
             />
           ))}
-          <Link testID="end-sprint" label={t.book.endSprint} onPress={() => setEndSure(true)} />
+          <Link
+            testID="end-sprint"
+            label={t.book.endSprint}
+            onPress={() => setEndSure(true)}
+          />
         </Card>
 
         <Card title={t.book.week} onEdit={edit('week')} testID="book-week">
@@ -115,7 +130,11 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
           ))}
         </Card>
 
-        <Card title={t.book.antiGoal} onEdit={edit('antiGoal')} testID="book-antigoal">
+        <Card
+          title={t.book.antiGoal}
+          onEdit={edit('antiGoal')}
+          testID="book-antigoal"
+        >
           {state.antiGoals.length ? (
             state.antiGoals.map(a => (
               <AppText key={a.id} variant="body">
@@ -127,7 +146,11 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
           )}
         </Card>
 
-        <Card title={t.book.sacrifice} onEdit={edit('sacrifice')} testID="book-sacrifice">
+        <Card
+          title={t.book.sacrifice}
+          onEdit={edit('sacrifice')}
+          testID="book-sacrifice"
+        >
           {state.giveUp.length || state.keep.length ? (
             <>
               {state.giveUp.map(a => (
@@ -180,7 +203,11 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
         </Card>
 
         <View style={styles.print}>
-          <Link testID="book-print" label={t.book.print} onPress={() => setPrintNote(true)} />
+          <Link
+            testID="book-print"
+            label={t.book.print}
+            onPress={() => setPrintNote(true)}
+          />
           {printNote ? (
             <AppText variant="caption">{t.setupDone.printSoon}</AppText>
           ) : null}
@@ -213,7 +240,10 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
         onClose={() => setEndSure(false)}
         accessibilityLabel={t.book.endSprint}
       >
-        <SheetTitle title={t.book.endSprint} subtitle={t.goalDone.endSprintSure} />
+        <SheetTitle
+          title={t.book.endSprint}
+          subtitle={t.goalDone.endSprintSure}
+        />
         <PrimaryButton
           testID="end-confirm"
           label={t.book.endSprint}
@@ -284,7 +314,12 @@ function Tag({
     </View>
   );
   return onPress ? (
-    <Pressable testID={testID} accessibilityRole="button" hitSlop={6} onPress={onPress}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      hitSlop={6}
+      onPress={onPress}
+    >
       {body}
     </Pressable>
   ) : (
@@ -302,7 +337,12 @@ function Link({
   testID?: string;
 }) {
   return (
-    <Pressable testID={testID} accessibilityRole="button" hitSlop={8} onPress={onPress}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      hitSlop={8}
+      onPress={onPress}
+    >
       <AppText variant="label" style={styles.link}>
         {label}
       </AppText>

@@ -197,7 +197,9 @@ export function TasksEditor({
               width={18}
               height={18}
               color={colors.textMuted}
-              style={{ transform: [{ rotate: openShallow ? '180deg' : '0deg' }] }}
+              style={{
+                transform: [{ rotate: openShallow ? '180deg' : '0deg' }],
+              }}
             />
           </Pressable>
           {openShallow ? (
@@ -229,8 +231,7 @@ export function TasksEditor({
         <View style={styles.options}>
           {milestones.map(m => {
             const n = activeMilestones(state).findIndex(x => x.id === m.id);
-            const on =
-              deep.find(x => x.id === linking)?.milestoneId === m.id;
+            const on = deep.find(x => x.id === linking)?.milestoneId === m.id;
             return (
               <Pressable
                 key={m.id}

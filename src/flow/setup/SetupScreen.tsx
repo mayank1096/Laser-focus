@@ -100,7 +100,9 @@ export function SetupScreen({ navigation, route }: RootScreenProps<'Setup'>) {
     if (step === 'values' && !useBook.getState().values.length) {
       useBook
         .getState()
-        .setValues(t.values.template.map(text => ({ id: createId('value'), text })));
+        .setValues(
+          t.values.template.map(text => ({ id: createId('value'), text })),
+        );
     }
   }, [step, t]);
 

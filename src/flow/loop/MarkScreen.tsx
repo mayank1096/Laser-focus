@@ -69,13 +69,15 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
     if (!mark) {
       return;
     }
-    useBook.getState().markSession(
-      session.id,
-      mark,
-      mark === 'full'
-        ? { finished: finished.trim() || session.outcome }
-        : { wentWrong: [...wrong] },
-    );
+    useBook
+      .getState()
+      .markSession(
+        session.id,
+        mark,
+        mark === 'full'
+          ? { finished: finished.trim() || session.outcome }
+          : { wentWrong: [...wrong] },
+      );
     haptics.tap();
     if (nextSession) {
       navigation.replace('Start', { id: nextSession.id });
@@ -94,7 +96,10 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   ];
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + spacing.xl }]} testID="mark">
+    <View
+      style={[styles.screen, { paddingTop: insets.top + spacing.xl }]}
+      testID="mark"
+    >
       <WeekRow
         days={days}
         marks={days.map(d => dayMark(state, d))}
@@ -127,15 +132,34 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
               {t.mark.howTo}
             </AppText>
             <View style={styles.alt}>
-              <Link testID="mark-full" label={t.mark.tapFull} onPress={() => choose('full')} />
-              <Link testID="mark-half" label={t.mark.tapHalf} onPress={() => choose('half')} />
-              <Link testID="mark-empty" label={t.mark.empty} onPress={() => choose('empty')} />
+              <Link
+                testID="mark-full"
+                label={t.mark.tapFull}
+                onPress={() => choose('full')}
+              />
+              <Link
+                testID="mark-half"
+                label={t.mark.tapHalf}
+                onPress={() => choose('half')}
+              />
+              <Link
+                testID="mark-empty"
+                label={t.mark.empty}
+                onPress={() => choose('empty')}
+              />
             </View>
           </>
         ) : (
-          <Animated.View entering={FadeIn.duration(motion.base)} style={styles.verdict}>
+          <Animated.View
+            entering={FadeIn.duration(motion.base)}
+            style={styles.verdict}
+          >
             <AppText variant="bodyMedium">
-              {mark === 'full' ? t.mark.full : mark === 'half' ? t.mark.half : t.mark.empty}
+              {mark === 'full'
+                ? t.mark.full
+                : mark === 'half'
+                ? t.mark.half
+                : t.mark.empty}
             </AppText>
             <Link testID="mark-change" label={t.mark.change} onPress={reset} />
           </Animated.View>
@@ -198,7 +222,9 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
       <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
         <PrimaryButton
           testID="mark-next"
-          label={nextSession ? t.mark.next(nextSession.order + 1) : t.common.done}
+          label={
+            nextSession ? t.mark.next(nextSession.order + 1) : t.common.done
+          }
           disabled={!mark}
           onPress={proceed}
         />

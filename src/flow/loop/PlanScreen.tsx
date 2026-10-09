@@ -111,7 +111,10 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
     setDrafts(ds => ds.map(d => (d.key === key ? { ...d, ...patch } : d)));
 
   const complete = drafts.every(
-    d => d.what.trim().length >= 2 && d.outcome.trim().length >= 2 && d.minutes > 0,
+    d =>
+      d.what.trim().length >= 2 &&
+      d.outcome.trim().length >= 2 &&
+      d.minutes > 0,
   );
 
   const save = () => {
@@ -193,9 +196,15 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
         </View>
 
         {weekEmpty ? (
-          <Animated.View entering={FadeIn.duration(motion.base)} style={styles.week}>
+          <Animated.View
+            entering={FadeIn.duration(motion.base)}
+            style={styles.week}
+          >
             <AppText variant="bodyMedium">{t.plan.emptyWeek}</AppText>
-            <TasksEditor week={weekStart(date, state.rhythm.reviewDay)} showShallow={false} />
+            <TasksEditor
+              week={weekStart(date, state.rhythm.reviewDay)}
+              showShallow={false}
+            />
           </Animated.View>
         ) : null}
 
@@ -211,8 +220,10 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
               <AppText variant="eyebrow">
                 {`${t.common.session(locked.length + i + 1)} · ${clock(
                   t,
-                  Math.max(state.rhythm.focusStart, ...locked.map(l => l.start + l.minutes)) +
-                    drafts.slice(0, i).reduce((n, x) => n + x.minutes, 0),
+                  Math.max(
+                    state.rhythm.focusStart,
+                    ...locked.map(l => l.start + l.minutes),
+                  ) + drafts.slice(0, i).reduce((n, x) => n + x.minutes, 0),
                 )}`}
               </AppText>
               {drafts.length > 1 ? (
@@ -220,7 +231,9 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                   testID={`remove-${i}`}
                   accessibilityRole="button"
                   hitSlop={8}
-                  onPress={() => setDrafts(ds => ds.filter(x => x.key !== d.key))}
+                  onPress={() =>
+                    setDrafts(ds => ds.filter(x => x.key !== d.key))
+                  }
                 >
                   <AppText variant="label" style={styles.danger}>
                     {t.plan.removeSession}
@@ -241,7 +254,11 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                   label={task.text}
                   selected={!d.other && d.taskId === task.id}
                   onPress={() =>
-                    update(d.key, { taskId: task.id, other: false, what: task.text })
+                    update(d.key, {
+                      taskId: task.id,
+                      other: false,
+                      what: task.text,
+                    })
                   }
                 />
               ))}
@@ -250,7 +267,9 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                 role="radio"
                 label={t.plan.other}
                 selected={d.other}
-                onPress={() => update(d.key, { other: true, taskId: undefined, what: '' })}
+                onPress={() =>
+                  update(d.key, { other: true, taskId: undefined, what: '' })
+                }
               />
             </ChipRow>
 
@@ -310,7 +329,10 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
               />
             </Pressable>
             {d.open ? (
-              <Animated.View entering={FadeIn.duration(motion.base)} style={styles.moreBody}>
+              <Animated.View
+                entering={FadeIn.duration(motion.base)}
+                style={styles.moreBody}
+              >
                 <Field label={t.plan.challenge}>
                   <TextField
                     testID={`challenge-${i}`}
@@ -378,7 +400,13 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.field}>
       <AppText variant="eyebrow">{label}</AppText>

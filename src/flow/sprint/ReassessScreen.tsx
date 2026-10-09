@@ -58,7 +58,10 @@ export function ReassessScreen({ navigation }: RootScreenProps<'Reassess'>) {
               keepLessons();
               useBook.getState().continueGoal();
               haptics.tap();
-              navigation.replace('Setup', { returnTo: 'reassess', step: 'milestones' });
+              navigation.replace('Setup', {
+                returnTo: 'reassess',
+                step: 'milestones',
+              });
             }}
             style={styles.link}
           >

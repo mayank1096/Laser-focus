@@ -3,7 +3,14 @@ import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import App from '../App';
 import { useBook } from '../src/core/store';
 import { useProfile } from '../src/features/account/store';
-import { addLine, hold, press, textContent, tick, type } from '../test/flowHelpers';
+import {
+  addLine,
+  hold,
+  press,
+  textContent,
+  tick,
+  type,
+} from '../test/flowHelpers';
 
 jest.useFakeTimers();
 jest.setTimeout(20000);
@@ -94,6 +101,8 @@ describe('setup', () => {
     await press(tree, 'go-home');
     await tick(1000);
     expect(useBook.getState().setup).toBe('done');
-    expect(textContent(tree)).toContain('Tomorrow · Session 1: Cut 3 client reels');
+    expect(textContent(tree)).toContain(
+      'Tomorrow · Session 1: Cut 3 client reels',
+    );
   });
 });

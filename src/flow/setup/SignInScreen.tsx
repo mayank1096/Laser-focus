@@ -13,14 +13,23 @@ import { useProfile, type Language } from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { auth } from '../../services/auth';
-import { colors, fonts, layout, motion, radii, spacing, typography } from '../../theme';
+import {
+  colors,
+  fonts,
+  layout,
+  motion,
+  radii,
+  spacing,
+  typography,
+} from '../../theme';
 import { now } from '../../utils/clock';
 import { haptics } from '../../utils/haptics';
 
 const RESEND_AFTER = 30;
 
 /** 9876543210 → "98765 43210". */
-const spaced = (d: string) => (d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5)}` : d);
+const spaced = (d: string) =>
+  d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5)}` : d;
 
 /**
  * Language, number, code. Nothing else: no name, no email, no password.
@@ -121,7 +130,10 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
           ) : null}
 
           {!sent ? (
-            <Animated.View entering={FadeIn.duration(motion.base)} style={styles.row}>
+            <Animated.View
+              entering={FadeIn.duration(motion.base)}
+              style={styles.row}
+            >
               <View style={styles.cc}>
                 <AppText variant="body">+91</AppText>
               </View>
@@ -130,7 +142,9 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
                   testID="phone-input"
                   accessibilityLabel={t.signIn.phone}
                   value={spaced(digits)}
-                  onChangeText={v => setDigits(v.replace(/\D/g, '').slice(0, 10))}
+                  onChangeText={v =>
+                    setDigits(v.replace(/\D/g, '').slice(0, 10))
+                  }
                   keyboardType="number-pad"
                   textContentType="telephoneNumber"
                   autoComplete="tel"
@@ -144,8 +158,17 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
               </View>
             </Animated.View>
           ) : (
-            <Animated.View entering={FadeInDown.duration(motion.base)} style={styles.group}>
-              <View style={[styles.field, (code || wrong) && styles.active, wrong && styles.error]}>
+            <Animated.View
+              entering={FadeInDown.duration(motion.base)}
+              style={styles.group}
+            >
+              <View
+                style={[
+                  styles.field,
+                  (code || wrong) && styles.active,
+                  wrong && styles.error,
+                ]}
+              >
                 <TextInput
                   ref={codeRef}
                   testID="code-input"
@@ -181,7 +204,10 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
                   onPress={send}
                   hitSlop={8}
                 >
-                  <AppText variant="label" style={wait ? styles.muted : styles.saffron}>
+                  <AppText
+                    variant="label"
+                    style={wait ? styles.muted : styles.saffron}
+                  >
                     {wait ? t.signIn.resendIn(wait) : t.signIn.resend}
                   </AppText>
                 </Pressable>

@@ -5,7 +5,11 @@ import { PrimaryButton } from '../../components/PrimaryButton';
 import { QuestionBody, QuestionHeader } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import type { RootScreenProps } from '../../navigation/types';
-import { PRATIGYAS, useProfile, type Pratigya } from '../../features/account/store';
+import {
+  PRATIGYAS,
+  useProfile,
+  type Pratigya,
+} from '../../features/account/store';
 
 export const VOW_STEPS = 5;
 import { useT } from '../../i18n';

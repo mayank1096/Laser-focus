@@ -1,4 +1,9 @@
-import { addDays, daysBetween, formatClock, toISODate } from '../src/utils/date';
+import {
+  addDays,
+  daysBetween,
+  formatClock,
+  toISODate,
+} from '../src/utils/date';
 import { addMonths } from '../src/utils/time';
 
 describe('date helpers', () => {

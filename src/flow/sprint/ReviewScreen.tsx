@@ -33,7 +33,9 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(week, i));
   const next = addDays(week, 7);
   const milestones = activeMilestones(state);
-  const lastTasks = state.tasks.filter(x => x.week === week && x.kind === 'deep');
+  const lastTasks = state.tasks.filter(
+    x => x.week === week && x.kind === 'deep',
+  );
   const carried = (text: string) =>
     state.tasks.some(x => x.week === next && x.text === text);
   const firstWeek = state.reviews.length === 0;
@@ -56,7 +58,13 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
       testID="review"
       tone="parchment"
       onBack={() => navigation.goBack()}
-      footer={<PrimaryButton testID="review-save" label={t.review.save} onPress={save} />}
+      footer={
+        <PrimaryButton
+          testID="review-save"
+          label={t.review.save}
+          onPress={save}
+        />
+      }
     >
       <QuestionHeader
         eyebrow={`${shortDate(t, week)} – ${shortDate(t, addDays(week, 6))}`}
@@ -113,7 +121,9 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
                 {task.done ? null : (
                   <Toggle
                     testID={`carry-${task.id}`}
-                    label={carried(task.text) ? t.review.carried : t.review.carry}
+                    label={
+                      carried(task.text) ? t.review.carried : t.review.carry
+                    }
                     on={carried(task.text)}
                     onPress={() => state.carryOver(task.id, next)}
                   />
@@ -133,13 +143,17 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
               testID="open-antigoal"
               title={t.review.antiGoal}
               sub={t.review.antiGoalSub}
-              onPress={() => navigation.navigate('BookSheet', { sheet: 'antiGoal' })}
+              onPress={() =>
+                navigation.navigate('BookSheet', { sheet: 'antiGoal' })
+              }
             />
             <Row
               testID="open-sacrifice"
               title={t.review.sacrifice}
               sub={t.review.sacrificeSub}
-              onPress={() => navigation.navigate('BookSheet', { sheet: 'sacrifice' })}
+              onPress={() =>
+                navigation.navigate('BookSheet', { sheet: 'sacrifice' })
+              }
             />
           </Section>
         ) : null}
@@ -148,7 +162,13 @@ export function ReviewScreen({ navigation, route }: RootScreenProps<'Review'>) {
   );
 }
 
-function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.section}>
       {title ? <AppText variant="eyebrow">{title}</AppText> : null}
@@ -181,7 +201,12 @@ export function CheckRow({
     >
       <View style={[styles.box, checked && styles.boxOn]}>
         {checked ? (
-          <Check width={14} height={14} color={colors.white} strokeWidth={2.4} />
+          <Check
+            width={14}
+            height={14}
+            color={colors.white}
+            strokeWidth={2.4}
+          />
         ) : null}
       </View>
       <AppText variant="body" style={[styles.flex, checked && styles.struck]}>
@@ -233,7 +258,12 @@ function Row({
   testID?: string;
 }) {
   return (
-    <Pressable testID={testID} accessibilityRole="button" onPress={onPress} style={styles.row}>
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.row}
+    >
       <View style={styles.flex}>
         <AppText variant="bodyMedium">{title}</AppText>
         <AppText variant="micro" style={styles.muted}>

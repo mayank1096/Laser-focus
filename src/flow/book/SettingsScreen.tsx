@@ -89,7 +89,10 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
             />
           </Pressable>
           {how ? (
-            <Animated.View entering={FadeIn.duration(motion.base)} style={styles.how}>
+            <Animated.View
+              entering={FadeIn.duration(motion.base)}
+              style={styles.how}
+            >
               {t.settings.howSteps.map((step, i) => (
                 <AppText key={step} variant="body" style={styles.muted}>
                   {`${i + 1}.  ${step}`}
@@ -97,11 +100,19 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
               ))}
             </Animated.View>
           ) : null}
-          <Row testID="settings-print" label={t.settings.print} onPress={() => setPrintNote(true)} />
+          <Row
+            testID="settings-print"
+            label={t.settings.print}
+            onPress={() => setPrintNote(true)}
+          />
           {printNote ? (
             <AppText variant="caption">{t.setupDone.printSoon}</AppText>
           ) : null}
-          <Row testID="settings-export" label={t.settings.export} onPress={exportData} />
+          <Row
+            testID="settings-export"
+            label={t.settings.export}
+            onPress={exportData}
+          />
         </Section>
 
         <Section>
@@ -127,7 +138,10 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
         onClose={() => setDeleteSure(false)}
         accessibilityLabel={t.settings.delete}
       >
-        <SheetTitle title={t.settings.delete} subtitle={t.settings.deleteSure} />
+        <SheetTitle
+          title={t.settings.delete}
+          subtitle={t.settings.deleteSure}
+        />
         <PrimaryButton
           testID="delete-confirm"
           label={t.common.delete}
@@ -144,7 +158,13 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
   );
 }
 
-function Section({ title, children }: { title?: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+}: {
+  title?: string;
+  children: React.ReactNode;
+}) {
   return (
     <View style={styles.section}>
       {title ? <AppText variant="eyebrow">{title}</AppText> : null}
