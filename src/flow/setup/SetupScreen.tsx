@@ -245,7 +245,9 @@ function Sheet({ step, t }: { step: SheetStep; t: Strings }) {
             </View>
             <View style={styles.list}>
               <MilestonesEditor />
-              <AppText variant="caption">{t.milestones.hint}</AppText>
+              <AppText variant="caption" style={styles.hint}>
+                {t.milestones.hint}
+              </AppText>
             </View>
           </QuestionBody>
         </>
@@ -289,5 +291,9 @@ const styles = StyleSheet.create({
   list: {
     marginTop: 20,
     gap: spacing.md,
+  },
+  hint: {
+    marginTop: spacing.lg,
+    textAlign: 'center',
   },
 });
