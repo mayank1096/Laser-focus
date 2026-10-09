@@ -14,6 +14,7 @@ import { InProgressScreen } from '../flow/loop/InProgressScreen';
 import { MarkScreen } from '../flow/loop/MarkScreen';
 import { PlanScreen } from '../flow/loop/PlanScreen';
 import { StartScreen } from '../flow/loop/StartScreen';
+import { ContactScreen } from '../flow/setup/ContactScreen';
 import { SetupDoneScreen } from '../flow/setup/SetupDoneScreen';
 import { SetupScreen } from '../flow/setup/SetupScreen';
 import { SignInScreen } from '../flow/setup/SignInScreen';
@@ -86,6 +87,7 @@ export function RootNavigator() {
         screenOptions={{ headerShown: false, animation: 'fade' }}
       >
         <Stack.Screen name="SignIn" component={SignInScreen} />
+        <Stack.Screen name="Contact" component={ContactScreen} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         {/* Back is handled sheet by sheet inside setup. */}
         <Stack.Screen

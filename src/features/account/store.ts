@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type Language = 'en' | 'hi';
-export type SignInMethod = 'phone' | 'google' | 'apple';
+export type SignInMethod = 'phone' | 'email' | 'google' | 'apple';
 /** The three vows, from gentlest to life-long. */
 export type Pratigya = 'abhimanyu' | 'arjun' | 'bhishma';
 export type Permission = 'screenTime' | 'focus' | 'notifications';

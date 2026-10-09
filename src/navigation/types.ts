@@ -15,6 +15,7 @@ export type BookSheet =
 export type RootStackParamList = {
   // Part 1 · Set up
   SignIn: undefined;
+  Contact: { via: 'phone' | 'email' };
   Welcome: undefined;
   Setup: { step?: SetupStep; returnTo?: 'reassess' | 'reread' } | undefined;
   Pratigya: undefined;

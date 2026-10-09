@@ -29,7 +29,8 @@ describe('setup', () => {
     });
 
     // 01 Sign in
-    expect(textContent(tree)).toContain('Sign in with your number');
+    expect(textContent(tree)).toContain('A warrior never leaves his bow behind.');
+    await press(tree, 'auth-phone');
     await type(tree, 'phone-input', '9876543210');
     await press(tree, 'send-code');
     await tick(500);

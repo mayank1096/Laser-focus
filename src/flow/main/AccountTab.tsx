@@ -69,7 +69,7 @@ export function AccountTab({
         2,
         7,
       )} ${profile.account.phone.slice(7)}`
-    : '';
+    : profile.account?.email ?? '';
   const vow = profile.pratigya ? PRATIGYAS[profile.pratigya].latin : null;
 
   return (
@@ -184,7 +184,11 @@ export function AccountTab({
         </Section>
         <Section title={t.account.accountSection}>
           {phone ? (
-            <Row Icon={Mail} title={t.account.phone} detail={phone} />
+            <Row
+              Icon={Mail}
+              title={profile.account?.phone ? t.account.phone : t.signIn.email}
+              detail={phone}
+            />
           ) : null}
           <Row
             testID="account-language"

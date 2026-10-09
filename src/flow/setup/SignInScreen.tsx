@@ -1,46 +1,67 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Image,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
   StyleSheet,
-  TextInput,
+  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  FadeInDown,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { art } from '../../assets/art';
+import Apple from '../../assets/icons/apple.svg';
+import Google from '../../assets/icons/google.svg';
 import { AppText } from '../../components/AppText';
 import { OrbOverlay } from '../../components/OrbOverlay';
-import { PrimaryButton } from '../../components/PrimaryButton';
-import { rise } from '../../components/QuestionHeader';
 import { useBook } from '../../core/store';
-import { useProfile, type Language } from '../../features/account/store';
+import {
+  useProfile,
+  type Account,
+  type Language,
+  type SignInMethod,
+} from '../../features/account/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { auth } from '../../services/auth';
-import { colors, fonts, motion, spacing, typography } from '../../theme';
+import { colors, motion, springs, spacing, typography } from '../../theme';
 import { now } from '../../utils/clock';
 import { haptics } from '../../utils/haptics';
 
-const RESEND_AFTER = 30;
-const CODE_LENGTH = 6;
-/** The painting's own sky and mist, so its edges melt into the screen. */
-const SKY = '#FEECEA';
-/** The painting is 941 × 1672; the warrior sits a little below its top. */
+/** The illustration's own mist, so the art melts into the screen. */
+const MIST = '#FEEDEA';
+/** The illustration is 941 × 1672. */
 const ART_RATIO = 1672 / 941;
-const ART_DROP = 0.1;
+/** How far the art sits above the top edge, so the warrior clears the copy. */
+const ART_LIFT = 0.08;
 
-/** 9876543210 → "98765 43210". */
-const spaced = (d: string) =>
-  d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5)}` : d;
+type Nav = RootScreenProps<'SignIn'>['navigation'];
+
+/** Saves the account, then opens Home for a returning book, else Welcome. */
+export function finishSignIn(
+  navigation: Pick<Nav, 'reset'>,
+  account: Omit<Account, 'signedInAt'>,
+) {
+  haptics.success();
+  useProfile.getState().signIn(account, now().toISOString());
+  const returning = useBook.getState().setup === 'done';
+  navigation.reset({
+    index: 0,
+    routes: [{ name: returning ? 'Home' : 'Welcome' }],
+  });
+}
 
 /**
- * The warrior on the ridge fills the screen; the title sits in his sky and
- * a frosted card rests in the mist below. Language, number, code — nothing
- * else. A number that already has an Action Book goes straight to Home.
+ * The first screen. The whole screen is the
+ * painting: the warrior on the ridge at dawn, the mist below him rising
+ * into the page, and the line and the ways to sign in resting in that mist.
  */
 export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
   const t = useT();
@@ -48,251 +69,150 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
   const { width, height } = useWindowDimensions();
   const language = useProfile(s => s.language);
   const setLanguage = useProfile(s => s.setLanguage);
-  const signIn = useProfile(s => s.signIn);
-  const [digits, setDigits] = useState('');
-  const [code, setCode] = useState('');
-  const [sent, setSent] = useState(false);
-  const [busy, setBusy] = useState<'sending' | 'checking' | null>(null);
-  const [wrong, setWrong] = useState(false);
-  const [wait, setWait] = useState(0);
-  const [focused, setFocused] = useState(false);
-  const codeRef = useRef<React.ComponentRef<typeof TextInput>>(null);
+  const [busy, setBusy] = useState<SignInMethod | null>(null);
 
+  // The painting fills the screen however tall the phone is.
+  const artHeight = Math.max(height * 1.04, width * ART_RATIO);
+  const artWidth = artHeight / ART_RATIO;
+
+  // It settles in slowly, as if the camera is still finding him.
+  const settle = useSharedValue(0);
   useEffect(() => {
-    if (!wait) {
+    settle.value = withTiming(1, { duration: 1800, easing: motion.easeOut });
+  }, [settle]);
+  const artStyle = useAnimatedStyle(() => ({
+    opacity: Math.min(1, settle.value * 1.6),
+    transform: [{ scale: 1.08 - settle.value * 0.08 }],
+  }));
+
+  const social = async (method: 'google' | 'apple') => {
+    if (busy) {
       return;
     }
-    const id = setTimeout(() => setWait(w => w - 1), 1000);
-    return () => clearTimeout(id);
-  }, [wait]);
-
-  const send = async () => {
-    haptics.tap();
-    setBusy('sending');
-    await auth.sendCode(`91${digits}`);
+    setBusy(method);
+    const { email } = await (method === 'google'
+      ? auth.google()
+      : auth.apple());
     setBusy(null);
-    setSent(true);
-    setWait(RESEND_AFTER);
-    setTimeout(() => codeRef.current?.focus(), 200);
+    finishSignIn(navigation, { method, email });
   };
 
-  const verify = async (value = code) => {
-    setBusy('checking');
-    const ok = await auth.verify(`91${digits}`, value);
-    setBusy(null);
-    if (!ok) {
-      haptics.warning();
-      setWrong(true);
-      return;
-    }
-    haptics.success();
-    signIn({ method: 'phone', phone: `91${digits}` }, now().toISOString());
-    const returning = useBook.getState().setup === 'done';
-    navigation.reset({
-      index: 0,
-      routes: [{ name: returning ? 'Home' : 'Welcome' }],
-    });
-  };
-
-  // Cover the screen's width, and drop the painting a touch so the title
-  // has clear sky above the warrior.
-  const artWidth = Math.max(width, height / ART_RATIO);
-  const artHeight = artWidth * ART_RATIO;
+  const rise = (step: number) =>
+    FadeInDown.delay(500 + step * 110)
+      .duration(motion.slow + 120)
+      .easing(motion.easeOut);
 
   return (
-    <>
-      <View testID="sign-in" style={styles.screen}>
+    <View testID="sign-in" style={styles.screen}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          styles.art,
+          { top: -height * ART_LIFT, left: (width - artWidth) / 2 },
+          artStyle,
+        ]}
+      >
         <Image
           source={art.ridge}
+          style={{ width: artWidth, height: artHeight }}
           resizeMode="cover"
-          style={[
-            styles.art,
-            {
-              width: artWidth,
-              height: artHeight,
-              left: (width - artWidth) / 2,
-              top: height * ART_DROP,
-            },
-          ]}
+          accessibilityIgnoresInvertColors
         />
+      </Animated.View>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.fill}
-        >
-          <View style={[styles.top, { paddingTop: insets.top + spacing.lg }]}>
-            <Animated.View entering={rise(0)} style={styles.bar}>
-              <AppText variant="eyebrow" style={styles.brand}>
-                {t.signIn.eyebrow}
-              </AppText>
-              <LanguagePill value={language} onChange={setLanguage} />
-            </Animated.View>
-            <Animated.Text
-              key={sent ? 'code' : 'phone'}
-              entering={rise(1)}
-              style={styles.title}
-              accessibilityRole="header"
-            >
-              {sent ? t.signIn.codeTitle : t.signIn.title}
-            </Animated.Text>
-            <Animated.View entering={rise(2)}>
-              <AppText variant="body" style={styles.sub}>
-                {sent ? t.signIn.codeSent(spaced(digits)) : t.signIn.sub}
-              </AppText>
-            </Animated.View>
-          </View>
+      {/* The mist thickens toward the bottom so the copy always reads. */}
+      <Svg
+        pointerEvents="none"
+        style={styles.mist}
+        width={width}
+        height={height * 0.6}
+      >
+        <Defs>
+          <LinearGradient id="save-mist" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={MIST} stopOpacity="0" />
+            <Stop offset="0.3" stopColor={MIST} stopOpacity="0.7" />
+            <Stop offset="0.5" stopColor={MIST} stopOpacity="1" />
+            <Stop offset="1" stopColor={MIST} stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+        <Rect width={width} height={height * 0.6} fill="url(#save-mist)" />
+      </Svg>
 
-          <Animated.View
-            entering={FadeInDown.delay(240)
-              .duration(motion.slow)
-              .easing(motion.easeOut)}
-            style={[styles.card, { marginBottom: insets.bottom + 20 }]}
-          >
-            {!sent ? (
-              <Animated.View
-                key="phone"
-                entering={FadeIn.duration(motion.base)}
-                style={styles.cardBody}
-              >
-                <AppText variant="eyebrow">{t.signIn.phone}</AppText>
-                <View
-                  style={[
-                    styles.field,
-                    (focused || digits) && styles.fieldActive,
-                  ]}
-                >
-                  <AppText style={styles.cc}>+91</AppText>
-                  <View style={styles.rule} />
-                  <TextInput
-                    testID="phone-input"
-                    accessibilityLabel={t.signIn.phone}
-                    value={spaced(digits)}
-                    onChangeText={v =>
-                      setDigits(v.replace(/\D/g, '').slice(0, 10))
-                    }
-                    onFocus={() => setFocused(true)}
-                    onBlur={() => setFocused(false)}
-                    keyboardType="number-pad"
-                    textContentType="telephoneNumber"
-                    autoComplete="tel"
-                    placeholder="98765 43210"
-                    placeholderTextColor={colors.textGhost}
-                    selectionColor={colors.saffron}
-                    cursorColor={colors.saffron}
-                    style={styles.number}
-                    onSubmitEditing={() => digits.length === 10 && send()}
-                  />
-                </View>
-                <PrimaryButton
-                  testID="send-code"
-                  label={t.signIn.send}
-                  disabled={digits.length !== 10 || busy !== null}
-                  onPress={send}
-                />
-              </Animated.View>
-            ) : (
-              <Animated.View
-                key="code"
-                entering={FadeIn.duration(motion.base)}
-                style={styles.cardBody}
-              >
-                <Pressable
-                  accessibilityRole="none"
-                  onPress={() => codeRef.current?.focus()}
-                  style={styles.cells}
-                >
-                  {Array.from({ length: CODE_LENGTH }, (_, i) => {
-                    const filled = i < code.length;
-                    const current = i === code.length && !wrong;
-                    return (
-                      <View
-                        key={i}
-                        style={[
-                          styles.cell,
-                          filled && styles.cellFilled,
-                          current && styles.cellCurrent,
-                          wrong && styles.cellWrong,
-                        ]}
-                      >
-                        <AppText style={styles.cellText}>
-                          {code[i] ?? ''}
-                        </AppText>
-                      </View>
-                    );
-                  })}
-                  {/* The real input sits invisibly over the cells. */}
-                  <TextInput
-                    ref={codeRef}
-                    testID="code-input"
-                    accessibilityLabel={t.signIn.codeTitle}
-                    value={code}
-                    onChangeText={v => {
-                      const next = v.replace(/\D/g, '').slice(0, CODE_LENGTH);
-                      setWrong(false);
-                      setCode(next);
-                      if (next.length === CODE_LENGTH) {
-                        verify(next);
-                      }
-                    }}
-                    keyboardType="number-pad"
-                    textContentType="oneTimeCode"
-                    autoComplete="sms-otp"
-                    caretHidden
-                    style={styles.hiddenInput}
-                  />
-                </Pressable>
-                {wrong ? (
-                  <AppText variant="caption" style={styles.wrong}>
-                    {t.signIn.wrong}
-                  </AppText>
-                ) : null}
-                <PrimaryButton
-                  testID="verify"
-                  label={t.signIn.verify}
-                  disabled={code.length !== CODE_LENGTH || busy !== null}
-                  onPress={() => verify()}
-                />
-                <View style={styles.links}>
-                  <Pressable
-                    testID="change-number"
-                    accessibilityRole="button"
-                    onPress={() => {
-                      setSent(false);
-                      setCode('');
-                      setWrong(false);
-                    }}
-                    hitSlop={8}
-                  >
-                    <AppText variant="label" style={styles.muted}>
-                      {t.signIn.change}
-                    </AppText>
-                  </Pressable>
-                  <Pressable
-                    testID="resend"
-                    accessibilityRole="button"
-                    disabled={wait > 0}
-                    onPress={send}
-                    hitSlop={8}
-                  >
-                    <AppText
-                      variant="label"
-                      style={wait ? styles.muted : styles.saffron}
-                    >
-                      {wait ? t.signIn.resendIn(wait) : t.signIn.resend}
-                    </AppText>
-                  </Pressable>
-                </View>
-              </Animated.View>
-            )}
-          </Animated.View>
-        </KeyboardAvoidingView>
+      <View style={[styles.bar, { top: insets.top + spacing.sm }]}>
+        <LanguagePill value={language} onChange={setLanguage} />
       </View>
+
+      <View
+        style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}
+      >
+        <Animated.Text
+          entering={rise(0)}
+          style={[styles.eyebrow, language === 'hi' && styles.noTracking]}
+        >
+          {t.signIn.eyebrow}
+        </Animated.Text>
+        <Animated.Text
+          entering={rise(1)}
+          style={styles.line}
+          accessibilityRole="header"
+        >
+          {t.signIn.line}
+        </Animated.Text>
+        <Animated.Text entering={rise(2)} style={styles.sub}>
+          {t.signIn.lineSub}
+        </Animated.Text>
+
+        <Animated.View entering={rise(3)} style={styles.actions}>
+          <Choice
+            testID="auth-phone"
+            label={t.signIn.continuePhone}
+            tone="dark"
+            onPress={() => navigation.navigate('Contact', { via: 'phone' })}
+          />
+          <View style={styles.pair}>
+            <Choice
+              testID="auth-google"
+              label={t.signIn.google}
+              icon={<Google width={18} height={18} />}
+              onPress={() => social('google')}
+            />
+            <Choice
+              testID="auth-apple"
+              label={t.signIn.apple}
+              icon={<Apple width={18} height={18} color={colors.ink} />}
+              onPress={() => social('apple')}
+            />
+          </View>
+        </Animated.View>
+
+        <Animated.View entering={rise(4)} style={styles.below}>
+          <Pressable
+            testID="auth-email"
+            accessibilityRole="button"
+            hitSlop={10}
+            onPress={() => {
+              haptics.tap();
+              navigation.navigate('Contact', { via: 'email' });
+            }}
+          >
+            <AppText variant="label" style={styles.email}>
+              {t.signIn.useEmail}
+            </AppText>
+          </Pressable>
+          <AppText variant="micro" style={styles.private}>
+            {t.signIn.private}
+          </AppText>
+        </Animated.View>
+      </View>
+
       <OrbOverlay
         visible={busy !== null}
-        label={busy === 'sending' ? t.signIn.sending : t.signIn.checking}
+        label={t.signIn.connecting(
+          busy === 'apple' ? t.signIn.apple : t.signIn.google,
+        )}
         state="connecting"
       />
-    </>
+    </View>
   );
 }
 
@@ -309,7 +229,7 @@ function LanguagePill({
     { id: 'hi', label: 'हिंदी' },
   ];
   return (
-    <View style={styles.pill} accessibilityRole="radiogroup">
+    <View style={styles.lang} accessibilityRole="radiogroup">
       {options.map(o => {
         const on = o.id === value;
         return (
@@ -325,11 +245,11 @@ function LanguagePill({
                 onChange(o.id);
               }
             }}
-            style={[styles.pillOption, on && styles.pillOn]}
+            style={[styles.langOption, on && styles.langOn]}
           >
             <AppText
               variant="label"
-              style={on ? styles.pillTextOn : styles.pillText}
+              style={on ? styles.langTextOn : styles.langText}
             >
               {o.label}
             </AppText>
@@ -340,154 +260,178 @@ function LanguagePill({
   );
 }
 
+/** A soft pill: dark for the main way in, frosted glass for the others. */
+function Choice({
+  label,
+  onPress,
+  icon,
+  tone = 'glass',
+  testID,
+}: {
+  label: string;
+  onPress: () => void;
+  icon?: React.ReactNode;
+  tone?: 'dark' | 'glass';
+  testID?: string;
+}) {
+  const dark = tone === 'dark';
+  const scale = useSharedValue(1);
+  const pressStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+  return (
+    <Pressable
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={dark ? null : styles.half}
+      onPress={() => {
+        haptics.tap();
+        onPress();
+      }}
+      onPressIn={() => {
+        scale.value = withSpring(0.97, springs.snappy);
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, springs.snappy);
+      }}
+    >
+      <Animated.View
+        style={[
+          styles.pill,
+          dark ? styles.pillDark : styles.pillGlass,
+          pressStyle,
+        ]}
+      >
+        {icon}
+        <Text
+          numberOfLines={1}
+          style={[
+            typography.button,
+            { color: dark ? colors.white : colors.ink },
+          ]}
+        >
+          {label}
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: SKY,
+    backgroundColor: MIST,
     overflow: 'hidden',
   },
   art: {
     position: 'absolute',
   },
-  fill: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  top: {
-    paddingHorizontal: spacing.gutter,
-    gap: spacing.md,
+  mist: {
+    position: 'absolute',
+    left: 0,
+    bottom: 0,
   },
   bar: {
+    position: 'absolute',
+    left: spacing.gutter,
+    right: spacing.gutter,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.lg,
+    justifyContent: 'flex-end',
   },
-  brand: {
-    color: colors.ink,
-  },
-  title: {
-    ...typography.display,
-    fontSize: 36,
-    lineHeight: 40,
-    color: colors.ink,
-    maxWidth: 320,
-  },
-  sub: {
-    color: 'rgba(0, 0, 0, 0.6)',
-  },
-  pill: {
+  lang: {
     flexDirection: 'row',
     padding: 3,
     borderRadius: 999,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.9)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(80, 40, 20, 0.12)',
   },
-  pillOption: {
+  langOption: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
   },
-  pillOn: {
+  langOn: {
     backgroundColor: colors.ink,
   },
-  pillText: {
+  langText: {
     color: colors.textMuted,
   },
-  pillTextOn: {
+  langTextOn: {
     color: colors.white,
   },
-  card: {
-    marginHorizontal: spacing.gutter - 6,
-    padding: 18,
-    borderRadius: 26,
-    backgroundColor: 'rgba(255, 255, 255, 0.92)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 1)',
-    boxShadow: '0px 24px 48px rgba(122, 52, 12, 0.16)',
-  },
-  cardBody: {
-    gap: 14,
-  },
-  field: {
-    height: 60,
-    flexDirection: 'row',
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: spacing.gutter,
     alignItems: 'center',
-    paddingHorizontal: 18,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
   },
-  fieldActive: {
-    borderColor: colors.saffron,
+  noTracking: {
+    letterSpacing: 0,
   },
-  cc: {
-    fontFamily: fonts.sansMedium,
-    fontSize: 18,
-    color: colors.ink,
+  eyebrow: {
+    ...typography.eyebrow,
+    color: '#B4612A',
   },
-  rule: {
-    width: 1,
-    height: 24,
-    marginHorizontal: 14,
-    backgroundColor: colors.hairline,
+  line: {
+    ...typography.title,
+    lineHeight: 34,
+    maxWidth: 340,
+    marginTop: spacing.md,
+    textAlign: 'center',
   },
-  number: {
-    flex: 1,
-    padding: 0,
-    fontFamily: fonts.sansMedium,
-    fontSize: 20,
-    letterSpacing: 0.5,
-    color: colors.ink,
-  },
-  cells: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  cell: {
-    flex: 1,
-    height: 58,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
-  },
-  cellFilled: {
-    borderColor: colors.ink,
-  },
-  cellCurrent: {
-    borderColor: colors.saffron,
-  },
-  cellWrong: {
-    borderColor: colors.danger,
-  },
-  cellText: {
-    fontFamily: fonts.sansBold,
-    fontSize: 22,
-    color: colors.ink,
-  },
-  hiddenInput: {
-    ...StyleSheet.absoluteFill,
-    opacity: 0.01,
-    color: 'transparent',
-  },
-  wrong: {
-    color: colors.danger,
-  },
-  links: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 4,
-  },
-  muted: {
+  sub: {
+    ...typography.body,
+    maxWidth: 320,
+    marginTop: spacing.md,
+    textAlign: 'center',
     color: colors.textMuted,
   },
-  saffron: {
-    color: colors.saffron,
+  actions: {
+    alignSelf: 'stretch',
+    marginTop: 28,
+    gap: 10,
+  },
+  pair: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  half: {
+    flex: 1,
+  },
+  pill: {
+    height: 54,
+    borderRadius: 27,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 18,
+  },
+  pillDark: {
+    backgroundColor: colors.charcoal,
+    boxShadow: '0px 12px 24px rgba(60, 24, 6, 0.18)',
+  },
+  pillGlass: {
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(80, 40, 20, 0.12)',
+  },
+  below: {
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    gap: spacing.md,
+  },
+  email: {
+    color: colors.ink,
+    textDecorationLine: 'underline',
+  },
+  private: {
+    textAlign: 'center',
+    color: colors.textMuted,
   },
 });
