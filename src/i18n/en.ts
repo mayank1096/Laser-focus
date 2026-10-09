@@ -329,10 +329,19 @@ export const en = {
   },
 
   goalDone: {
-    title: 'Done.',
+    reached: 'Goal reached',
+    ended: 'Sprint ended',
+    span: (from: string, to: string) => `${from} – ${to}`,
+    days: 'days',
+    full: 'full',
+    half: 'zig-zag',
+    milestones: (done: number, total: number) =>
+      `Milestones · ${done} of ${total}`,
+    journey: 'Every day since you circled it',
+    rest: 'Rest now',
     counts: (full: number, half: number) =>
       `${full} ● days · ${half} zig-zag days`,
-    rest: 'Rest now',
+    restSub: 'Every peak needs a valley.',
     endSprint: 'End this sprint',
     endSprintSure: 'End this sprint now? Your milestones stay on the sheet.',
   },

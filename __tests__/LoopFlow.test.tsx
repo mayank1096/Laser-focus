@@ -216,7 +216,7 @@ describe('the daily loop', () => {
     expect(useBook.getState().reviews).toHaveLength(1);
 
     // 18 Goal done → 19 Rest
-    expect(textContent(tree)).toContain('Done.');
+    expect(textContent(tree)).toContain('Goal reached');
     await press(tree, 'rest-now');
     await press(tree, 'rest-3');
     await press(tree, 'rest-go');
