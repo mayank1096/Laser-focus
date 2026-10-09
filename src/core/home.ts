@@ -34,8 +34,9 @@ export const activeMilestones = (
 ) =>
   book.milestones.filter(m => m.goalId === book.circledGoalId && !m.archived);
 
-export const inProgress = (book: Pick<BookData, 'sessions'>) =>
-  book.sessions.find(s => s.startedAt && !s.mark) ?? null;
+/** Today's running session. One started on an earlier day waits for its mark. */
+export const inProgress = (book: Pick<BookData, 'sessions'>, today: ISODate) =>
+  book.sessions.find(s => s.date === today && s.startedAt && !s.mark) ?? null;
 
 /** The most recent past session still waiting for its mark. */
 export const pendingMark = (
@@ -113,7 +114,7 @@ export function homeAction(
   if (book.reassessing) {
     return { kind: 'reassess' };
   }
-  const running = inProgress(book);
+  const running = inProgress(book, today);
   if (running) {
     return { kind: 'inProgress', session: running };
   }

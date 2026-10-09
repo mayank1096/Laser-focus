@@ -62,6 +62,8 @@ export function Box({
   }));
   const zigProps = useAnimatedProps(() => ({
     strokeDashoffset: length * (1 - zig.value),
+    // A round cap would leave a dot where the line starts.
+    strokeOpacity: zig.value > 0.001 ? 1 : 0,
   }));
   return (
     <View

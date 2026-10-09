@@ -41,7 +41,11 @@ export function RestScreen({ navigation }: RootScreenProps<'Rest'>) {
         />
       }
     >
-      <QuestionHeader eyebrow={t.rest.title} title={t.rest.why} />
+      <QuestionHeader
+        eyebrow={t.rest.title}
+        title={t.rest.valley}
+        subtitle={t.rest.why}
+      />
       <QuestionBody gap={24}>
         <ChipRow wrap>
           {CHIPS.map(n => (

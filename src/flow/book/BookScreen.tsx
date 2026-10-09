@@ -21,7 +21,7 @@ import { SheetTitle } from '../components/SheetTitle';
 import { CheckRow } from '../sprint/ReviewScreen';
 import { vowText } from '../vow/TakeVowScreen';
 
-const RECENT = 12;
+const RECENT = 7;
 
 /** The whole book on one page. Each sheet opens to edit. */
 export function BookScreen({ navigation }: RootScreenProps<'Book'>) {

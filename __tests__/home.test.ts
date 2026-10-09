@@ -95,6 +95,14 @@ describe('homeAction', () => {
     expect(homeAction(book, WED, 600).kind).toBe('inProgress');
   });
 
+  it('asks for the mark of a session left running yesterday', () => {
+    const book = {
+      ...base,
+      sessions: [s({ date: '2026-10-06', startedAt: '2026-10-06T06:04:00Z' })],
+    };
+    expect(homeAction(book, WED, 600).kind).toBe('markPast');
+  });
+
   it('starts the next unstarted session of today', () => {
     const book = {
       ...base,

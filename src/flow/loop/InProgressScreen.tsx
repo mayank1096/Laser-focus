@@ -69,8 +69,12 @@ export function InProgressScreen({
   const elapsed = Math.max(0, (tick.getTime() - started.getTime()) / 1000);
   const left = total - elapsed;
   const shown = Math.abs(left);
-  const mm = Math.floor(shown / 60);
+  const hh = Math.floor(shown / 3600);
+  const mm = Math.floor((shown % 3600) / 60);
   const ss = Math.floor(shown % 60);
+  const two = (n: number) => String(n).padStart(2, '0');
+  // 1:59:57 past the hour, 45:00 under it.
+  const clockText = hh ? `${hh}:${two(mm)}:${two(ss)}` : `${mm}:${two(ss)}`;
   const planned = t.common.minutes(session.minutes);
 
   return (
@@ -90,7 +94,7 @@ export function InProgressScreen({
       >
         <FocusDial elapsed={Math.min(elapsed, total)} total={total}>
           <AppText style={styles.time} testID="time-left">
-            {`${left < 0 ? '+' : ''}${mm}:${String(ss).padStart(2, '0')}`}
+            {`${left < 0 ? '+' : ''}${clockText}`}
           </AppText>
           <AppText variant="micro" style={styles.faint}>
             {left >= 0 ? t.progress.left(planned) : t.progress.over(planned)}

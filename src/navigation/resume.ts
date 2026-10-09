@@ -1,3 +1,4 @@
+import { appDay } from '../core/days';
 import { inProgress } from '../core/home';
 import { useBook } from '../core/store';
 import { useProfile } from '../features/account/store';
@@ -21,7 +22,7 @@ export function resumeRoute(): Resume {
   if (!profile.account) {
     return { name: 'SignIn' };
   }
-  const running = inProgress(book);
+  const running = inProgress(book, appDay());
   if (running) {
     return { name: 'InProgress', params: { id: running.id } };
   }

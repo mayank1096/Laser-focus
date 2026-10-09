@@ -342,7 +342,8 @@ export const en = {
 
   rest: {
     title: 'Rest',
-    why: 'Laser focus → achieve → rest → reassess → repeat. Every peak needs a valley.',
+    valley: 'Every peak needs a valley.',
+    why: 'Laser focus → achieve → rest → reassess → repeat.',
     days: (n: number) => `${n} days`,
     pickDate: 'Pick a date',
     list: [
@@ -468,7 +469,7 @@ export const en = {
           'Never reinstall until the goal is done',
         ],
         text: (goal: string) =>
-          `Until ${goal}, no distraction returns to my phone. If one does, I stop and set it right before I sit again.`,
+          `Until I reach “${goal}”, no distraction returns to my phone. If one does, I stop and set it right before I sit again.`,
       },
       bhishma: {
         tag: 'For life',

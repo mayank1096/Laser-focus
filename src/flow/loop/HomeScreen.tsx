@@ -94,17 +94,23 @@ export function HomeScreen({ navigation }: RootScreenProps<'Home'>) {
           entering={FadeInDown.duration(motion.slow).easing(motion.easeOut)}
           style={styles.action}
         >
-          <PrimaryButton
-            testID="home-action"
-            label={label}
-            disabled={disabled}
-            onPress={() => {
-              if (!disabled) {
+          {disabled ? (
+            // Nothing to press yet: a plain status, not a dead button.
+            <View testID="home-action" style={styles.status}>
+              <AppText variant="bodyMedium" style={styles.statusText}>
+                {label}
+              </AppText>
+            </View>
+          ) : (
+            <PrimaryButton
+              testID="home-action"
+              label={label}
+              onPress={() => {
                 haptics.tap();
                 go();
-              }
-            }}
-          />
+              }}
+            />
+          )}
           {extra ? (
             <Pressable
               testID="home-extra"
@@ -242,6 +248,17 @@ function describe(
 }
 
 const styles = StyleSheet.create({
+  status: {
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    backgroundColor: colors.white,
+  },
+  statusText: {
+    textAlign: 'center',
+  },
   screen: {
     flex: 1,
     backgroundColor: colors.stone,

@@ -18,11 +18,10 @@ import { now } from '../../utils/clock';
 import { VOW_STEPS } from './PratigyaScreen';
 
 /** "Clear CA Foundation" → "clear CA Foundation", to sit inside a sentence. */
-const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
 export function vowText(t: Strings, pratigya: Pratigya, goal: string): string {
   const v = t.vow.names[pratigya];
-  return typeof v.text === 'function' ? v.text(lower(goal)) : v.text;
+  return typeof v.text === 'function' ? v.text(goal) : v.text;
 }
 
 export function TakeVowScreen({ navigation }: RootScreenProps<'TakeVow'>) {
