@@ -190,7 +190,7 @@ export const en = {
     other: 'Other',
     window: (from: string, to: string) => `${from} – ${to}`,
     reviewShort: 'Weekly review',
-    reminderSub: 'Only to plan tomorrow. Nothing else, ever.',
+    reminderSub: 'A nudge to plan tomorrow.',
     pickReminder: 'Evening reminder',
   },
 
