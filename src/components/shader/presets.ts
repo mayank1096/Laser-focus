@@ -58,14 +58,18 @@ vec4 effect(vec2 uv, float aspect, float t) {
   vec3 cream = mix(c2, vec3(1.0, 0.97, 0.92), 0.5);
   vec3 ramp = mix(c0, c1, smoothstep(0.0, 0.3, f));
   ramp = mix(ramp, coral, smoothstep(0.3, 0.5, f) * 0.8);
-  ramp = mix(ramp, c2, smoothstep(0.45, 0.72, f));
-  ramp = mix(ramp, cream, smoothstep(0.7, 0.95, f) * 0.85);
+  // Where the type sits, the light ribbons are held back so it stays legible.
+  float text = smoothstep(0.18, 0.4, uv.y);
+  ramp = mix(ramp, c2, smoothstep(0.45, 0.72, f) * mix(1.0, 0.45, text));
+  ramp = mix(ramp, cream, smoothstep(0.7, 0.95, f) * mix(0.85, 0.15, text));
   // A steady warm sky underneath, saffron above and peach below, so the
   // ribbons never wash the type out or sink it into shadow.
-  vec3 base = mix(c2, mix(c0, c1, 0.75), smoothstep(0.15, 0.95, uv.y));
+  vec3 base = mix(c2, mix(c0, c1, 0.4), smoothstep(0.08, 0.5, uv.y));
   vec3 col = mix(base, ramp, 0.6);
   // The folds catch light where the warp bends hardest.
   col += vec3(1.0, 0.85, 0.7) * smoothstep(0.55, 0.9, length(r - q)) * 0.06;
+  // Deeper towards the top, where the type sits on it.
+  col = mix(col, c0, smoothstep(0.25, 1.0, uv.y) * 0.35);
   // Fine grain so the gradients never band.
   col += (hash3(vec3(uv * 900.0, 1.0)) - 0.5) * 0.02;
   float page = 1.0 - smoothstep(0.04, 0.32, uv.y);
