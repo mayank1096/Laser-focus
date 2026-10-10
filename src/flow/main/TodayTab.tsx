@@ -15,6 +15,7 @@ import { ShaderView } from '../../components/shader';
 import { GradientPill } from '../../components/GradientPill';
 import { rise } from '../../components/QuestionHeader';
 import { TAB_BAR_CLEARANCE } from '../../components/TabBar';
+import { Ticker } from '../../components/Ticker';
 import { appDay, appMinutes } from '../../core/days';
 import {
   activeMilestones,
@@ -143,9 +144,10 @@ export function TodayTab({ go }: { go: Go }) {
           {value ? (
             <Animated.View entering={rise(0)} style={styles.reminder}>
               <GradientPill radius={10}>
-                <AppText style={styles.reminderText} numberOfLines={2}>
-                  {t.today.remember(value)}
-                </AppText>
+                <Ticker
+                  text={t.today.remember(value)}
+                  style={styles.reminderText}
+                />
               </GradientPill>
             </Animated.View>
           ) : null}
