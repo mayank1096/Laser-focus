@@ -2,6 +2,7 @@ import React from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ArtPreloader } from './src/components/ArtPreloader';
 import { RootNavigator } from './src/navigation/RootNavigator';
 
 function App() {
@@ -9,6 +10,7 @@ function App() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <StatusBar barStyle="dark-content" />
+        <ArtPreloader />
         <RootNavigator />
       </SafeAreaProvider>
     </GestureHandlerRootView>

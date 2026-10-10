@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Image,
   Pressable,
@@ -77,9 +77,10 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
 
   // It settles in slowly, as if the camera is still finding him.
   const settle = useSharedValue(0);
-  useEffect(() => {
+  // The art settles in once it has loaded, so it never pops in mid-way.
+  const reveal = () => {
     settle.value = withTiming(1, { duration: 1800, easing: motion.easeOut });
-  }, [settle]);
+  };
   const artStyle = useAnimatedStyle(() => ({
     opacity: Math.min(1, settle.value * 1.6),
     transform: [{ scale: 1.08 - settle.value * 0.08 }],
@@ -114,6 +115,8 @@ export function SignInScreen({ navigation }: RootScreenProps<'SignIn'>) {
       >
         <Image
           source={art.ridge}
+          onLoad={reveal}
+          onError={reveal}
           style={{ width: artWidth, height: artHeight }}
           resizeMode="cover"
           accessibilityIgnoresInvertColors

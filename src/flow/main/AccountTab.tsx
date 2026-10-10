@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Image, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
@@ -14,6 +14,7 @@ import Mail from '../../assets/icons/mail.svg';
 import Scroll from '../../assets/icons/scroll-text.svg';
 import Settings from '../../assets/icons/settings.svg';
 import Shield from '../../assets/icons/shield-check.svg';
+import { Toggle } from '../../components/Toggle';
 import { AppText } from '../../components/AppText';
 import { SettingsRow, SettingsSection } from '../../components/SettingsList';
 import { rise } from '../../components/QuestionHeader';
@@ -156,15 +157,13 @@ export function AccountTab({
                 : t.account.reminderOff
             }
             trailing={
-              <Switch
+              <Toggle
                 testID="reminders-toggle"
                 value={state.rhythm.reminderOn}
                 onValueChange={on => {
                   haptics.selection();
                   state.setRhythm({ reminderOn: on });
                 }}
-                trackColor={{ true: colors.saffron, false: colors.hairline }}
-                thumbColor={colors.white}
               />
             }
           />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Switch, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import type { SvgProps } from 'react-native-svg';
 import Bell from '../../assets/icons/bell.svg';
@@ -9,6 +9,7 @@ import Moon from '../../assets/icons/moon.svg';
 import Sun from '../../assets/icons/sun.svg';
 import Sunrise from '../../assets/icons/sunrise.svg';
 import Sunset from '../../assets/icons/sunset.svg';
+import { Toggle } from '../../components/Toggle';
 import { AppText } from '../../components/AppText';
 import { Pill, PillRow, SectionHeader } from '../../components/Pill';
 import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
@@ -193,15 +194,13 @@ export function RhythmEditor() {
             <AppText variant="bodyMedium">{t.rhythm.reminder}</AppText>
             <AppText variant="detail">{t.rhythm.reminderSub}</AppText>
           </View>
-          <Switch
+          <Toggle
             testID="rhythm-reminder"
             value={rhythm.reminderOn}
             onValueChange={on => {
               haptics.selection();
               setRhythm({ reminderOn: on });
             }}
-            trackColor={{ true: colors.saffron, false: colors.hairline }}
-            thumbColor={colors.white}
           />
         </View>
         {rhythm.reminderOn ? (

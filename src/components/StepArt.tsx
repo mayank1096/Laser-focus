@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   StyleSheet,
   useWindowDimensions,
@@ -25,9 +25,10 @@ export function useArtSize() {
 }
 
 /**
- * The warrior illustration anchored to the bottom of the screen. When the
- * art changes between steps the old one dissolves into the new one; when a
- * long list reaches it, it fades back so text stays readable.
+ * The warrior illustration anchored to the bottom of the screen. It arrives
+ * with its page, never after it; when the art changes between steps the old
+ * one dissolves into the new one; when a long list reaches it, it fades back
+ * so text stays readable.
  */
 export function StepArt({
   source,
@@ -40,12 +41,15 @@ export function StepArt({
 }) {
   const { width } = useWindowDimensions();
   const size = useArtSize();
-  const opacity = useSharedValue(dimmed ? DIMMED_OPACITY : 1);
-
+  // Rises with the page itself, straight to the strength the content allows.
+  const opacity = useSharedValue(0);
+  // The first art is part of the page; only later changes cross-fade.
+  const mounted = useRef(false);
   useEffect(() => {
     opacity.value = withTiming(dimmed ? DIMMED_OPACITY : 1, {
-      duration: motion.slow,
+      duration: mounted.current ? motion.slow : motion.base,
     });
+    mounted.current = true;
   }, [dimmed, opacity]);
 
   const fadeStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
@@ -62,8 +66,12 @@ export function StepArt({
       <Animated.Image
         key={artKey}
         source={source}
-        entering={FadeIn.duration(motion.cinematic).easing(motion.easeOut)}
-        exiting={FadeOut.duration(motion.cinematic)}
+        entering={
+          mounted.current
+            ? FadeIn.duration(motion.slow).easing(motion.easeOut)
+            : undefined
+        }
+        exiting={FadeOut.duration(motion.slow)}
         resizeMode="cover"
         accessibilityIgnoresInvertColors
         style={StyleSheet.absoluteFill}
