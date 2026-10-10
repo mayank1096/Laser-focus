@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { art } from '../../assets/art';
 import { AppText } from '../../components/AppText';
-import { OutlineButton, PrimaryButton } from '../../components/PrimaryButton';
+import { PrimaryButton } from '../../components/PrimaryButton';
 import { rise } from '../../components/QuestionHeader';
 import { SimpleScreen } from '../../components/SimpleScreen';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing, typography } from '../../theme';
-import { haptics } from '../../utils/haptics';
 
-/** The end of setup. Paper is the point: the sheets belong on the desk. */
+/** The end of setup: the Action Book is written. */
 export function SetupDoneScreen({ navigation }: RootScreenProps<'SetupDone'>) {
   const t = useT();
-  const [printNote, setPrintNote] = useState(false);
   return (
     <SimpleScreen
       testID="setup-done"
@@ -24,20 +22,15 @@ export function SetupDoneScreen({ navigation }: RootScreenProps<'SetupDone'>) {
       art={art.drawingBow}
       footer={
         <View style={styles.footer}>
-          <OutlineButton
-            testID="print"
-            label={t.setupDone.print}
-            onPress={() => {
-              haptics.tap();
-              setPrintNote(true);
-            }}
-          />
           <PrimaryButton
             testID="go-home"
             label={t.setupDone.home}
             onPress={() => {
               useBook.getState().setSetup('done');
-              navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Home', params: { arrive: true } }],
+              });
             }}
           />
         </View>
@@ -52,9 +45,6 @@ export function SetupDoneScreen({ navigation }: RootScreenProps<'SetupDone'>) {
             {t.setupDone.note}
           </AppText>
         </Animated.View>
-        {printNote ? (
-          <AppText variant="caption">{t.setupDone.printSoon}</AppText>
-        ) : null}
       </View>
     </SimpleScreen>
   );

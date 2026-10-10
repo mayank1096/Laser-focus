@@ -212,10 +212,8 @@ export const en = {
 
   setupDone: {
     title: 'Your Action Book is ready.',
-    print: 'Print your Action Book',
-    printSoon: 'Printing arrives in the next update.',
     home: 'Go to Home',
-    note: 'The ritual says read your sheets at the desk. The phone will be outside. Paper is the point.',
+    note: 'Read your sheets each evening before you plan. When you work, the phone stays outside.',
   },
 
   home: {
@@ -408,7 +406,6 @@ export const en = {
     endSprint: 'End this sprint',
     noSessions: 'Your first session will appear here.',
     vow: 'Your vow',
-    print: 'Print',
   },
 
   settings: {
@@ -421,10 +418,8 @@ export const en = {
     ],
     helpSection: 'Help and your data',
     howSub: 'The loop, in five steps',
-    printSub: 'Your sheets, ready for paper',
     exportSub: 'Everything you wrote, as one file',
     deleteSub: 'Erases your book from this phone',
-    print: 'Printable Action Book',
     title: 'Settings',
     language: 'Language',
     focus: 'Focus time',
@@ -601,7 +596,6 @@ export const en = {
     language: 'Language',
     languageName: 'English',
     how: 'How this app works',
-    print: 'Printable Action Book',
     export: 'Export my data',
     signOut: 'Sign out',
     signOutSure: 'Tap again to sign out',

@@ -58,7 +58,7 @@ export const colors = {
 export type ColorToken = keyof typeof colors;
 
 /** The silk behind Home and the goal: deep, body, light. Add the page colour it melts into. */
-export const SILK = ['#C4501F', '#EC8040', '#FFC596'] as const;
+export const SILK = ['#C8470F', '#F58D4C', '#FFD6B4'] as const;
 
 /** The full-screen haze behind the ritual, the session and the goal: dark, ember, body, light. */
 export const MIST = ['#140806', '#6E2410', '#C2561E', '#EBA06A'] as const;

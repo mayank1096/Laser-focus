@@ -6,7 +6,17 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  Keyframe,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+  ZoomIn,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Line } from 'react-native-svg';
 import { AppText } from '../../components/AppText';
@@ -32,6 +42,7 @@ import type { RootStackParamList } from '../../navigation/types';
 import {
   colors,
   fonts,
+  motion,
   spacing,
   typography,
   SILK,
@@ -55,6 +66,58 @@ const WHITE_22 = 'rgba(255, 255, 255, 0.22)';
 const INK_50 = 'rgba(0, 0, 0, 0.5)';
 const INK_06 = 'rgba(0, 0, 0, 0.06)';
 
+/**
+ * The first landing after setup, in ms from the moment Home appears: the
+ * sky dawns, the reminder drops on its strings, the goal rises, the days
+ * light up one by one, then the card and the tab bar come up to meet you.
+ */
+export const ARRIVE = {
+  strings: 300,
+  reminder: 480,
+  goal: 700,
+  stats: 860,
+  squares: 960,
+  card: 1500,
+  list: 1700,
+  dock: 1800,
+};
+
+/** The sky settles down from above as it brightens. */
+const dawn = new Keyframe({
+  0: { opacity: 0, transform: [{ translateY: -90 }, { scale: 1.08 }] },
+  100: {
+    opacity: 1,
+    transform: [{ translateY: 0 }, { scale: 1 }],
+    easing: motion.easeOut,
+  },
+}).duration(1100);
+
+/** The reminder drops on its strings and swings to rest. */
+const drop = new Keyframe({
+  0: { opacity: 0, transform: [{ translateY: -36 }, { rotate: '-5deg' }] },
+  45: { opacity: 1, transform: [{ translateY: 4 }, { rotate: '3deg' }] },
+  70: { transform: [{ translateY: -1 }, { rotate: '-1.5deg' }] },
+  100: { transform: [{ translateY: 0 }, { rotate: '0deg' }] },
+})
+  .delay(ARRIVE.reminder)
+  .duration(900);
+
+const lift = (delay: number) =>
+  FadeInDown.delay(delay).duration(motion.slow).easing(motion.easeOut);
+
+/** The card comes up from further below, on a soft spring. */
+const rise3 = (delay: number) =>
+  new Keyframe({
+    0: { opacity: 0, transform: [{ translateY: 70 }, { scale: 0.96 }] },
+    100: {
+      opacity: 1,
+      transform: [{ translateY: 0 }, { scale: 1 }],
+      easing: motion.easeOut,
+    },
+  })
+    .delay(delay)
+    .duration(700);
+
 type Go = <K extends keyof RootStackParamList>(
   name: K,
   params?: RootStackParamList[K],
@@ -65,7 +128,7 @@ type Go = <K extends keyof RootStackParamList>(
  * it; the one next step waits in the card; the milestones below show where
  * this week fits.
  */
-export function TodayTab({ go }: { go: Go }) {
+export function TodayTab({ go, arrive = false }: { go: Go; arrive?: boolean }) {
   const t = useT();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -100,6 +163,21 @@ export function TodayTab({ go }: { go: Go }) {
 
   const card = describe(action, t, today, go);
 
+  // On arrival the milestone bar fills from empty.
+  const share = p.milestonesTotal ? p.milestonesDone / p.milestonesTotal : 0;
+  const fill = useSharedValue(arrive ? 0 : share);
+  useEffect(() => {
+    fill.value = arrive
+      ? withDelay(
+          ARRIVE.stats + 200,
+          withTiming(share, { duration: 900, easing: motion.easeOut }),
+        )
+      : share;
+  }, [arrive, share, fill]);
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${fill.value * 100}%`,
+  }));
+
   return (
     <View style={styles.screen} testID="home">
       <ScrollView
@@ -108,7 +186,8 @@ export function TodayTab({ go }: { go: Go }) {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View
+        <Animated.View
+          entering={arrive ? dawn : undefined}
           style={[styles.glow, { height: GLOW_HEIGHT * scale }]}
           pointerEvents="none"
         >
@@ -119,30 +198,38 @@ export function TodayTab({ go }: { go: Go }) {
             colours={SKY}
             style={styles.aurora}
           />
-        </View>
+        </Animated.View>
 
         <View style={[styles.hero, { paddingTop: insets.top + 6 }]}>
           {/* The reminder hangs from two dashed strings. */}
-          <Svg
+          <Animated.View
+            entering={
+              arrive
+                ? FadeInUp.delay(ARRIVE.strings).duration(motion.slow)
+                : undefined
+            }
             style={styles.strings}
-            width="100%"
-            height={insets.top + 6}
             pointerEvents="none"
           >
-            {['9.5%', '90.5%'].map(x => (
-              <Line
-                key={x}
-                x1={x}
-                x2={x}
-                y1={0}
-                y2={insets.top + 6}
-                stroke={colors.white}
-                strokeDasharray="3 3"
-              />
-            ))}
-          </Svg>
+            <Svg width="100%" height={insets.top + 6}>
+              {['9.5%', '90.5%'].map(x => (
+                <Line
+                  key={x}
+                  x1={x}
+                  x2={x}
+                  y1={0}
+                  y2={insets.top + 6}
+                  stroke={colors.white}
+                  strokeDasharray="3 3"
+                />
+              ))}
+            </Svg>
+          </Animated.View>
           {value ? (
-            <Animated.View entering={rise(0)} style={styles.reminder}>
+            <Animated.View
+              entering={arrive ? drop : rise(0)}
+              style={styles.reminder}
+            >
               <GradientPill radius={10}>
                 <Ticker
                   text={t.today.remember(value)}
@@ -152,14 +239,20 @@ export function TodayTab({ go }: { go: Go }) {
             </Animated.View>
           ) : null}
 
-          <Animated.View entering={rise(1)} style={styles.goalBlock}>
+          <Animated.View
+            entering={arrive ? lift(ARRIVE.goal) : rise(1)}
+            style={styles.goalBlock}
+          >
             <AppText style={styles.eyebrow}>{t.today.goal}</AppText>
             <AppText style={styles.goal} accessibilityRole="header">
               {p.goal?.text ?? ''}
             </AppText>
           </Animated.View>
 
-          <Animated.View entering={rise(2)} style={styles.stats}>
+          <Animated.View
+            entering={arrive ? FadeIn.delay(ARRIVE.stats) : rise(2)}
+            style={styles.stats}
+          >
             <View style={styles.statsRow}>
               <AppText style={styles.micro}>
                 {t.today.milestones(p.milestonesDone, p.milestonesTotal)}
@@ -171,18 +264,7 @@ export function TodayTab({ go }: { go: Go }) {
               </View>
             </View>
             <View style={styles.bar}>
-              <View
-                style={[
-                  styles.barFill,
-                  {
-                    width: `${
-                      p.milestonesTotal
-                        ? (p.milestonesDone / p.milestonesTotal) * 100
-                        : 0
-                    }%`,
-                  },
-                ]}
-              />
+              <Animated.View style={[styles.barFill, fillStyle]} />
             </View>
             <Pressable
               testID="home-week"
@@ -195,7 +277,12 @@ export function TodayTab({ go }: { go: Go }) {
                   {squares
                     .slice(r * PER_ROW, (r + 1) * PER_ROW)
                     .map((mark, i) => (
-                      <DaySquare key={i} mark={mark} />
+                      <DaySquare
+                        key={i}
+                        mark={mark}
+                        // A wave across the run, left to right.
+                        delay={arrive ? ARRIVE.squares + i * 22 + r * 50 : null}
+                      />
                     ))}
                 </View>
               ))}
@@ -203,7 +290,11 @@ export function TodayTab({ go }: { go: Go }) {
           </Animated.View>
         </View>
 
-        <Animated.View key={action.kind} entering={rise(3)} style={styles.card}>
+        <Animated.View
+          key={action.kind}
+          entering={arrive ? rise3(ARRIVE.card) : rise(3)}
+          style={styles.card}
+        >
           <View style={styles.cardText}>
             <AppText style={styles.cardTitle}>{card.title}</AppText>
             {card.body ? (
@@ -245,11 +336,17 @@ export function TodayTab({ go }: { go: Go }) {
           ) : null}
         </Animated.View>
 
-        <MilestoneList
-          milestones={milestones}
-          testIDPrefix="today-ms"
-          style={styles.milestones}
-        />
+        <Animated.View
+          entering={
+            arrive ? FadeIn.delay(ARRIVE.list).duration(motion.slow) : undefined
+          }
+        >
+          <MilestoneList
+            milestones={milestones}
+            testIDPrefix="today-ms"
+            style={styles.milestones}
+          />
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -382,12 +479,26 @@ function describe(a: HomeAction, t: Strings, today: string, go: Go): Card {
 }
 
 /** Full: solid. Half: filled half way up. Empty or not yet: faint. */
-function DaySquare({ mark }: { mark: Mark | null }) {
+function DaySquare({
+  mark,
+  delay,
+}: {
+  mark: Mark | null;
+  /** On arrival, when this square pops in. */
+  delay: number | null;
+}) {
   return (
-    <View style={styles.square}>
+    <Animated.View
+      entering={
+        delay === null
+          ? undefined
+          : ZoomIn.delay(delay).springify().damping(14).stiffness(260)
+      }
+      style={styles.square}
+    >
       {mark === 'full' ? <View style={styles.squareFull} /> : null}
       {mark === 'half' ? <View style={styles.squareHalf} /> : null}
-    </View>
+    </Animated.View>
   );
 }
 

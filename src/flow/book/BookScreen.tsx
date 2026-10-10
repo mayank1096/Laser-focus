@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { appDay } from '../../core/days';
 import { useBook } from '../../core/store';
@@ -23,7 +23,6 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
     .sort((a, b) =>
       a.date === b.date ? b.order - a.order : a.date < b.date ? 1 : -1,
     );
-  const [printNote, setPrintNote] = useState(false);
 
   return (
     <SheetPage
@@ -66,22 +65,6 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
           <AppText variant="caption">{t.book.noSessions}</AppText>
         )}
       </View>
-
-      <View style={styles.print}>
-        <Pressable
-          testID="book-print"
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={() => setPrintNote(true)}
-        >
-          <AppText variant="label" style={styles.link}>
-            {t.book.print}
-          </AppText>
-        </Pressable>
-        {printNote ? (
-          <AppText variant="caption">{t.setupDone.printSoon}</AppText>
-        ) : null}
-      </View>
     </SheetPage>
   );
 }
@@ -111,13 +94,5 @@ const styles = StyleSheet.create({
   },
   muted: {
     color: colors.textMuted,
-  },
-  link: {
-    color: colors.saffron,
-  },
-  print: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.sm,
   },
 });

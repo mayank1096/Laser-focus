@@ -6,7 +6,6 @@ import BookOpen from '../../assets/icons/book-open.svg';
 import ChevronDown from '../../assets/icons/chevron-down.svg';
 import Languages from '../../assets/icons/languages.svg';
 import LogOut from '../../assets/icons/log-out.svg';
-import ScrollText from '../../assets/icons/scroll-text.svg';
 import Trash from '../../assets/icons/trash.svg';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
@@ -27,7 +26,6 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
   const language = useProfile(s => s.language);
   const setLanguage = useProfile(s => s.setLanguage);
   const [how, setHow] = useState(false);
-  const [printNote, setPrintNote] = useState(false);
   const [deleteSure, setDeleteSure] = useState(false);
 
   const toSignIn = () =>
@@ -111,13 +109,6 @@ export function SettingsScreen({ navigation }: RootScreenProps<'Settings'>) {
                 </Animated.View>
               ) : null}
             </SettingsRow>
-            <SettingsRow
-              testID="settings-print"
-              Icon={ScrollText}
-              title={t.settings.print}
-              detail={printNote ? t.setupDone.printSoon : t.settings.printSub}
-              onPress={() => setPrintNote(true)}
-            />
             <SettingsRow
               testID="settings-export"
               Icon={ArrowDown}

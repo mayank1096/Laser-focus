@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { TabBar, type TabId } from '../../components/TabBar';
 import { useProfile } from '../../features/account/store';
 import type {
@@ -11,11 +11,13 @@ import { colors, motion } from '../../theme';
 import { AccountTab } from './AccountTab';
 import { BookTab } from './BookTab';
 import { TasksTab } from './TasksTab';
-import { TodayTab } from './TodayTab';
+import { ARRIVE, TodayTab } from './TodayTab';
 
 /** The four tabs: Today, Action Book, Tasks, Account. */
 export function MainScreen({ navigation, route }: RootScreenProps<'Home'>) {
   const [tab, setTab] = useState<TabId>(route.params?.tab ?? 'today');
+  // The first landing after setup plays once, then Home is just Home.
+  const [arrive] = useState(route.params?.arrive === true);
 
   useEffect(() => {
     if (route.params?.tab) {
@@ -39,7 +41,7 @@ export function MainScreen({ navigation, route }: RootScreenProps<'Home'>) {
         entering={FadeIn.duration(motion.fast)}
         style={styles.fill}
       >
-        {tab === 'today' ? <TodayTab go={go} /> : null}
+        {tab === 'today' ? <TodayTab go={go} arrive={arrive} /> : null}
         {tab === 'book' ? (
           <BookTab
             onOpen={to => {
@@ -83,7 +85,19 @@ export function MainScreen({ navigation, route }: RootScreenProps<'Home'>) {
           />
         ) : null}
       </Animated.View>
-      <TabBar active={tab} onChange={setTab} />
+      <Animated.View
+        pointerEvents="box-none"
+        style={styles.dock}
+        entering={
+          arrive
+            ? FadeInDown.delay(ARRIVE.dock)
+                .duration(motion.slow)
+                .easing(motion.easeOut)
+            : undefined
+        }
+      >
+        <TabBar active={tab} onChange={setTab} />
+      </Animated.View>
     </View>
   );
 }
@@ -95,5 +109,12 @@ const styles = StyleSheet.create({
   },
   fill: {
     flex: 1,
+  },
+  dock: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
 });

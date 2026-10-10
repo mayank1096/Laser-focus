@@ -39,45 +39,35 @@ float fbm(vec3 p) {
 
 export const PRESETS = {
   /**
-   * Today's sky: light apricot silk. A few broad folds drift slowly, each
-   * crest catching a soft cream sheen, with one warm pool of light wandering
-   * behind them. A touch deeper at the top so white type reads; melts into
-   * the page at the bottom. c0 deep, c1 body, c2 light, c3 the page.
+   * Today's sky: liquid dawn. Warm light folded through itself (noise warped
+   * by noise), so ribbons of cream, coral and saffron slide over one another
+   * like ink in water. A touch deeper at the top so white type reads; melts
+   * into the page at the bottom. c0 deep, c1 body, c2 light, c3 the page.
    */
   silk: `
-float folds(vec2 p, float t) {
-  // Smooth sine warps only: noise would mottle the cloth.
-  vec2 q = p;
-  for (int i = 1; i < 4; i++) {
-    float k = float(i);
-    q += vec2(sin(k * 0.8 * q.y + t * 0.07 + k * 1.3),
-              cos(k * 0.6 * q.x + t * 0.05 + k * 2.1)) * (0.6 / k);
-  }
-  return sin(q.x * 0.9 + q.y * 0.7);
-}
-
 vec4 effect(vec2 uv, float aspect, float t) {
-  vec2 p = vec2(uv.x * aspect, uv.y) * 1.9;
-  float e = 0.01;
-  float h = folds(p, t);
-  float hx = folds(p + vec2(e, 0.0), t);
-  float hy = folds(p + vec2(0.0, e), t);
-  vec3 n = normalize(vec3((h - hx) / e * 0.55, (h - hy) / e * 0.55, 1.0));
-  vec3 l = normalize(vec3(-0.45, 0.6, 0.7));
-  float diff = clamp(dot(n, l), 0.0, 1.0);
-  float sheen = pow(clamp(dot(reflect(-l, n), vec3(0.0, 0.0, 1.0)), 0.0, 1.0), 6.0);
-  // Folds shade between body and light; the deep tone only in the troughs.
-  vec3 col = mix(c0, c1, smoothstep(0.15, 0.7, diff));
-  col = mix(col, c2, smoothstep(0.7, 1.0, diff) * 0.6);
-  col = mix(col, mix(c2, vec3(1.0), 0.45), sheen * 0.45);
-  // A warm pool of light drifting behind the cloth.
-  vec2 g = vec2(0.72 + 0.18 * sin(t * 0.05), 0.62 + 0.12 * cos(t * 0.04));
-  float glow = exp(-dot((uv - g) * vec2(aspect, 1.0), (uv - g) * vec2(aspect, 1.0)) * 2.6);
-  col = mix(col, c2, glow * 0.3);
-  // A little deeper towards the top, where the type sits on it.
-  col = mix(col, c0, smoothstep(0.5, 1.0, uv.y) * 0.35);
+  vec2 p = vec2(uv.x * aspect, uv.y) * 1.15;
+  float s = t * 0.08;
+  vec2 q = vec2(fbm(vec3(p, s)), fbm(vec3(p + vec2(5.2, 1.3), s)));
+  vec2 r = vec2(fbm(vec3(p + 3.2 * q + vec2(1.7, 9.2), s * 1.3)),
+                fbm(vec3(p + 3.2 * q + vec2(8.3, 2.8), s * 1.3)));
+  // fbm sits near its middle; stretch it so every ribbon gets its turn.
+  float f = smoothstep(0.28, 0.72, fbm(vec3(p + 2.6 * r, s * 0.7)));
+  // Ribbons: the ramp runs deep, saffron, coral, cream.
+  vec3 coral = mix(c1, vec3(1.0, 0.62, 0.55), 0.55);
+  vec3 cream = mix(c2, vec3(1.0, 0.97, 0.92), 0.5);
+  vec3 ramp = mix(c0, c1, smoothstep(0.0, 0.3, f));
+  ramp = mix(ramp, coral, smoothstep(0.3, 0.5, f) * 0.8);
+  ramp = mix(ramp, c2, smoothstep(0.45, 0.72, f));
+  ramp = mix(ramp, cream, smoothstep(0.7, 0.95, f) * 0.85);
+  // A steady warm sky underneath, saffron above and peach below, so the
+  // ribbons never wash the type out or sink it into shadow.
+  vec3 base = mix(c2, mix(c0, c1, 0.75), smoothstep(0.15, 0.95, uv.y));
+  vec3 col = mix(base, ramp, 0.6);
+  // The folds catch light where the warp bends hardest.
+  col += vec3(1.0, 0.85, 0.7) * smoothstep(0.55, 0.9, length(r - q)) * 0.06;
   // Fine grain so the gradients never band.
-  col += (hash3(vec3(uv * 900.0, 1.0)) - 0.5) * 0.012;
+  col += (hash3(vec3(uv * 900.0, 1.0)) - 0.5) * 0.02;
   float page = 1.0 - smoothstep(0.04, 0.32, uv.y);
   // Through warm light into the page, never through grey.
   col = mix(col, c2, smoothstep(0.0, 0.6, page) * 0.45);

@@ -27,7 +27,8 @@ export type RootStackParamList = {
   DayOne: undefined;
   Lockout: undefined;
   // Part 2 · The daily loop
-  Home: { tab?: TabId } | undefined;
+  /** `arrive`: the first landing after setup, played as an entrance. */
+  Home: { tab?: TabId; arrive?: boolean } | undefined;
   Plan: { date?: ISODate; first?: boolean } | undefined;
   Start: { id: Id };
   InProgress: { id: Id };

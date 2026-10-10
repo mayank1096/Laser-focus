@@ -156,7 +156,7 @@ export const DEFAULT_RHYTHM: Rhythm = {
     { start: 16 * 60, minutes: 90 },
   ],
   reviewDay: 0,
-  reminderOn: true,
+  reminderOn: false,
   reminderAt: 21 * 60,
 };
 

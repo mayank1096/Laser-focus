@@ -21,12 +21,12 @@ import { firstName, useProfile } from '../../features/account/store';
 import { useT } from '../../i18n';
 import { haptics } from '../../utils/haptics';
 
-/** The pace of one line: arrive, stay, leave. Slow on purpose. */
-const IN = 1100;
-const HOLD = 2600;
-const OUT = 800;
+/** The pace of one line: arrive, stay, leave. Unhurried, never slow. */
+const IN = 800;
+const HOLD = 1800;
+const OUT = 600;
 /** A breath before the first line, while the colour settles. */
-const FIRST_DELAY = 900;
+const FIRST_DELAY = 600;
 
 const DEEP = '#DD5800';
 const LIGHT = '#F9E0CB';
