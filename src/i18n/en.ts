@@ -301,8 +301,7 @@ export const en = {
   },
 
   mark: {
-    won: 'Lakshya bhed.',
-    wonSub: 'The arrow found its mark.',
+    won: 'You did it.',
     dayOf: (n: number) => `Day ${n} of your run`,
     title: (n: number, what: string) => `Session ${n} · ${what}`,
     full: 'Done, the whole outcome',

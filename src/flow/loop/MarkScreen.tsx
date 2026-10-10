@@ -169,7 +169,6 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
             width={cardWidth}
             eyebrow={t.common.session(session.order + 1)}
             headline={t.mark.won}
-            sub={t.mark.wonSub}
             footer={t.mark.dayOf(sprintProgress(state, today).day)}
             brand={t.signIn.eyebrow}
             holdLabel={t.mark.hold}

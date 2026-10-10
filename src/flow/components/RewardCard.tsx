@@ -39,7 +39,6 @@ export function RewardCard({
   width,
   eyebrow,
   headline,
-  sub,
   footer,
   brand,
   holdLabel,
@@ -53,8 +52,6 @@ export function RewardCard({
   eyebrow: string;
   /** The win, large: "Lakshya bhed." */
   headline: string;
-  /** Under it, one quiet line. */
-  sub: string;
   /** At the foot of the card: where this sits in the run. */
   footer: string;
   /** Printed on the card's back. */
@@ -292,7 +289,7 @@ export function RewardCard({
           collapsable={false}
           testID="mark-pad"
           accessibilityRole="button"
-          accessibilityLabel={`${eyebrow}, ${headline} ${sub}`}
+          accessibilityLabel={`${eyebrow}, ${headline}`}
           accessibilityActions={
             locked
               ? []
@@ -332,9 +329,6 @@ export function RewardCard({
               </Animated.Text>
               <Animated.Text style={[styles.headline, inkStyle]}>
                 {headline}
-              </Animated.Text>
-              <Animated.Text style={[styles.sub, softInkStyle]}>
-                {sub}
               </Animated.Text>
               <Animated.Text style={[styles.footer, softInkStyle]}>
                 {footer}
@@ -429,12 +423,6 @@ const styles = StyleSheet.create({
     fontSize: 40,
     lineHeight: 46,
     letterSpacing: -0.8,
-  },
-  sub: {
-    marginTop: 2,
-    fontFamily: fonts.sans,
-    fontSize: 15,
-    lineHeight: 20,
   },
   footer: {
     position: 'absolute',
