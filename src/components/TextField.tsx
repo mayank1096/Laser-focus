@@ -24,6 +24,8 @@ export interface TextFieldProps
   > {
   /** Grows to several lines; return still submits. */
   multiline?: boolean;
+  /** On a dark ground: see-through glass with white text. */
+  tone?: 'light' | 'dark';
 }
 
 /**
@@ -34,18 +36,25 @@ export const TextField = forwardRef<
   React.ComponentRef<typeof TextInput>,
   TextFieldProps
 >(function TextFieldInput(
-  { multiline = false, maxLength = 90, returnKeyType = 'done', ...rest },
+  {
+    multiline = false,
+    maxLength = 90,
+    returnKeyType = 'done',
+    tone = 'light',
+    ...rest
+  },
   ref,
 ) {
   const surface = useSurface();
   const [focused, setFocused] = useState(false);
   const focus = useSharedValue(0);
 
+  const dark = tone === 'dark';
   const frameStyle = useAnimatedStyle(() => ({
     borderColor: interpolateColor(
       focus.value,
       [0, 1],
-      [colors.hairline, colors.saffron],
+      [dark ? 'rgba(255, 255, 255, 0.22)' : colors.hairline, colors.saffron],
     ),
     boxShadow: `0px 0px ${4 + focus.value * 4}px rgba(250, 140, 34, ${
       focus.value * 0.6
@@ -59,7 +68,11 @@ export const TextField = forwardRef<
 
   return (
     <Animated.View
-      style={[styles.frame, { backgroundColor: surface }, frameStyle]}
+      style={[
+        styles.frame,
+        { backgroundColor: dark ? 'rgba(255, 255, 255, 0.06)' : surface },
+        frameStyle,
+      ]}
     >
       <TextInput
         ref={ref}
@@ -71,10 +84,12 @@ export const TextField = forwardRef<
         submitBehavior="blurAndSubmit"
         returnKeyType={returnKeyType}
         maxLength={maxLength}
-        placeholderTextColor={colors.textGhost}
+        placeholderTextColor={
+          dark ? 'rgba(255, 255, 255, 0.4)' : colors.textGhost
+        }
         selectionColor={colors.saffron}
         cursorColor={colors.saffron}
-        style={[typography.body, styles.input]}
+        style={[typography.body, styles.input, dark && styles.inputDark]}
       />
     </Animated.View>
   );
@@ -91,5 +106,8 @@ const styles = StyleSheet.create({
   input: {
     paddingVertical: 14,
     paddingHorizontal: 0,
+  },
+  inputDark: {
+    color: colors.white,
   },
 });

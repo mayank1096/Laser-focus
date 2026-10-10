@@ -191,6 +191,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
                   {t.mark.finished}
                 </AppText>
                 <TextField
+                  tone="dark"
                   testID="finished"
                   accessibilityLabel={t.mark.finished}
                   value={finished}
