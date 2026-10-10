@@ -239,7 +239,7 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
                     }
                     style={styles.remove}
                   >
-                    <X width={16} height={16} color={colors.textMuted} />
+                    <X width={16} height={16} color={colors.danger} />
                   </Pressable>
                 ) : null
               }
@@ -445,7 +445,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: TRACK,
+    // A soft red, so removing a session reads as removing.
+    backgroundColor: 'rgba(220, 38, 38, 0.1)',
   },
   field: {
     gap: spacing.label,
