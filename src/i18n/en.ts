@@ -292,7 +292,7 @@ export const en = {
   mark: {
     title: (n: number, what: string) => `Session ${n} · ${what}`,
     full: 'Done, the whole outcome',
-    half: 'Zig-zag, at least 10 minutes',
+    half: 'Half, at least 10 minutes',
     finished: 'What did you finish?',
     wentWrong: 'What went wrong?',
     reasons: {
@@ -310,7 +310,6 @@ export const en = {
   dayDone: {
     plan: 'Plan tomorrow',
   },
-
 
   review: {
     title: 'Review the week',
@@ -333,7 +332,7 @@ export const en = {
 
   goalDone: {
     summary: (days: number, full: number, half: number) =>
-      `${days} ${days === 1 ? 'day' : 'days'}. ${full} full, ${half} zig-zag.`,
+      `${days} ${days === 1 ? 'day' : 'days'}. ${full} full, ${half} half.`,
     reached: 'Goal reached',
     ended: 'Sprint ended',
     span: (from: string, to: string) => `${from} – ${to}`,
@@ -341,7 +340,7 @@ export const en = {
       `Milestones · ${done} of ${total}`,
     rest: 'Rest now',
     counts: (full: number, half: number) =>
-      `${full} ● days · ${half} zig-zag days`,
+      `${full} full days · ${half} half days`,
     restSub: 'Every peak needs a valley.',
     endSprint: 'End this sprint',
     endSprintSure: 'End this sprint now? Your milestones stay on the sheet.',
@@ -562,10 +561,10 @@ export const en = {
   account: {
     day: (n: number, of: number) => `Day ${n} of ${of}`,
     full: 'Full days',
-    half: 'Zig-zag days',
+    half: 'Half days',
     left: 'Days left',
     marks: 'Your marks',
-    legendHalf: 'Zig-zag',
+    legendHalf: 'Half',
     legendFull: 'Full',
     lifetime: 'Once in a lifetime',
     values: 'Values',
@@ -625,7 +624,7 @@ export const en = {
     holdHint: 'Hold anywhere to end early · Dims in 5 s',
     eyebrow: (min: number, what: string) => `${min} min in · ${what}`,
     title: 'End early?',
-    counts: 'Past 10 minutes, so it still counts as a zig-zag.',
+    counts: 'Past 10 minutes, so it still counts as a half day.',
     wontCount: (left: number) =>
       `Under 10 minutes, this one won’t count. ${left} more and it would.`,
     what: 'What happened',

@@ -5,7 +5,6 @@ import Animated, {
   Easing,
   interpolate,
   interpolateColor,
-  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -15,7 +14,6 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Polyline } from 'react-native-svg';
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import { GLASS_EDGE, GlassFill } from '../../components/Glass';
@@ -23,16 +21,16 @@ import { ShaderView } from '../../components/shader';
 import type { Mark } from '../../core/model';
 import { colors, fonts, springs, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
-import { FILL_MS, SaffronFill, zigzag } from './MarkBox';
+import { FILL_MS, SaffronFill } from './MarkBox';
 
-const AnimatedPolyline = Animated.createAnimatedComponent(Polyline);
 const RADIUS = 28;
 
 /**
  * The reward. The card spins in like a game drop, face down first, and
  * lands face up on a warm glow. Hold it and it fills with saffron while the
- * phone ticks faster and harder; let go early and it drains. Swipe across
- * it for the zig-zag. Once it's full it pops, and the glow flares.
+ * phone ticks faster and harder. Let go before half way and it drains;
+ * past half way and it settles half full. Once it's full it pops,
+ * and the glow flares.
  */
 export function RewardCard({
   width,
@@ -42,7 +40,6 @@ export function RewardCard({
   brand,
   holdLabel,
   fill,
-  zig,
   locked,
   fullLabel,
   halfLabel,
@@ -57,7 +54,6 @@ export function RewardCard({
   /** The word inside the dashed ring: "Hold". */
   holdLabel: string;
   fill: SharedValue<number>;
-  zig: SharedValue<number>;
   locked: boolean;
   /** What a screen reader offers in place of the hold and the swipe. */
   fullLabel: string;
@@ -150,7 +146,6 @@ export function RewardCard({
         return;
       }
       press.value = withTiming(0.97, { duration: 200 });
-      zig.value = withTiming(0, { duration: 150 });
       fill.value = withTiming(1, {
         duration: FILL_MS * (1 - fill.value),
         easing: Easing.bezier(0.33, 0, 0.67, 1),
@@ -171,33 +166,18 @@ export function RewardCard({
     })
     .onFinalize((_e, success) => {
       stopTicks();
-      if (!success && !done.current) {
-        press.value = withSpring(1, springs.snappy);
-        fill.value = withTiming(0, { duration: 400 });
-      }
-    });
-
-  const swipe = Gesture.Pan()
-    .runOnJS(true)
-    .activeOffsetX([-14, 14])
-    .onUpdate(e => {
-      if (done.current) {
+      if (success || done.current) {
         return;
       }
-      fill.value = 0;
-      zig.value = Math.min(1, Math.abs(e.translationX) / (width * 0.7));
-    })
-    .onEnd(() => {
-      if (done.current) {
-        return;
-      }
-      if (zig.value > 0.6) {
-        zig.value = withTiming(1, { duration: 150 });
+      press.value = withSpring(1, springs.snappy);
+      // Let go past half way and it settles half full: a half day.
+      // Before that, it drains.
+      if (fill.value >= 0.5) {
+        fill.value = withSpring(0.5, springs.morph);
         haptics.success();
-        celebrate();
         onMark('half');
       } else {
-        zig.value = withTiming(0, { duration: 250 });
+        fill.value = withTiming(0, { duration: 400 });
       }
     });
 
@@ -247,7 +227,7 @@ export function RewardCard({
   }));
   // The invitation: a dashed ring that breathes until the card fills.
   const targetStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(fill.value + zig.value, [0, 0.3], [1, 0], 'clamp'),
+    opacity: interpolate(fill.value, [0, 0.3], [1, 0], 'clamp'),
     transform: [{ scale: 0.94 + breathe.value * 0.08 }],
   }));
   const tickStyle = useAnimatedStyle(() => ({
@@ -256,12 +236,6 @@ export function RewardCard({
       { scale: interpolate(fill.value, [0.9, 1], [0.4, 1], 'clamp') },
     ],
   }));
-  const { points, length } = zigzag(width, height);
-  const zigProps = useAnimatedProps(() => ({
-    strokeDashoffset: length * (1 - zig.value),
-    strokeOpacity: zig.value > 0.001 ? 1 : 0,
-  }));
-  const washStyle = useAnimatedStyle(() => ({ opacity: zig.value }));
 
   return (
     <View style={[styles.stage, { height: height + 40 }]}>
@@ -286,7 +260,7 @@ export function RewardCard({
         />
       </Animated.View>
 
-      <GestureDetector gesture={Gesture.Race(swipe, hold)}>
+      <GestureDetector gesture={hold}>
         <Animated.View
           collapsable={false}
           testID="mark-pad"
@@ -305,8 +279,7 @@ export function RewardCard({
               return;
             }
             const full = e.nativeEvent.actionName === 'activate';
-            fill.value = withTiming(full ? 1 : 0, { duration: 400 });
-            zig.value = withTiming(full ? 0 : 1, { duration: 400 });
+            fill.value = withTiming(full ? 1 : 0.5, { duration: 400 });
             haptics.success();
             celebrate();
             onMark(full ? 'full' : 'half');
@@ -323,24 +296,9 @@ export function RewardCard({
           {/* Front */}
           <Animated.View style={[styles.face, styles.front, frontStyle]}>
             <GlassFill />
-            <Animated.View
-              style={[StyleSheet.absoluteFill, styles.wash, washStyle]}
-            />
             <Animated.View style={[styles.fill, fillStyle]}>
               <SaffronFill id="reward-fill" />
             </Animated.View>
-            <Svg width={width} height={height} style={StyleSheet.absoluteFill}>
-              <AnimatedPolyline
-                points={points}
-                fill="none"
-                stroke={colors.saffron}
-                strokeWidth={10}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeDasharray={`${length} ${length}`}
-                animatedProps={zigProps}
-              />
-            </Svg>
             <View style={styles.copy} pointerEvents="none">
               <Animated.Text style={[styles.eyebrow, softInkStyle]}>
                 {eyebrow}
@@ -422,9 +380,6 @@ const styles = StyleSheet.create({
   backBrand: {
     ...typography.eyebrow,
     color: colors.white,
-  },
-  wash: {
-    backgroundColor: 'rgba(250, 140, 34, 0.12)',
   },
   fill: {
     alignSelf: 'stretch',

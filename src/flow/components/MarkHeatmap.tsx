@@ -23,7 +23,8 @@ type Cell = 'full' | 'half' | 'missed' | 'rest' | 'before' | 'ahead';
 
 const FILL: Record<Cell, string> = {
   full: colors.saffron,
-  half: '#FBC48F',
+  // A half day: the empty tile, filled half way up in saffron.
+  half: '#F1E4D8',
   missed: '#F1E4D8',
   rest: '#F7EFE8',
   before: 'rgba(0, 0, 0, 0.025)',
@@ -32,7 +33,7 @@ const FILL: Record<Cell, string> = {
 
 /**
  * Fourteen weeks of marks as a grid: a column per week, a row per weekday.
- * Saffron for a full day, pale saffron for a zig-zag, warm grey for a day
+ * Saffron for a full day, half filled for a half day, warm grey for a day
  * that was planned and didn't happen. Page back through earlier weeks.
  */
 export function MarkHeatmap({
@@ -112,7 +113,9 @@ export function MarkHeatmap({
                         c === 'ahead' && styles.ahead,
                         d === today && styles.today,
                       ]}
-                    />
+                    >
+                      {c === 'half' ? <View style={styles.halfFill} /> : null}
+                    </View>
                   );
                 })}
               </View>
@@ -185,7 +188,17 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'left',
   },
-  cell: {},
+  cell: {
+    overflow: 'hidden',
+  },
+  halfFill: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '50%',
+    backgroundColor: colors.saffron,
+  },
   ahead: {
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.05)',

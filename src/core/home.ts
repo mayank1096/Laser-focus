@@ -8,7 +8,7 @@ export const sessionsOn = (book: Pick<BookData, 'sessions'>, date: ISODate) =>
   book.sessions.filter(s => s.date === date).sort((a, b) => a.order - b.order);
 
 /**
- * A day's box: ● only when every session that day is ●, zig-zag when any
+ * A day's box: full only when every session that day is full, half when any
  * session reached the minimum, empty otherwise. Null when nothing was
  * planned (a rest day, or before the first session).
  */

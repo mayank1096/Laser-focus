@@ -37,7 +37,7 @@ export interface WeekTask {
   done: boolean;
 }
 
-/** ● the whole outcome · zig-zag at least ten minutes · empty, didn't happen. */
+/** Full: the whole outcome · half: at least ten minutes · empty: didn't happen. */
 export type Mark = 'full' | 'half' | 'empty';
 
 export interface Session {

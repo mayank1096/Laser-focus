@@ -14,8 +14,8 @@ import { now } from '../../utils/clock';
 
 /** Ending early is a serious act; the whole screen says so. */
 const DEEP_RED = '#7A0C12';
-/** Ten minutes in, a session still counts as a zig-zag. */
-const ZIG_ZAG_MINUTES = 10;
+/** Ten minutes in, a session still counts as a half day. */
+const HALF_MINUTES = 10;
 
 /** There is no pause. Ending early is possible, but it is a held decision. */
 export function EndEarlyScreen({
@@ -32,7 +32,7 @@ export function EndEarlyScreen({
   const sat = Math.floor(
     (now().getTime() - Date.parse(session.startedAt)) / 60000,
   );
-  const counts = sat >= ZIG_ZAG_MINUTES;
+  const counts = sat >= HALF_MINUTES;
 
   return (
     <View
@@ -53,9 +53,7 @@ export function EndEarlyScreen({
         {t.endEarly.title}
       </Animated.Text>
       <Animated.Text entering={rise(2)} style={[typography.body, styles.soft]}>
-        {counts
-          ? t.endEarly.counts
-          : t.endEarly.wontCount(ZIG_ZAG_MINUTES - sat)}
+        {counts ? t.endEarly.counts : t.endEarly.wontCount(HALF_MINUTES - sat)}
       </Animated.Text>
       <Animated.View entering={rise(3)} style={styles.reasons}>
         <AppText variant="eyebrow" style={styles.dim}>

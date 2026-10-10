@@ -107,7 +107,7 @@ export function GoalDoneScreen({ navigation }: RootScreenProps<'GoalDone'>) {
               >
                 {m === 'full' ? <View style={styles.tileFull} /> : null}
                 {m === 'half' ? (
-                  <View style={[styles.tileHalf, { width: tile / 2 }]} />
+                  <View style={[styles.tileHalf, { height: tile / 2 }]} />
                 ) : null}
               </Animated.View>
             ))}
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   tileHalf: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    right: 0,
     bottom: 0,
     backgroundColor: colors.white,
   },

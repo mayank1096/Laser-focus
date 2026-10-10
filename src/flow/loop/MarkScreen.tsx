@@ -27,13 +27,13 @@ import type { RootScreenProps } from '../../navigation/types';
 import { MIST, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { addDays } from '../../utils/date';
-import { WeekRow } from '../components/MarkBox';
+import { levelOf, WeekRow } from '../components/MarkBox';
 import { MarigoldShower } from '../components/MarigoldShower';
 import { RewardCard } from '../components/RewardCard';
 
 /**
  * The reward. A card spins in; hold it and it fills (●) and petals are
- * thrown, or swipe across it for the zig-zag. A beat after the card fills,
+ * thrown; let go past half way for a half day. A beat after the card fills,
  * the same day's box in the week above fills too.
  */
 export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
@@ -48,8 +48,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   const [wrong, setWrong] = useState<Set<string>>(
     new Set(session?.wentWrong ?? []),
   );
-  const fill = useSharedValue(mark === 'full' ? 1 : 0);
-  const zig = useSharedValue(mark === 'half' ? 1 : 0);
+  const fill = useSharedValue(levelOf(mark));
   const [shower, setShower] = useState(0);
   const [cardY, setCardY] = useState(0);
   if (!session) {
@@ -63,8 +62,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
     if (m === 'full') {
       setShower(n => n + 1);
     }
-    fill.value = withTiming(m === 'full' ? 1 : 0, { duration: 300 });
-    zig.value = withTiming(m === 'half' ? 1 : 0, { duration: 300 });
+    fill.value = withTiming(levelOf(m), { duration: 300 });
     useBook.getState().markSession(session.id, m);
   };
 
@@ -148,7 +146,6 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
             brand={t.signIn.eyebrow}
             holdLabel={t.mark.hold}
             fill={fill}
-            zig={zig}
             locked={mark !== null}
             fullLabel={t.mark.full}
             halfLabel={t.mark.half}

@@ -3,7 +3,6 @@ import { StyleSheet, View } from 'react-native';
 import Animated, {
   Easing,
   interpolate,
-  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withSequence,
@@ -11,21 +10,13 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, {
-  Defs,
-  LinearGradient,
-  Polyline,
-  Rect,
-  Stop,
-} from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import type { Mark } from '../../core/model';
 import { colors, springs } from '../../theme';
 import type { ISODate } from '../../types/models';
 import { fromISODate } from '../../utils/date';
-
-const AnimatedPolyline = Animated.createAnimatedComponent(Polyline);
 
 /** A full fill takes this long to hold. */
 export const FILL_MS = 1500;
@@ -34,21 +25,6 @@ export const FILL_MS = 1500;
 export const FILL_TOP = '#FFB45E';
 export const FILL_BOTTOM = '#F27A10';
 const EMPTY = 'rgba(0, 0, 0, 0.05)';
-const WASH = 'rgba(250, 140, 34, 0.14)';
-
-/** The zig-zag across a box of `w × h`, and its length for drawing it in. */
-export function zigzag(w: number, h = w) {
-  const pad = w * 0.2;
-  const top = h * 0.36;
-  const bottom = h * 0.64;
-  const step = (w - pad * 2) / 4;
-  const pts = Array.from({ length: 5 }, (_, i) => [
-    pad + step * i,
-    i % 2 === 0 ? bottom : top,
-  ]);
-  const seg = Math.hypot(step, bottom - top);
-  return { points: pts.map(p => p.join(',')).join(' '), length: seg * 4 };
-}
 
 /** The saffron that rises inside a box or card, lit from above. */
 export function SaffronFill({ id }: { id: string }) {
@@ -69,26 +45,23 @@ let boxIds = 0;
 
 /**
  * One day's box. Empty is a faint tile; `fill` (0–1) raises saffron from
- * the bottom and a white tick settles in once it's full; `zig` (0–1) tints
- * the tile and draws a saffron zig-zag in from the left. Today wears a ring.
+ * the bottom: half way for a half day, all the way for a full one, where a
+ * white tick settles in. Today wears a ring.
  */
 export function Box({
   size,
   fill,
-  zig,
   today = false,
   dark = false,
 }: {
   size: number;
   fill: SharedValue<number>;
-  zig: SharedValue<number>;
   today?: boolean;
   /** On the haze: an empty box is a faint white, not a faint black. */
   dark?: boolean;
 }) {
   const id = useRef(`box-fill-${++boxIds}`).current;
   const r = Math.round(size * 0.3);
-  const { points, length } = zigzag(size);
   const fillStyle = useAnimatedStyle(() => ({
     height: `${fill.value * 100}%`,
   }));
@@ -97,12 +70,6 @@ export function Box({
     transform: [
       { scale: interpolate(fill.value, [0.85, 1], [0.5, 1], 'clamp') },
     ],
-  }));
-  const washStyle = useAnimatedStyle(() => ({ opacity: zig.value }));
-  const zigProps = useAnimatedProps(() => ({
-    strokeDashoffset: length * (1 - zig.value),
-    // A round cap would leave a dot where the line starts.
-    strokeOpacity: zig.value > 0.001 ? 1 : 0,
   }));
   return (
     <View
@@ -113,24 +80,9 @@ export function Box({
         today && styles.today,
       ]}
     >
-      <Animated.View
-        style={[StyleSheet.absoluteFill, styles.wash, washStyle]}
-      />
       <Animated.View style={[styles.fill, fillStyle]}>
         <SaffronFill id={id} />
       </Animated.View>
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
-        <AnimatedPolyline
-          points={points}
-          fill="none"
-          stroke={colors.saffron}
-          strokeWidth={Math.max(1.8, size * 0.075)}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-          strokeDasharray={`${length} ${length}`}
-          animatedProps={zigProps}
-        />
-      </Svg>
       <Animated.View style={[styles.tick, tickStyle]} pointerEvents="none">
         <Check
           width={size * 0.5}
@@ -142,6 +94,10 @@ export function Box({
     </View>
   );
 }
+
+/** How far a mark fills its box: all, half, or none. */
+export const levelOf = (mark: Mark | null) =>
+  mark === 'full' ? 1 : mark === 'half' ? 0.5 : 0;
 
 /** A box showing a settled mark, animating when the mark changes. */
 export function DayBox({
@@ -157,8 +113,7 @@ export function DayBox({
   delay?: number;
   dark?: boolean;
 }) {
-  const fill = useSharedValue(mark === 'full' ? 1 : 0);
-  const zig = useSharedValue(mark === 'half' ? 1 : 0);
+  const fill = useSharedValue(levelOf(mark));
   const pop = useSharedValue(1);
   const first = useRef(true);
   useEffect(() => {
@@ -167,24 +122,23 @@ export function DayBox({
       return;
     }
     const t = setTimeout(() => {
-      fill.value = withTiming(mark === 'full' ? 1 : 0, {
+      fill.value = withTiming(levelOf(mark), {
         duration: 700,
         easing: Easing.bezier(0.16, 1, 0.3, 1),
       });
-      zig.value = withTiming(mark === 'half' ? 1 : 0, { duration: 600 });
       pop.value = withSequence(
         withTiming(1.25, { duration: 220 }),
         withSpring(1, springs.morph),
       );
     }, delay);
     return () => clearTimeout(t);
-  }, [mark, delay, fill, zig, pop]);
+  }, [mark, delay, fill, pop]);
   const popStyle = useAnimatedStyle(() => ({
     transform: [{ scale: pop.value }],
   }));
   return (
     <Animated.View style={popStyle}>
-      <Box size={size} fill={fill} zig={zig} today={today} dark={dark} />
+      <Box size={size} fill={fill} today={today} dark={dark} />
     </Animated.View>
   );
 }
@@ -249,9 +203,6 @@ const styles = StyleSheet.create({
   today: {
     borderWidth: 1.5,
     borderColor: colors.saffron,
-  },
-  wash: {
-    backgroundColor: WASH,
   },
   fill: {
     alignSelf: 'stretch',

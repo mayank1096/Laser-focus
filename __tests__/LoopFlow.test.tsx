@@ -147,7 +147,7 @@ describe('the daily loop', () => {
     });
   });
 
-  it('ends a session early on the red screen, as a zig-zag', async () => {
+  it('ends a session early on the red screen, as a half day', async () => {
     jest.setSystemTime(new Date(2026, 9, 7, 6, 15));
     useBook.setState({
       ...book,

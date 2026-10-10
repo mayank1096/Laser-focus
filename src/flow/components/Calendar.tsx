@@ -79,7 +79,7 @@ export function Calendar({
   );
 }
 
-/** Counts of ● days and zig-zag days in a range. */
+/** Counts of full days and half days in a range. */
 export function countDays(
   book: Pick<BookData, 'sessions'>,
   from: ISODate,

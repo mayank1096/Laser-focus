@@ -381,7 +381,7 @@ function describe(a: HomeAction, t: Strings, today: string, go: Go): Card {
   }
 }
 
-/** ● solid, zig-zag half filled, empty or not yet: faint. */
+/** Full: solid. Half: filled half way up. Empty or not yet: faint. */
 function DaySquare({ mark }: { mark: Mark | null }) {
   return (
     <View style={styles.square}>
@@ -510,12 +510,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     backgroundColor: colors.white,
   },
+  // Half a day: the box filled half way up.
   squareHalf: {
     position: 'absolute',
     left: 0,
-    top: 0,
+    right: 0,
     bottom: 0,
-    width: 7,
+    height: 7,
     backgroundColor: colors.white,
   },
   card: {

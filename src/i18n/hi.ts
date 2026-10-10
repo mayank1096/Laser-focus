@@ -287,7 +287,7 @@ export const hi: Strings = {
   mark: {
     title: (n: number, what: string) => `सत्र ${n} · ${what}`,
     full: 'हो गया, पूरा नतीजा',
-    half: 'ज़िग-ज़ैग, कम से कम 10 मिनट',
+    half: 'आधा, कम से कम 10 मिनट',
     finished: 'आपने क्या पूरा किया?',
     wentWrong: 'क्या गलत हुआ?',
     reasons: {
@@ -305,7 +305,6 @@ export const hi: Strings = {
   dayDone: {
     plan: 'कल की योजना',
   },
-
 
   review: {
     title: 'हफ़्ते की समीक्षा',
@@ -328,7 +327,7 @@ export const hi: Strings = {
 
   goalDone: {
     summary: (days: number, full: number, half: number) =>
-      `${days} दिन। ${full} पूरे, ${half} ज़िग-ज़ैग।`,
+      `${days} दिन। ${full} पूरे, ${half} आधे।`,
     reached: 'लक्ष्य हासिल',
     ended: 'दौर खत्म',
     span: (from: string, to: string) => `${from} – ${to}`,
@@ -336,7 +335,7 @@ export const hi: Strings = {
       `माइलस्टोन · ${total} में से ${done}`,
     rest: 'अब आराम करें',
     counts: (full: number, half: number) =>
-      `${full} ● दिन · ${half} ज़िग-ज़ैग दिन`,
+      `${full} पूरे दिन · ${half} आधे दिन`,
     restSub: 'हर शिखर के बाद एक घाटी।',
     endSprint: 'यह दौर खत्म करें',
     endSprintSure: 'यह दौर अभी खत्म करें? आपके माइलस्टोन शीट पर रहेंगे।',
@@ -558,10 +557,10 @@ export const hi: Strings = {
   account: {
     day: (n: number, of: number) => `${of} में से दिन ${n}`,
     full: 'पूरे दिन',
-    half: 'ज़िग-ज़ैग दिन',
+    half: 'आधे दिन',
     left: 'दिन बाकी',
     marks: 'आपके निशान',
-    legendHalf: 'ज़िग-ज़ैग',
+    legendHalf: 'आधा',
     legendFull: 'पूरा',
     lifetime: 'जीवन में एक बार',
     values: 'मूल्य',
@@ -621,7 +620,7 @@ export const hi: Strings = {
     holdHint: 'जल्दी खत्म करने के लिए कहीं भी दबाकर रखें · 5 सेकंड में मंद',
     eyebrow: (min: number, what: string) => `${min} मिनट · ${what}`,
     title: 'जल्दी खत्म करें?',
-    counts: '10 मिनट से ज़्यादा हुए, यह ज़िग-ज़ैग गिना जाएगा।',
+    counts: '10 मिनट से ज़्यादा हुए, यह आधा दिन गिना जाएगा।',
     wontCount: (left: number) =>
       `10 मिनट से कम, यह नहीं गिना जाएगा। ${left} मिनट और, तो गिना जाता।`,
     what: 'क्या हुआ',
@@ -749,7 +748,8 @@ export const hi: Strings = {
     holdContinue: 'आगे बढ़ने के लिए दबाकर रखें',
     tratak: 'त्राटक',
     lookAtWork: 'अपने काम को देखें',
-    tratakSkip: 'आँखों के लिए स्क्रीन मंद होती है · अभी शुरू करने के लिए टैप करें',
+    tratakSkip:
+      'आँखों के लिए स्क्रीन मंद होती है · अभी शुरू करने के लिए टैप करें',
     countdown: ['3', '2', '1', 'जय श्री राम।'],
   },
 };
