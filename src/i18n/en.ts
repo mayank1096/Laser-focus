@@ -176,10 +176,10 @@ export const en = {
   },
 
   rhythm: {
-    selectFocus: 'Select your focus time',
-    focusSub: 'The same window, every day.',
-    from: 'From',
-    to: 'To',
+    startsAt: 'Deep work starts at',
+    startsSub:
+      'The same time every day. The sessions you plan line up from here; each gets its own length when you plan it.',
+    change: 'Change',
     eyebrow: 'Your rhythm',
     title: 'Fix your deep-work time.',
     sub: 'Two to three slots at the same time every day. Fit everything else around them.',

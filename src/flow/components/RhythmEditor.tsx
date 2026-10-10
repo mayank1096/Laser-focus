@@ -19,7 +19,6 @@ import { clock } from '../../i18n/format';
 import { colors, fonts, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { ClockSheet } from './ClockSheet';
-import { FocusTimeSheet } from './FocusTimeSheet';
 
 const REMINDER_TIMES = [1200, 1260, 1320];
 
@@ -46,8 +45,7 @@ export function RhythmEditor() {
   const t = useT();
   const rhythm = useBook(s => s.rhythm);
   const setRhythm = useBook(s => s.setRhythm);
-  const [picking, setPicking] = useState<'reminder' | null>(null);
-  const [focusOpen, setFocusOpen] = useState(false);
+  const [picking, setPicking] = useState<'focus' | 'reminder' | null>(null);
   const FocusIcon = skyIcon(rhythm.focusStart);
 
   // A custom time shows up as its own pill, first in the row.
@@ -66,10 +64,10 @@ export function RhythmEditor() {
         <Pressable
           testID="rhythm-focus"
           accessibilityRole="button"
-          accessibilityLabel={t.rhythm.selectFocus}
+          accessibilityLabel={t.rhythm.startsAt}
           onPress={() => {
             haptics.tap();
-            setFocusOpen(true);
+            setPicking('focus');
           }}
           style={({ pressed }) => [
             styles.focusButton,
@@ -85,16 +83,13 @@ export function RhythmEditor() {
             />
           </View>
           <View style={styles.flex}>
-            <AppText variant="detail">{t.rhythm.selectFocus}</AppText>
+            <AppText variant="detail">{t.rhythm.startsAt}</AppText>
             <AppText style={styles.focusValue}>
-              {t.rhythm.window(
-                clock(t, rhythm.focusStart),
-                clock(t, rhythm.focusStart + rhythm.focusMinutes),
-              )}
+              {clock(t, rhythm.focusStart)}
             </AppText>
           </View>
           <AppText variant="label" style={styles.focusLength}>
-            {t.common.minutes(rhythm.focusMinutes)}
+            {t.rhythm.change}
           </AppText>
         </Pressable>
       </View>
@@ -179,25 +174,18 @@ export function RhythmEditor() {
         ) : null}
       </View>
 
-      <FocusTimeSheet
-        visible={focusOpen}
-        start={rhythm.focusStart}
-        minutes={rhythm.focusMinutes}
-        onClose={() => setFocusOpen(false)}
-        onDone={(focusStart, focusMinutes) => {
-          haptics.success();
-          setRhythm({ focusStart, focusMinutes });
-          setFocusOpen(false);
-        }}
-      />
       <ClockSheet
         testID="rhythm-clock"
         visible={picking !== null}
-        title={t.rhythm.pickReminder}
-        value={rhythm.reminderAt}
+        title={picking === 'focus' ? t.rhythm.startsAt : t.rhythm.pickReminder}
+        subtitle={picking === 'focus' ? t.rhythm.startsSub : undefined}
+        value={picking === 'focus' ? rhythm.focusStart : rhythm.reminderAt}
         onClose={() => setPicking(null)}
         onDone={at => {
-          setRhythm({ reminderAt: at });
+          haptics.success();
+          setRhythm(
+            picking === 'focus' ? { focusStart: at } : { reminderAt: at },
+          );
           setPicking(null);
         }}
       />

@@ -63,8 +63,8 @@ export interface Session {
 }
 
 export interface Rhythm {
+  /** When the day's deep work begins; planned sessions line up from here. */
   focusStart: ClockTime;
-  focusMinutes: number;
   /** 0 = Sunday … 6 = Saturday. */
   reviewDay: number;
   reminderOn: boolean;
@@ -116,6 +116,8 @@ export const LIMITS = {
 } as const;
 
 export const MINUTE_CHIPS = [30, 60, 120, 180];
+/** A new session's length until you pick one. */
+export const DEFAULT_SESSION_MINUTES = 120;
 
 export interface BookData {
   /** Where an unfinished setup resumes; 'done' once Home is open. */
@@ -143,7 +145,6 @@ export interface BookData {
 
 export const DEFAULT_RHYTHM: Rhythm = {
   focusStart: 6 * 60,
-  focusMinutes: 180,
   reviewDay: 0,
   reminderOn: true,
   reminderAt: 21 * 60,

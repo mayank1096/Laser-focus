@@ -20,7 +20,11 @@ import { SimpleScreen } from '../../components/SimpleScreen';
 import { TextField } from '../../components/TextField';
 import { appDay, appMinutes, weekStart } from '../../core/days';
 import { planDateFor, sessionsOn } from '../../core/home';
-import { LIMITS, MINUTE_CHIPS } from '../../core/model';
+import {
+  DEFAULT_SESSION_MINUTES,
+  LIMITS,
+  MINUTE_CHIPS,
+} from '../../core/model';
 import {
   finishReassess,
   lastDontDo,
@@ -80,7 +84,7 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
     other: false,
     what: '',
     outcome: '',
-    minutes: state.rhythm.focusMinutes,
+    minutes: DEFAULT_SESSION_MINUTES,
     challenge: finished ? t.plan.challengeFrom(finished) : '',
     steps: '',
     risks: '',
