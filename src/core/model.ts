@@ -160,8 +160,8 @@ export const DEFAULT_RHYTHM: Rhythm = {
   reminderAt: 21 * 60,
 };
 
-/** The course: 2–3 slots a day, 3–5 hours in all. */
-export const SLOTS = { min: 2, max: 3, minTotal: 180, maxTotal: 300 } as const;
+/** You choose 1–5 slots a day; the course aims for 3–5 hours in all. */
+export const SLOTS = { min: 1, max: 5, minTotal: 180, maxTotal: 300 } as const;
 
 /** Where session `order` (0-based) sits: its slot, or after the last one. */
 export function slotFor(rhythm: Rhythm, order: number): Slot {

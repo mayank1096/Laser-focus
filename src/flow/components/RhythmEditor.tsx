@@ -11,7 +11,7 @@ import Sunrise from '../../assets/icons/sunrise.svg';
 import Sunset from '../../assets/icons/sunset.svg';
 import { AppText } from '../../components/AppText';
 import { Pill, PillRow, SectionHeader } from '../../components/Pill';
-import { TRACK } from '../../components/SegmentedControl';
+import { SegmentedControl, TRACK } from '../../components/SegmentedControl';
 import type { ClockTime } from '../../types/models';
 import { SLOTS, totalSlotMinutes, type Slot } from '../../core/model';
 import { useBook } from '../../core/store';
@@ -23,6 +23,7 @@ import { ClockSheet } from './ClockSheet';
 import { SlotSheet } from './SlotSheet';
 
 const REMINDER_TIMES = [1200, 1260, 1320];
+const COUNTS = [1, 2, 3, 4, 5];
 
 /** The sky at that hour: sunrise, sun, sunset or moon. */
 function skyIcon(at: ClockTime): React.FC<SvgProps> {
@@ -54,6 +55,20 @@ export function RhythmEditor() {
   const setSlots = (slots: Slot[]) =>
     setRhythm({ slots: [...slots].sort((x, y) => x.start - y.start) });
   const edited = editing !== null ? rhythm.slots[editing] : undefined;
+  // More slots: each new one an hour after the last. Fewer: the latest go.
+  const setCount = (n: number) => {
+    haptics.selection();
+    const next = rhythm.slots.slice(0, n);
+    while (next.length < n) {
+      const last = next[next.length - 1];
+      const start = Math.min(
+        22 * 60,
+        last ? last.start + last.minutes + 60 : 6 * 60,
+      );
+      next.push({ start, minutes: 60 });
+    }
+    setSlots(next);
+  };
 
   // A custom time shows up as its own pill, first in the row.
   const reminderTimes = REMINDER_TIMES.includes(rhythm.reminderAt)
@@ -68,6 +83,15 @@ export function RhythmEditor() {
       {/* Deep work slots */}
       <View style={styles.section}>
         <SectionHeader Icon={Clock} title={t.rhythm.slots} />
+        <View style={styles.count}>
+          <AppText variant="detail">{t.rhythm.howMany}</AppText>
+          <SegmentedControl<number>
+            testIDPrefix="slot-count"
+            value={rhythm.slots.length}
+            segments={COUNTS.map(n => ({ id: n, label: String(n) }))}
+            onChange={setCount}
+          />
+        </View>
         <View style={styles.slots}>
           {rhythm.slots.map((slot, i) => {
             const Icon = skyIcon(slot.start);
@@ -109,27 +133,6 @@ export function RhythmEditor() {
               </Pressable>
             );
           })}
-          {rhythm.slots.length < SLOTS.max ? (
-            <Pressable
-              testID="slot-add"
-              accessibilityRole="button"
-              onPress={() => {
-                haptics.selection();
-                const last = rhythm.slots[rhythm.slots.length - 1];
-                const start = Math.min(
-                  22 * 60,
-                  (last ? last.start + last.minutes : 6 * 60) + 60,
-                );
-                setSlots([...rhythm.slots, { start, minutes: 60 }]);
-                setEditing(rhythm.slots.length);
-              }}
-              style={styles.addSlot}
-            >
-              <AppText variant="label" style={styles.addSlotText}>
-                {t.rhythm.addSlot}
-              </AppText>
-            </Pressable>
-          ) : null}
         </View>
         <AppText
           variant="detail"
@@ -239,14 +242,6 @@ export function RhythmEditor() {
             setSlots(rhythm.slots.map((x, i) => (i === editing ? slot : x)));
             setEditing(null);
           }}
-          onRemove={
-            rhythm.slots.length > SLOTS.min
-              ? () => {
-                  setSlots(rhythm.slots.filter((_, i) => i !== editing));
-                  setEditing(null);
-                }
-              : undefined
-          }
         />
       ) : null}
       <ClockSheet
@@ -267,6 +262,9 @@ export function RhythmEditor() {
 const styles = StyleSheet.create({
   wrap: {
     gap: 40,
+  },
+  count: {
+    gap: spacing.label,
   },
   slots: {
     gap: 10,
@@ -299,18 +297,6 @@ const styles = StyleSheet.create({
   },
   slotLength: {
     color: colors.saffron,
-  },
-  addSlot: {
-    height: 52,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addSlotText: {
-    color: colors.textMuted,
   },
   warn: {
     color: colors.danger,

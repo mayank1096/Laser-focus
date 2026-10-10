@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { PrimaryButton } from '../../components/PrimaryButton';
@@ -9,7 +9,6 @@ import { useT } from '../../i18n';
 import { clock } from '../../i18n/format';
 import { colors, spacing } from '../../theme';
 import type { ClockTime } from '../../types/models';
-import { haptics } from '../../utils/haptics';
 import { SheetTitle } from './SheetTitle';
 
 /** Times move in quarter hours. */
@@ -30,7 +29,6 @@ export function SlotSheet({
   slot,
   others,
   onDone,
-  onRemove,
   onClose,
 }: {
   visible: boolean;
@@ -39,8 +37,6 @@ export function SlotSheet({
   /** The day's other slots, to keep this one clear of them. */
   others: Slot[];
   onDone: (slot: Slot) => void;
-  /** Shown when the day can spare this slot. */
-  onRemove?: () => void;
   onClose: () => void;
 }) {
   const t = useT();
@@ -105,22 +101,6 @@ export function SlotSheet({
           disabled={clash}
           onPress={() => onDone({ start: from, minutes: length })}
         />
-        {onRemove ? (
-          <Pressable
-            testID="slot-remove"
-            accessibilityRole="button"
-            hitSlop={10}
-            onPress={() => {
-              haptics.selection();
-              onRemove();
-            }}
-            style={styles.remove}
-          >
-            <AppText variant="label" style={styles.removeText}>
-              {t.rhythm.removeSlot}
-            </AppText>
-          </Pressable>
-        ) : null}
       </View>
     </BottomSheet>
   );
@@ -143,12 +123,5 @@ const styles = StyleSheet.create({
   actions: {
     marginTop: spacing.xxl,
     gap: spacing.lg,
-  },
-  remove: {
-    alignSelf: 'center',
-    paddingVertical: 4,
-  },
-  removeText: {
-    color: colors.danger,
   },
 });

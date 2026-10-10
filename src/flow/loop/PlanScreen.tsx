@@ -383,7 +383,8 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
           </Animated.View>
         ))}
 
-        {locked.length + drafts.length < LIMITS.sessionsPerDay ? (
+        {locked.length + drafts.length <
+        Math.max(state.rhythm.slots.length, LIMITS.sessionsPerDay) ? (
           <Pressable
             testID="add-session"
             accessibilityRole="button"
