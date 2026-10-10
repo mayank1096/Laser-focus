@@ -88,6 +88,7 @@ export function BookSheetScreen({
       eyebrow={head[sheet].eyebrow}
       title={sheet === 'week' ? t.bookTab.tasks : t.book[sheet]}
       subtitle={head[sheet].sub}
+      panel={sheet === 'week' ? colors.white : undefined}
       onBack={() => navigation.goBack()}
     >
       <EditorAppearance.Provider value="card">
@@ -203,7 +204,9 @@ export function BookSheetScreen({
             )}
           </>
         ) : null}
-        {sheet === 'week' ? <TasksEditor week={week} /> : null}
+        {sheet === 'week' ? (
+          <TasksEditor week={week} cardColor={colors.stone} />
+        ) : null}
         {sheet === 'antiGoal' ? (
           <ListField
             testID="antigoal-list"

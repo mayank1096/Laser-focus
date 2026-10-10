@@ -166,6 +166,8 @@ export const en = {
     placeholder: 'Mock test 3, full paper',
     moves: 'Moves',
     full: 'Five is the most for one week.',
+    deepTab: (n: number) => (n ? `Deep work · ${n}` : 'Deep work'),
+    shallowTab: (n: number) => (n ? `Shallow work · ${n}` : 'Shallow work'),
     shallowToggle: 'Shallow work to batch',
     shallowSub:
       'Emails, calls, admin. They get a place here and stay out of sessions.',

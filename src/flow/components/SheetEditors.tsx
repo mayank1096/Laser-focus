@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import ChevronDown from '../../assets/icons/chevron-down.svg';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { ListField } from '../../components/ListField';
@@ -10,6 +9,7 @@ import { activeMilestones } from '../../core/home';
 import { Chip, ChipRow } from '../../components/Chip';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { RulerPicker } from '../../components/RulerPicker';
+import { SegmentedControl } from '../../components/SegmentedControl';
 import {
   LIMITS,
   TERM_RANGE,
@@ -199,9 +199,12 @@ export function MilestonesEditor() {
 export function TasksEditor({
   week,
   showShallow = true,
+  cardColor,
 }: {
   week: ISODate;
   showShallow?: boolean;
+  /** Card colour, e.g. a soft grey when the page itself is white. */
+  cardColor?: string;
 }) {
   const appearance = useContext(EditorAppearance);
   const t = useT();
@@ -212,87 +215,79 @@ export function TasksEditor({
   );
   const milestones = activeMilestones(state).filter(m => !m.done);
   const [linking, setLinking] = useState<string | null>(null);
-  const [openShallow, setOpenShallow] = useState(shallow.length > 0);
+  const [kind, setKind] = useState<TaskKind>('deep');
   const set = (kind: TaskKind) => (lines: { id: string; text: string }[]) =>
     state.setTaskLines(week, kind, lines);
 
   return (
     <View style={styles.gap}>
-      <ListField
-        appearance={appearance}
-        testID="tasks-list"
-        items={deep.map(x => ({ id: x.id, text: x.text }))}
-        onChange={set('deep')}
-        max={LIMITS.deep.max}
-        min={LIMITS.deep.min}
-        addLabel={t.tasks.add}
-        placeholder={t.tasks.placeholder}
-        idPrefix="task"
-        inlineTrailing
-        renderTrailing={item => {
-          const task = deep.find(x => x.id === item.id);
-          const m = state.milestones.find(x => x.id === task?.milestoneId);
-          const n = activeMilestones(state).findIndex(x => x.id === m?.id);
-          return milestones.length ? (
-            <Pill
-              testID={`link-${item.id}`}
-              label={n >= 0 ? `M${n + 1}` : '—'}
-              onPress={() => setLinking(item.id)}
-            />
-          ) : null;
-        }}
-      />
-      {deep.length >= LIMITS.deep.max ? (
-        <AppText variant="caption">{t.tasks.full}</AppText>
-      ) : null}
-
       {showShallow ? (
-        <View>
-          <Pressable
-            testID="shallow-toggle"
-            accessibilityRole="button"
-            accessibilityState={{ expanded: openShallow }}
-            onPress={() => {
-              haptics.selection();
-              setOpenShallow(o => !o);
-            }}
-            style={styles.toggle}
-          >
-            <View style={styles.toggleText}>
-              <AppText variant="bodyMedium">{t.tasks.shallowToggle}</AppText>
-              <AppText variant="micro" style={styles.muted}>
-                {t.tasks.shallowSub}
-              </AppText>
-            </View>
-            <ChevronDown
-              width={18}
-              height={18}
-              color={colors.textMuted}
-              style={{
-                transform: [{ rotate: openShallow ? '180deg' : '0deg' }],
-              }}
-            />
-          </Pressable>
-          {openShallow ? (
-            <Animated.View
-              entering={FadeIn.duration(motion.base)}
-              exiting={FadeOut.duration(motion.fast)}
-              style={styles.shallow}
-            >
-              <ListField
-                appearance={appearance}
-                testID="shallow-list"
-                items={shallow.map(x => ({ id: x.id, text: x.text }))}
-                onChange={set('shallow')}
-                max={10}
-                addLabel={t.tasks.shallowAdd}
-                placeholder={t.tasks.shallowPlaceholder}
-                idPrefix="shallow"
-              />
-            </Animated.View>
-          ) : null}
-        </View>
+        <SegmentedControl<TaskKind>
+          testIDPrefix="task-kind"
+          value={kind}
+          segments={[
+            { id: 'deep', label: t.tasks.deepTab(deep.length) },
+            { id: 'shallow', label: t.tasks.shallowTab(shallow.length) },
+          ]}
+          onChange={setKind}
+        />
       ) : null}
+      {kind === 'deep' ? (
+        <Animated.View
+          key="deep"
+          entering={FadeIn.duration(motion.base)}
+          style={styles.gap}
+        >
+          <ListField
+            appearance={appearance}
+            cardColor={cardColor}
+            testID="tasks-list"
+            items={deep.map(x => ({ id: x.id, text: x.text }))}
+            onChange={set('deep')}
+            max={LIMITS.deep.max}
+            min={LIMITS.deep.min}
+            addLabel={t.tasks.add}
+            placeholder={t.tasks.placeholder}
+            idPrefix="task"
+            inlineTrailing
+            renderTrailing={item => {
+              const task = deep.find(x => x.id === item.id);
+              const m = state.milestones.find(x => x.id === task?.milestoneId);
+              const n = activeMilestones(state).findIndex(x => x.id === m?.id);
+              return milestones.length ? (
+                <Pill
+                  testID={`link-${item.id}`}
+                  label={n >= 0 ? `M${n + 1}` : '—'}
+                  onPress={() => setLinking(item.id)}
+                />
+              ) : null;
+            }}
+          />
+          {deep.length >= LIMITS.deep.max ? (
+            <AppText variant="caption">{t.tasks.full}</AppText>
+          ) : null}
+        </Animated.View>
+      ) : (
+        <Animated.View
+          key="shallow"
+          entering={FadeIn.duration(motion.base)}
+          style={styles.gap}
+        >
+          <AppText variant="detail">{t.tasks.shallowSub}</AppText>
+          <ListField
+            appearance={appearance}
+            cardColor={cardColor}
+            testID="shallow-list"
+            items={shallow.map(x => ({ id: x.id, text: x.text }))}
+            onChange={set('shallow')}
+            max={10}
+            addLabel={t.tasks.shallowAdd}
+            placeholder={t.tasks.shallowPlaceholder}
+            idPrefix="shallow"
+            inlineTrailing
+          />
+        </Animated.View>
+      )}
 
       <BottomSheet
         visible={linking !== null}
@@ -394,24 +389,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.chip,
-  },
-  toggle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xl,
-    paddingVertical: 16,
-    paddingHorizontal: 18,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.white,
-  },
-  toggleText: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  shallow: {
-    marginTop: spacing.lg,
   },
   options: {
     gap: spacing.md,
