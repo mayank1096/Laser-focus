@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Animated, {
   FadeInDown,
+  useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
@@ -50,6 +51,25 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   );
   const fill = useSharedValue(levelOf(mark));
   const [shower, setShower] = useState(0);
+  const [weekFilled, setWeekFilled] = useState(mark !== null);
+  const weekIn = useSharedValue(mark !== null ? 1 : 0);
+  const weekStyle = useAnimatedStyle(() => ({
+    opacity: weekIn.value,
+    transform: [{ translateY: (1 - weekIn.value) * -12 }],
+  }));
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  const revealWeek = () => {
+    timers.current.push(
+      setTimeout(() => {
+        weekIn.value = withTiming(1, {
+          duration: motion.slow,
+          easing: motion.easeOut,
+        });
+      }, 1800),
+      setTimeout(() => setWeekFilled(true), 2300),
+    );
+  };
   const [cardY, setCardY] = useState(0);
   if (!session) {
     return null;
@@ -59,6 +79,7 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
 
   const choose = (m: Mark) => {
     setMark(m);
+    revealWeek();
     if (m === 'full') {
       setShower(n => n + 1);
     }
@@ -119,18 +140,24 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.week}>
+        {/* Kept in place but hidden until the card is marked and the petals
+            have fallen; then it rises in and the day's box fills. */}
+        <Animated.View
+          style={[styles.week, weekStyle]}
+          pointerEvents={weekFilled ? 'auto' : 'none'}
+        >
           <GlassFill />
           <WeekRow
             dark
             days={days}
-            marks={days.map(d => dayMark(state, d))}
+            marks={days.map(d =>
+              d === session.date && !weekFilled ? null : dayMark(state, d),
+            )}
             today={today}
             letters={t.common.dayLetter}
             size={32}
-            delayFor={d => (d === session.date ? 700 : 0)}
           />
-        </View>
+        </Animated.View>
 
         <View
           style={styles.cardWrap}

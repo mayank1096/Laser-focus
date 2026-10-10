@@ -22,8 +22,11 @@ import type { Mark } from '../../core/model';
 import { colors, fonts, springs, typography } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { FILL_MS, SaffronFill } from './MarkBox';
+import { RewardRays } from './RewardRays';
 
 const RADIUS = 28;
+/** When the spinning card lands face up. */
+const LAND_MS = 2100;
 
 /**
  * The reward. The card spins in like a game drop, face down first, and
@@ -62,6 +65,7 @@ export function RewardCard({
 }) {
   const height = Math.round(width * 1.32);
   const glowSize = width * 1.9;
+  const raysSize = width * 2.6;
   const done = useRef(locked);
   done.current = locked;
   const ticks = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -86,7 +90,7 @@ export function RewardCard({
           easing: Easing.bezier(0.3, 0.1, 0.2, 1),
         }),
       );
-      const land = setTimeout(() => haptics.confirm(), 2100);
+      const land = setTimeout(() => haptics.confirm(), LAND_MS);
       return () => clearTimeout(land);
     }
     // Only on arrival.
@@ -239,6 +243,24 @@ export function RewardCard({
 
   return (
     <View style={[styles.stage, { height: height + 40 }]}>
+      <View
+        pointerEvents="none"
+        style={[
+          styles.raysBox,
+          {
+            width: raysSize,
+            height: raysSize,
+            left: (width - raysSize) / 2,
+            top: (height - raysSize) / 2 + 20,
+          },
+        ]}
+      >
+        <RewardRays
+          size={raysSize}
+          delay={locked ? 0 : LAND_MS - 200}
+          flare={flare}
+        />
+      </View>
       <Animated.View
         pointerEvents="none"
         style={[
@@ -349,6 +371,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   glow: {
+    position: 'absolute',
+  },
+  raysBox: {
     position: 'absolute',
   },
   face: {
