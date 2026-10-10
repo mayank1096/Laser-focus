@@ -2,19 +2,24 @@ import React, { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { dayMark } from '../../core/home';
-import type { BookData } from '../../core/model';
+import type { BookData, Mark } from '../../core/model';
 import { useT } from '../../i18n';
-import { colors } from '../../theme';
+import { colors, fonts } from '../../theme';
 import type { ISODate } from '../../types/models';
 import { addDays, fromISODate } from '../../utils/date';
-import { DayBox } from './MarkBox';
+import { SaffronFill } from './MarkBox';
 
 const GAP = 6;
 const MAX_WEEKS = 26;
+/** Monday first, as the review week reads. */
+const ORDER = [1, 2, 3, 4, 5, 6, 0];
+const TRACK = 'rgba(0, 0, 0, 0.045)';
 
 /**
- * Every day from `from` to `to`, one box each, weeks as rows. The same box
- * the day was marked with; nothing to read but the boxes.
+ * The run as a calendar: weeks as rows, Monday first, each day with its
+ * date. A full day is solid saffron, a half day filled half way up, a
+ * missed day a soft grey tile; days with nothing planned are just their
+ * date.
  */
 export function Calendar({
   book,
@@ -27,8 +32,10 @@ export function Calendar({
 }) {
   const t = useT();
   const [width, setWidth] = useState(0);
-  const lastRow = addDays(to, -fromISODate(to).getDay());
-  let firstRow = addDays(from, -fromISODate(from).getDay());
+  const monday = (d: ISODate) =>
+    addDays(d, -((fromISODate(d).getDay() + 6) % 7));
+  const lastRow = monday(to);
+  let firstRow = monday(from);
   if (addDays(firstRow, 7 * MAX_WEEKS) <= lastRow) {
     firstRow = addDays(lastRow, -7 * (MAX_WEEKS - 1));
   }
@@ -36,8 +43,7 @@ export function Calendar({
   for (let d = firstRow; d <= lastRow; d = addDays(d, 7)) {
     rows.push(d);
   }
-  const size = width ? Math.min(32, Math.floor((width - 6 * GAP) / 7)) : 0;
-
+  const size = width ? Math.min(42, Math.floor((width - 6 * GAP) / 7)) : 0;
   return (
     <View
       onLayout={e => setWidth(e.nativeEvent.layout.width)}
@@ -46,35 +52,87 @@ export function Calendar({
       {size ? (
         <>
           <View style={styles.row}>
-            {t.common.dayLetter.map((l, i) => (
+            {ORDER.map(i => (
               <AppText
                 key={i}
                 variant="micro"
                 style={[styles.letter, { width: size }]}
               >
-                {l}
+                {t.common.dayLetter[i]}
               </AppText>
             ))}
           </View>
-          {rows.map(row => (
-            <View key={row} style={styles.row}>
-              {Array.from({ length: 7 }, (_, i) => {
-                const d = addDays(row, i);
-                return d < from || d > to ? (
-                  <View key={d} style={{ width: size, height: size }} />
-                ) : (
-                  <DayBox
-                    key={d}
-                    size={size}
-                    mark={dayMark(book, d)}
-                    today={d === to}
-                  />
-                );
-              })}
-            </View>
-          ))}
+          {rows.map(row => {
+            return (
+              <View key={row} style={styles.week}>
+                <View style={styles.row}>
+                  {Array.from({ length: 7 }, (_, i) => {
+                    const d = addDays(row, i);
+                    return (
+                      <DayCell
+                        key={d}
+                        size={size}
+                        iso={d}
+                        inRun={d >= from && d <= to}
+                        mark={dayMark(book, d)}
+                        today={d === to}
+                      />
+                    );
+                  })}
+                </View>
+              </View>
+            );
+          })}
         </>
       ) : null}
+    </View>
+  );
+}
+
+function DayCell({
+  size,
+  iso,
+  inRun,
+  mark,
+  today,
+}: {
+  size: number;
+  iso: ISODate;
+  inRun: boolean;
+  mark: Mark | null;
+  today: boolean;
+}) {
+  const shown = inRun ? mark : null;
+  const date = fromISODate(iso).getDate();
+  return (
+    <View
+      style={[
+        styles.cell,
+        {
+          width: size,
+          height: size,
+          borderRadius: Math.round(size * 0.3),
+        },
+        shown === 'empty' || shown === 'half' ? styles.tile : null,
+        today && styles.today,
+      ]}
+    >
+      {shown === 'full' ? <SaffronFill id={`cal-${iso}`} /> : null}
+      {shown === 'half' ? (
+        <View style={styles.half}>
+          <SaffronFill id={`cal-${iso}`} />
+        </View>
+      ) : null}
+      <AppText
+        style={[
+          styles.date,
+          !inRun && styles.dateOut,
+          shown === 'full' && styles.dateOnFill,
+          shown === 'empty' && styles.dateMissed,
+        ]}
+      >
+        {String(date)}
+      </AppText>
     </View>
   );
 }
@@ -103,8 +161,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: GAP,
   },
+  week: {
+    gap: 8,
+  },
   letter: {
     textAlign: 'center',
+    color: colors.textMuted,
+  },
+  cell: {
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tile: {
+    backgroundColor: TRACK,
+  },
+  half: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '50%',
+    overflow: 'hidden',
+  },
+  today: {
+    borderWidth: 1.5,
+    borderColor: colors.saffron,
+  },
+  date: {
+    fontFamily: fonts.sansMedium,
+    fontSize: 14,
+    lineHeight: 18,
+    color: colors.ink,
+  },
+  dateOut: {
+    color: colors.textGhost,
+  },
+  dateOnFill: {
+    color: colors.white,
+  },
+  dateMissed: {
     color: colors.textMuted,
   },
 });
