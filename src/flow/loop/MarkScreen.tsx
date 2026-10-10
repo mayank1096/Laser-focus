@@ -19,7 +19,7 @@ import { MistBackdrop } from '../../components/MistBackdrop';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { TextField } from '../../components/TextField';
 import { appDay, lastSeven } from '../../core/days';
-import { dayMark, sessionsOn } from '../../core/home';
+import { dayMark, sessionsOn, sprintProgress } from '../../core/home';
 import type { Mark } from '../../core/model';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
@@ -76,6 +76,14 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
   }
   const today = appDay();
   const days = lastSeven(today);
+  // What was actually put in: start to now in 5-minute steps, held to
+  // the plan plus an hour so a day-old session doesn't read as 27 hours.
+  const elapsed = session.startedAt
+    ? Math.round(
+        (Date.now() - new Date(session.startedAt).getTime()) / 60000 / 5,
+      ) * 5
+    : session.minutes;
+  const worked = Math.min(Math.max(5, elapsed), session.minutes + 60);
 
   const choose = (m: Mark) => {
     setMark(m);
@@ -168,8 +176,9 @@ export function MarkScreen({ navigation, route }: RootScreenProps<'Mark'>) {
           <RewardCard
             width={cardWidth}
             eyebrow={t.common.session(session.order + 1)}
-            title={session.what}
-            outcome={session.outcome}
+            headline={t.common.minutes(worked)}
+            sub={t.mark.ofDeepWork}
+            footer={t.mark.dayOf(sprintProgress(state, today).day)}
             brand={t.signIn.eyebrow}
             holdLabel={t.mark.hold}
             fill={fill}

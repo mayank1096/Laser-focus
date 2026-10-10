@@ -296,6 +296,8 @@ export const hi: Strings = {
   },
 
   mark: {
+    ofDeepWork: 'गहरा काम',
+    dayOf: (n: number) => `आपके दौर का दिन ${n}`,
     title: (n: number, what: string) => `सत्र ${n} · ${what}`,
     full: 'हो गया, पूरा नतीजा',
     half: 'आधा, कम से कम 10 मिनट',

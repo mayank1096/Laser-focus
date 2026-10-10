@@ -17,6 +17,7 @@ import Animated, {
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import { GLASS_EDGE, GlassFill } from '../../components/Glass';
+import { sansDigits } from '../../components/Numerals';
 import { ShaderView } from '../../components/shader';
 import type { Mark } from '../../core/model';
 import { colors, fonts, springs, typography } from '../../theme';
@@ -38,8 +39,9 @@ const LAND_MS = 2100;
 export function RewardCard({
   width,
   eyebrow,
-  title,
-  outcome,
+  headline,
+  sub,
+  footer,
   brand,
   holdLabel,
   fill,
@@ -50,8 +52,12 @@ export function RewardCard({
 }: {
   width: number;
   eyebrow: string;
-  title: string;
-  outcome: string;
+  /** The achievement, large: the time worked, e.g. "2 h". */
+  headline: string;
+  /** Under it: "of deep work". */
+  sub: string;
+  /** At the foot of the card: where this sits in the run. */
+  footer: string;
   /** Printed on the card's back. */
   brand: string;
   /** The word inside the dashed ring: "Hold". */
@@ -287,7 +293,7 @@ export function RewardCard({
           collapsable={false}
           testID="mark-pad"
           accessibilityRole="button"
-          accessibilityLabel={`${eyebrow}, ${title}`}
+          accessibilityLabel={`${eyebrow}, ${headline} ${sub}`}
           accessibilityActions={
             locked
               ? []
@@ -325,14 +331,18 @@ export function RewardCard({
               <Animated.Text style={[styles.eyebrow, softInkStyle]}>
                 {eyebrow}
               </Animated.Text>
-              <Animated.Text style={[styles.title, inkStyle]} numberOfLines={3}>
-                {title}
-              </Animated.Text>
               <Animated.Text
-                style={[styles.outcome, softInkStyle]}
-                numberOfLines={3}
+                style={[styles.headline, inkStyle]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
-                {outcome}
+                {sansDigits(headline)}
+              </Animated.Text>
+              <Animated.Text style={[styles.sub, softInkStyle]}>
+                {sub}
+              </Animated.Text>
+              <Animated.Text style={[styles.footer, softInkStyle]}>
+                {footer}
               </Animated.Text>
             </View>
             <Animated.View
@@ -418,21 +428,35 @@ const styles = StyleSheet.create({
   eyebrow: {
     ...typography.eyebrow,
   },
-  title: {
-    ...typography.title,
-    fontSize: 26,
-    lineHeight: 30,
+  headline: {
+    marginTop: 18,
+    fontFamily: fonts.sansMedium,
+    fontSize: 48,
+    lineHeight: 56,
+    letterSpacing: -1.5,
   },
-  outcome: {
+  sub: {
+    marginTop: -6,
     fontFamily: fonts.sans,
-    fontSize: 14,
+    fontSize: 15,
     lineHeight: 20,
+  },
+  footer: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 22,
+    textAlign: 'center',
+    fontFamily: fonts.sans,
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 0.26,
   },
   tick: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 70,
+    paddingTop: 110,
   },
   target: {
     width: 88,

@@ -301,6 +301,8 @@ export const en = {
   },
 
   mark: {
+    ofDeepWork: 'of deep work',
+    dayOf: (n: number) => `Day ${n} of your run`,
     title: (n: number, what: string) => `Session ${n} · ${what}`,
     full: 'Done, the whole outcome',
     half: 'Half, at least 10 minutes',
