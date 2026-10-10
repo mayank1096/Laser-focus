@@ -194,3 +194,17 @@ describe('deep work slots', () => {
     expect(totalSlotMinutes(rhythm)).toBe(210);
   });
 });
+
+describe('changing the review day', () => {
+  it("keeps this week's tasks in this week", () => {
+    const { useBook } = require('../src/core/store');
+    const { appDay: day, weekStart: start } = require('../src/core/days');
+    useBook.getState().reset();
+    const week = start(day(), 0);
+    useBook.setState({
+      tasks: [{ id: 't1', text: 'Cut reels', kind: 'deep', week, done: false }],
+    });
+    useBook.getState().setRhythm({ reviewDay: 3 });
+    expect(useBook.getState().tasks[0].week).toBe(start(day(), 3));
+  });
+});

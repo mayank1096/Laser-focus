@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { Id, ISODate, SheetLine } from '../types/models';
 import { now } from '../utils/clock';
+import { addDays } from '../utils/date';
 import { createId } from '../utils/id';
 import { appDay, weekStart } from './days';
 import {
@@ -199,7 +200,28 @@ export const useBook = create<BookState>()(
           };
         }),
 
-      setRhythm: patch => set(s => ({ rhythm: { ...s.rhythm, ...patch } })),
+      setRhythm: patch =>
+        set(s => {
+          const rhythm = { ...s.rhythm, ...patch };
+          if (rhythm.reviewDay === s.rhythm.reviewDay) {
+            return { rhythm };
+          }
+          // A new review day moves where weeks start. Carry this week's and
+          // next week's tasks across, so they don't vanish from the plan.
+          const today = appDay();
+          const was = weekStart(today, s.rhythm.reviewDay);
+          const is = weekStart(today, rhythm.reviewDay);
+          const moved = (week: ISODate) =>
+            week === was
+              ? is
+              : week === addDays(was, 7)
+              ? addDays(is, 7)
+              : weekStart(week, rhythm.reviewDay);
+          return {
+            rhythm,
+            tasks: s.tasks.map(x => ({ ...x, week: moved(x.week) })),
+          };
+        }),
 
       saveSession: session => {
         const id = session.id ?? createId('session');
