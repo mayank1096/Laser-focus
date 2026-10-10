@@ -1,6 +1,12 @@
 import { appDay, weekStart } from '../src/core/days';
 import { dayMark, homeAction, planDateFor } from '../src/core/home';
-import { DEFAULT_RHYTHM, type BookData, type Session } from '../src/core/model';
+import {
+  DEFAULT_RHYTHM,
+  slotFor,
+  totalSlotMinutes,
+  type BookData,
+  type Session,
+} from '../src/core/model';
 
 const base: BookData & { rereadOn: string | null } = {
   setup: 'done',
@@ -170,5 +176,21 @@ describe('homeAction', () => {
     };
     expect(homeAction(book, WED, 600).kind).toBe('reread');
     expect(homeAction({ ...book, rereadOn: WED }, WED, 600).kind).toBe('plan');
+  });
+});
+
+describe('deep work slots', () => {
+  it('puts session N in slot N, and any extra right after the last', () => {
+    const rhythm = {
+      ...DEFAULT_RHYTHM,
+      slots: [
+        { start: 360, minutes: 120 },
+        { start: 660, minutes: 90 },
+      ],
+    };
+    expect(slotFor(rhythm, 0)).toEqual({ start: 360, minutes: 120 });
+    expect(slotFor(rhythm, 1)).toEqual({ start: 660, minutes: 90 });
+    expect(slotFor(rhythm, 2).start).toBe(750);
+    expect(totalSlotMinutes(rhythm)).toBe(210);
   });
 });

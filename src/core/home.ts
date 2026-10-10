@@ -151,13 +151,13 @@ export function homeAction(
   return { kind: 'plan', date: planDateFor(book, today, minutesNow) };
 }
 
-/** Today if nothing is planned yet and the focus slot is still ahead. */
+/** Today if nothing is planned yet and the first slot is still ahead. */
 export function planDateFor(
   book: Pick<BookData, 'sessions' | 'rhythm'>,
   today: ISODate,
   minutesNow: number,
 ): ISODate {
-  const slotAhead = minutesNow < book.rhythm.focusStart;
+  const slotAhead = minutesNow < (book.rhythm.slots[0]?.start ?? 0);
   return slotAhead && !sessionsOn(book, today).length
     ? today
     : addDays(today, 1);

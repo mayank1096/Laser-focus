@@ -142,9 +142,9 @@ export function AccountTab({
             testID="account-rhythm"
             Icon={Hourglass}
             title={t.account.rhythm}
-            detail={`${clock(t, state.rhythm.focusStart)} · ${
-              t.common.days[state.rhythm.reviewDay]
-            }`}
+            detail={`${state.rhythm.slots
+              .map(x => clock(t, x.start))
+              .join(', ')} · ${t.common.days[state.rhythm.reviewDay]}`}
             onPress={() => onOpen('settings')}
           />
           <SettingsRow

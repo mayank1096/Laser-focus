@@ -62,9 +62,15 @@ export interface Session {
   wentWrong?: string[];
 }
 
+/** One fixed deep-work slot, at the same time every day. */
+export interface Slot {
+  start: ClockTime;
+  minutes: number;
+}
+
 export interface Rhythm {
-  /** When the day's deep work begins; planned sessions line up from here. */
-  focusStart: ClockTime;
+  /** Two or three fixed slots, in order through the day. Session N is slot N. */
+  slots: Slot[];
   /** 0 = Sunday … 6 = Saturday. */
   reviewDay: number;
   reminderOn: boolean;
@@ -144,8 +150,28 @@ export interface BookData {
 }
 
 export const DEFAULT_RHYTHM: Rhythm = {
-  focusStart: 6 * 60,
+  slots: [
+    { start: 6 * 60, minutes: 120 },
+    { start: 11 * 60, minutes: 90 },
+    { start: 16 * 60, minutes: 90 },
+  ],
   reviewDay: 0,
   reminderOn: true,
   reminderAt: 21 * 60,
 };
+
+/** The course: 2–3 slots a day, 3–5 hours in all. */
+export const SLOTS = { min: 2, max: 3, minTotal: 180, maxTotal: 300 } as const;
+
+/** Where session `order` (0-based) sits: its slot, or after the last one. */
+export function slotFor(rhythm: Rhythm, order: number): Slot {
+  const slots = rhythm.slots;
+  if (slots[order]) {
+    return slots[order];
+  }
+  const last = slots[slots.length - 1] ?? { start: 6 * 60, minutes: 120 };
+  return { start: last.start + last.minutes, minutes: 120 };
+}
+
+export const totalSlotMinutes = (rhythm: Rhythm) =>
+  rhythm.slots.reduce((n, x) => n + x.minutes, 0);

@@ -13,12 +13,14 @@ import { AppText } from '../../components/AppText';
 import { Pill, PillRow, SectionHeader } from '../../components/Pill';
 import { TRACK } from '../../components/SegmentedControl';
 import type { ClockTime } from '../../types/models';
+import { SLOTS, totalSlotMinutes, type Slot } from '../../core/model';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
 import { clock } from '../../i18n/format';
 import { colors, fonts, motion, spacing } from '../../theme';
 import { haptics } from '../../utils/haptics';
 import { ClockSheet } from './ClockSheet';
+import { SlotSheet } from './SlotSheet';
 
 const REMINDER_TIMES = [1200, 1260, 1320];
 
@@ -38,15 +40,20 @@ function skyIcon(at: ClockTime): React.FC<SvgProps> {
 }
 
 /**
- * Focus time, review day and the one evening reminder: every choice is a
+ * Deep work slots, review day and the one evening reminder: every choice is a
  * tap on the screen itself, no dropdowns. Odd times live behind "Other".
  */
 export function RhythmEditor() {
   const t = useT();
   const rhythm = useBook(s => s.rhythm);
   const setRhythm = useBook(s => s.setRhythm);
-  const [picking, setPicking] = useState<'focus' | 'reminder' | null>(null);
-  const FocusIcon = skyIcon(rhythm.focusStart);
+  const [picking, setPicking] = useState<'reminder' | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
+  const total = totalSlotMinutes(rhythm);
+  // Slots always read in order through the day.
+  const setSlots = (slots: Slot[]) =>
+    setRhythm({ slots: [...slots].sort((x, y) => x.start - y.start) });
+  const edited = editing !== null ? rhythm.slots[editing] : undefined;
 
   // A custom time shows up as its own pill, first in the row.
   const reminderTimes = REMINDER_TIMES.includes(rhythm.reminderAt)
@@ -58,40 +65,86 @@ export function RhythmEditor() {
 
   return (
     <View style={styles.wrap}>
-      {/* Focus time */}
+      {/* Deep work slots */}
       <View style={styles.section}>
-        <SectionHeader Icon={Clock} title={t.rhythm.focus} />
-        <Pressable
-          testID="rhythm-focus"
-          accessibilityRole="button"
-          accessibilityLabel={t.rhythm.startsAt}
-          onPress={() => {
-            haptics.tap();
-            setPicking('focus');
-          }}
-          style={({ pressed }) => [
-            styles.focusButton,
-            pressed && styles.pressed,
-          ]}
+        <SectionHeader Icon={Clock} title={t.rhythm.slots} />
+        <View style={styles.slots}>
+          {rhythm.slots.map((slot, i) => {
+            const Icon = skyIcon(slot.start);
+            return (
+              <Pressable
+                key={i}
+                testID={`slot-${i}`}
+                accessibilityRole="button"
+                accessibilityLabel={t.rhythm.slot(i + 1)}
+                onPress={() => {
+                  haptics.tap();
+                  setEditing(i);
+                }}
+                style={({ pressed }) => [
+                  styles.slot,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <View style={styles.slotIcon}>
+                  <Icon
+                    width={18}
+                    height={18}
+                    color={colors.saffron}
+                    strokeWidth={1.75}
+                  />
+                </View>
+                <View style={styles.flex}>
+                  <AppText variant="detail">{t.rhythm.slot(i + 1)}</AppText>
+                  <AppText style={styles.slotValue}>
+                    {t.rhythm.window(
+                      clock(t, slot.start),
+                      clock(t, slot.start + slot.minutes),
+                    )}
+                  </AppText>
+                </View>
+                <AppText variant="label" style={styles.slotLength}>
+                  {t.common.minutes(slot.minutes)}
+                </AppText>
+              </Pressable>
+            );
+          })}
+          {rhythm.slots.length < SLOTS.max ? (
+            <Pressable
+              testID="slot-add"
+              accessibilityRole="button"
+              onPress={() => {
+                haptics.selection();
+                const last = rhythm.slots[rhythm.slots.length - 1];
+                const start = Math.min(
+                  22 * 60,
+                  (last ? last.start + last.minutes : 6 * 60) + 60,
+                );
+                setSlots([...rhythm.slots, { start, minutes: 60 }]);
+                setEditing(rhythm.slots.length);
+              }}
+              style={styles.addSlot}
+            >
+              <AppText variant="label" style={styles.addSlotText}>
+                {t.rhythm.addSlot}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+        <AppText
+          variant="detail"
+          style={
+            total < SLOTS.minTotal || total > SLOTS.maxTotal
+              ? styles.warn
+              : null
+          }
         >
-          <View style={styles.focusIcon}>
-            <FocusIcon
-              width={20}
-              height={20}
-              color={colors.saffron}
-              strokeWidth={1.75}
-            />
-          </View>
-          <View style={styles.flex}>
-            <AppText variant="detail">{t.rhythm.startsAt}</AppText>
-            <AppText style={styles.focusValue}>
-              {clock(t, rhythm.focusStart)}
-            </AppText>
-          </View>
-          <AppText variant="label" style={styles.focusLength}>
-            {t.rhythm.change}
-          </AppText>
-        </Pressable>
+          {total < SLOTS.minTotal
+            ? t.rhythm.tooLittle(t.common.minutes(total))
+            : total > SLOTS.maxTotal
+            ? t.rhythm.tooMuch(t.common.minutes(total))
+            : t.rhythm.total(t.common.minutes(total))}
+        </AppText>
       </View>
 
       {/* Weekly review */}
@@ -174,18 +227,36 @@ export function RhythmEditor() {
         ) : null}
       </View>
 
+      {edited && editing !== null ? (
+        <SlotSheet
+          visible
+          title={t.rhythm.slot(editing + 1)}
+          slot={edited}
+          others={rhythm.slots.filter((_, i) => i !== editing)}
+          onClose={() => setEditing(null)}
+          onDone={slot => {
+            haptics.success();
+            setSlots(rhythm.slots.map((x, i) => (i === editing ? slot : x)));
+            setEditing(null);
+          }}
+          onRemove={
+            rhythm.slots.length > SLOTS.min
+              ? () => {
+                  setSlots(rhythm.slots.filter((_, i) => i !== editing));
+                  setEditing(null);
+                }
+              : undefined
+          }
+        />
+      ) : null}
       <ClockSheet
         testID="rhythm-clock"
         visible={picking !== null}
-        title={picking === 'focus' ? t.rhythm.startsAt : t.rhythm.pickReminder}
-        subtitle={picking === 'focus' ? t.rhythm.startsSub : undefined}
-        value={picking === 'focus' ? rhythm.focusStart : rhythm.reminderAt}
+        title={t.rhythm.pickReminder}
+        value={rhythm.reminderAt}
         onClose={() => setPicking(null)}
         onDone={at => {
-          haptics.success();
-          setRhythm(
-            picking === 'focus' ? { focusStart: at } : { reminderAt: at },
-          );
+          setRhythm({ reminderAt: at });
           setPicking(null);
         }}
       />
@@ -197,33 +268,52 @@ const styles = StyleSheet.create({
   wrap: {
     gap: 40,
   },
-  focusButton: {
+  slots: {
+    gap: 10,
+  },
+  slot: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: colors.saffron,
     backgroundColor: colors.saffronWash,
   },
-  focusIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  slotIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
   },
-  focusValue: {
+  slotValue: {
     marginTop: 2,
     fontFamily: fonts.sansMedium,
-    fontSize: 17,
-    lineHeight: 22,
+    fontSize: 16,
+    lineHeight: 21,
     color: colors.ink,
   },
-  focusLength: {
+  slotLength: {
     color: colors.saffron,
+  },
+  addSlot: {
+    height: 52,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addSlotText: {
+    color: colors.textMuted,
+  },
+  warn: {
+    color: colors.danger,
   },
   flex: {
     flex: 1,

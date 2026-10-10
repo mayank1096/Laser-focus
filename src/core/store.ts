@@ -306,8 +306,26 @@ export const useBook = create<BookState>()(
     }),
     {
       name: 'laser-focus/book',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => AsyncStorage),
+      // v1 kept one focus start; v2 keeps the course's 2–3 fixed slots.
+      migrate: (persisted, version) => {
+        const state = persisted as { rhythm?: Record<string, unknown> };
+        if (version < 2 && state.rhythm && !state.rhythm.slots) {
+          const start =
+            typeof state.rhythm.focusStart === 'number'
+              ? state.rhythm.focusStart
+              : DEFAULT_RHYTHM.slots[0].start;
+          const rest = { ...state.rhythm };
+          delete rest.focusStart;
+          delete rest.focusMinutes;
+          state.rhythm = {
+            ...rest,
+            slots: [{ start, minutes: 120 }, ...DEFAULT_RHYTHM.slots.slice(1)],
+          };
+        }
+        return state as never;
+      },
       partialize: ({
         setup,
         welcomed,

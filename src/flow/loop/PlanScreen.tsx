@@ -24,6 +24,7 @@ import {
   DEFAULT_SESSION_MINUTES,
   LIMITS,
   MINUTE_CHIPS,
+  slotFor,
 } from '../../core/model';
 import {
   finishReassess,
@@ -130,11 +131,9 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
     sessionsOn(s, date)
       .filter(x => !x.startedAt && !x.mark && !drafts.some(d => d.id === x.id))
       .forEach(x => s.deleteSession(x.id));
-    let start = Math.max(
-      state.rhythm.focusStart,
-      ...locked.map(l => l.start + l.minutes),
-    );
     drafts.forEach((d, i) => {
+      // Session N goes in slot N: the same time every day.
+      const start = slotFor(state.rhythm, locked.length + i).start;
       s.saveSession({
         id: d.id,
         date,
@@ -149,7 +148,6 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
         risks: d.risks.trim() || undefined,
         dontDo: d.dontDo.map(x => x.text).filter(Boolean),
       });
-      start += d.minutes;
     });
     haptics.success();
     if (first) {
@@ -168,10 +166,8 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
     setDrafts(load(d));
   };
 
-  // Each session's window, following the focus slot and earlier sessions.
-  const startOf = (i: number) =>
-    Math.max(state.rhythm.focusStart, ...locked.map(l => l.start + l.minutes)) +
-    drafts.slice(0, i).reduce((n, x) => n + x.minutes, 0);
+  // Each session sits in its fixed slot.
+  const slotOf = (i: number) => slotFor(state.rhythm, locked.length + i);
 
   return (
     <SimpleScreen
@@ -228,8 +224,8 @@ export function PlanScreen({ navigation, route }: RootScreenProps<'Plan'>) {
               Icon={Target}
               title={t.common.session(locked.length + i + 1)}
               value={t.plan.window(
-                clock(t, startOf(i)),
-                clock(t, startOf(i) + d.minutes),
+                clock(t, slotOf(i).start),
+                clock(t, slotOf(i).start + slotOf(i).minutes),
               )}
               right={
                 drafts.length > 1 ? (

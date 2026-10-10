@@ -176,10 +176,19 @@ export const en = {
   },
 
   rhythm: {
-    startsAt: 'Deep work starts at',
-    startsSub:
-      'The same time every day. The sessions you plan line up from here; each gets its own length when you plan it.',
-    change: 'Change',
+    slots: 'Deep work slots',
+    slot: (n: number) => `Slot ${n}`,
+    slotSub: 'The same time every day. Session 1 goes in slot 1, session 2 in slot 2.',
+    addSlot: '+ Add a slot',
+    removeSlot: 'Remove this slot',
+    from: 'From',
+    to: 'To',
+    overlap: 'This overlaps another slot.',
+    total: (time: string) => `${time} of deep work a day.`,
+    tooLittle: (time: string) =>
+      `${time} a day. The course asks for 3 to 5 hours.`,
+    tooMuch: (time: string) =>
+      `${time} a day is hard to hold. The course asks for 3 to 5 hours.`,
     eyebrow: 'Your rhythm',
     title: 'Fix your deep-work time.',
     sub: 'Two to three slots at the same time every day. Fit everything else around them.',
