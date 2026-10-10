@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import ScrollText from '../../assets/icons/scroll-text.svg';
 import { AppText } from '../../components/AppText';
+import { SettingsRow, SettingsSection } from '../../components/SettingsList';
 import { appDay } from '../../core/days';
+import { dayMark } from '../../core/home';
+import type { Session } from '../../core/model';
 import { useBook } from '../../core/store';
 import { useT } from '../../i18n';
-import { dayDate } from '../../i18n/format';
+import { clock, dayDate } from '../../i18n/format';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme';
 import { Calendar, countDays } from '../components/Calendar';
 import { DayBox } from '../components/MarkBox';
 import { SheetPage } from '../components/SheetPage';
 
-/** Every session of this run, newest first, under the run's calendar. */
+/**
+ * Every session of this run. The calendar on top, then a ruled log, one
+ * day at a time, newest first: the day and its box, then each session
+ * with its start time in a column on the left.
+ */
 export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
   const t = useT();
   const state = useBook();
   const today = appDay();
   const from = state.sprintStart ?? today;
   const { full, half } = countDays(state, from, today);
-  const sessions = [...state.sessions]
+  const [printNote, setPrintNote] = useState(false);
+
+  const byDay = new Map<string, Session[]>();
+  [...state.sessions]
     .filter(s => s.mark)
     .sort((a, b) =>
-      a.date === b.date ? b.order - a.order : a.date < b.date ? 1 : -1,
-    );
-  const [printNote, setPrintNote] = useState(false);
+      a.date === b.date ? a.order - b.order : a.date < b.date ? 1 : -1,
+    )
+    .forEach(s => byDay.set(s.date, [...(byDay.get(s.date) ?? []), s]));
+  const days = [...byDay.entries()];
 
   return (
     <SheetPage
@@ -31,93 +43,105 @@ export function BookScreen({ navigation }: RootScreenProps<'Book'>) {
       eyebrow={t.sessionsPage.eyebrow}
       title={t.sessionsPage.title}
       subtitle={t.sessionsPage.sub}
+      panel={colors.white}
       onBack={() => navigation.goBack()}
     >
-      <View style={styles.card}>
-        <AppText variant="eyebrow">{t.book.calendar}</AppText>
+      <View style={styles.section}>
+        <View style={styles.head}>
+          <AppText variant="eyebrow">{t.book.calendar}</AppText>
+          <AppText variant="detail">{t.goalDone.counts(full, half)}</AppText>
+        </View>
         <Calendar book={state} from={from} to={today} />
-        <AppText variant="label" style={styles.muted}>
-          {t.goalDone.counts(full, half)}
-        </AppText>
       </View>
 
-      <View style={styles.card}>
+      <View style={styles.section}>
         <AppText variant="eyebrow">{t.book.sessions}</AppText>
-        {sessions.length ? (
-          sessions.map((s, i) => (
-            <View
-              key={s.id}
-              style={[styles.line, i < sessions.length - 1 && styles.divider]}
-            >
-              <DayBox size={20} mark={s.mark ?? null} />
-              <View style={styles.flex}>
-                <AppText variant="bodyMedium" numberOfLines={1}>
-                  {s.what}
-                </AppText>
-                <AppText variant="micro" style={styles.muted} numberOfLines={1}>
-                  {`${dayDate(t, s.date)} · ${t.common.minutes(s.minutes)}${
-                    s.finished ? ` · ${s.finished}` : ''
-                  }`}
-                </AppText>
+        {days.length ? (
+          <View style={styles.log}>
+            {days.map(([date, list]) => (
+              <View key={date} style={styles.day}>
+                <View style={styles.dayHead}>
+                  <AppText variant="bodyMedium">{dayDate(t, date)}</AppText>
+                  <DayBox size={18} mark={dayMark(state, date)} />
+                </View>
+                {list.map(s => (
+                  <View key={s.id} style={styles.row}>
+                    <AppText variant="detail" style={styles.time}>
+                      {clock(t, s.start)}
+                    </AppText>
+                    <View style={styles.flex}>
+                      <AppText variant="body" numberOfLines={1}>
+                        {s.what}
+                      </AppText>
+                      <AppText variant="detail" numberOfLines={1}>
+                        {[t.common.minutes(s.minutes), s.finished]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </AppText>
+                    </View>
+                    {list.length > 1 ? (
+                      <DayBox size={14} mark={s.mark ?? null} />
+                    ) : null}
+                  </View>
+                ))}
               </View>
-            </View>
-          ))
+            ))}
+          </View>
         ) : (
-          <AppText variant="caption">{t.book.noSessions}</AppText>
+          <AppText variant="detail">{t.book.noSessions}</AppText>
         )}
       </View>
 
-      <View style={styles.print}>
-        <Pressable
+      <SettingsSection>
+        <SettingsRow
           testID="book-print"
-          accessibilityRole="button"
-          hitSlop={8}
+          Icon={ScrollText}
+          title={t.book.print}
+          detail={printNote ? t.setupDone.printSoon : t.settings.printSub}
           onPress={() => setPrintNote(true)}
-        >
-          <AppText variant="label" style={styles.link}>
-            {t.book.print}
-          </AppText>
-        </Pressable>
-        {printNote ? (
-          <AppText variant="caption">{t.setupDone.printSoon}</AppText>
-        ) : null}
-      </View>
+          last
+        />
+      </SettingsSection>
     </SheetPage>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: 16,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    backgroundColor: colors.white,
-    gap: spacing.md,
+  section: {
+    gap: spacing.lg,
+    marginBottom: spacing.group,
   },
-  line: {
+  head: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.lg,
+    justifyContent: 'space-between',
   },
-  divider: {
+  log: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.divider,
+  },
+  day: {
+    paddingVertical: 16,
+    gap: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.divider,
   },
+  dayHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 16,
+  },
+  time: {
+    width: 64,
+    paddingTop: 2,
+  },
   flex: {
     flex: 1,
-    gap: spacing.xs,
-  },
-  muted: {
-    color: colors.textMuted,
-  },
-  link: {
-    color: colors.saffron,
-  },
-  print: {
-    marginTop: spacing.lg,
-    alignItems: 'center',
-    gap: spacing.sm,
+    gap: 2,
   },
 });
