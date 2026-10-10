@@ -92,7 +92,7 @@ export function RhythmEditor() {
             onChange={setCount}
           />
         </View>
-        <View style={styles.slots}>
+        <PillRow>
           {rhythm.slots.map((slot, i) => {
             const Icon = skyIcon(slot.start);
             return (
@@ -110,30 +110,30 @@ export function RhythmEditor() {
                   pressed && styles.pressed,
                 ]}
               >
-                <View style={styles.slotIcon}>
-                  <Icon
-                    width={18}
-                    height={18}
-                    color={colors.saffron}
-                    strokeWidth={1.75}
-                  />
-                </View>
-                <View style={styles.flex}>
-                  <AppText variant="detail">{t.rhythm.slot(i + 1)}</AppText>
-                  <AppText style={styles.slotValue}>
-                    {t.rhythm.window(
-                      clock(t, slot.start),
-                      clock(t, slot.start + slot.minutes),
-                    )}
+                <View style={styles.slotTop}>
+                  <View style={styles.slotIcon}>
+                    <Icon
+                      width={18}
+                      height={18}
+                      color={colors.saffron}
+                      strokeWidth={1.75}
+                    />
+                  </View>
+                  <AppText variant="label" style={styles.slotLength}>
+                    {t.common.minutes(slot.minutes)}
                   </AppText>
                 </View>
-                <AppText variant="label" style={styles.slotLength}>
-                  {t.common.minutes(slot.minutes)}
+                <AppText variant="detail">{t.rhythm.slot(i + 1)}</AppText>
+                <AppText style={styles.slotValue}>
+                  {clock(t, slot.start)}
+                </AppText>
+                <AppText variant="detail">
+                  {t.rhythm.until(clock(t, slot.start + slot.minutes))}
                 </AppText>
               </Pressable>
             );
           })}
-        </View>
+        </PillRow>
         <AppText
           variant="detail"
           style={
@@ -266,19 +266,20 @@ const styles = StyleSheet.create({
   count: {
     gap: spacing.label,
   },
-  slots: {
-    gap: 10,
-  },
   slot: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    width: 148,
+    gap: 2,
+    padding: 14,
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: colors.saffron,
     backgroundColor: colors.saffronWash,
+  },
+  slotTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   slotIcon: {
     width: 36,
@@ -289,10 +290,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.white,
   },
   slotValue: {
-    marginTop: 2,
     fontFamily: fonts.sansMedium,
-    fontSize: 16,
-    lineHeight: 21,
+    fontSize: 20,
+    lineHeight: 26,
     color: colors.ink,
   },
   slotLength: {
