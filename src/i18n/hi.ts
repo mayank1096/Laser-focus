@@ -296,7 +296,8 @@ export const hi: Strings = {
   },
 
   mark: {
-    ofDeepWork: 'गहरा काम',
+    won: 'लक्ष्य भेद।',
+    wonSub: 'तीर निशाने पर लगा।',
     dayOf: (n: number) => `आपके दौर का दिन ${n}`,
     title: (n: number, what: string) => `सत्र ${n} · ${what}`,
     full: 'हो गया, पूरा नतीजा',

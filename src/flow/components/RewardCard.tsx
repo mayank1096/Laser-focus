@@ -17,7 +17,6 @@ import Animated, {
 import Check from '../../assets/icons/check.svg';
 import { AppText } from '../../components/AppText';
 import { GLASS_EDGE, GlassFill } from '../../components/Glass';
-import { sansDigits } from '../../components/Numerals';
 import { ShaderView } from '../../components/shader';
 import type { Mark } from '../../core/model';
 import { colors, fonts, springs, typography } from '../../theme';
@@ -52,9 +51,9 @@ export function RewardCard({
 }: {
   width: number;
   eyebrow: string;
-  /** The achievement, large: the time worked, e.g. "2 h". */
+  /** The win, large: "Lakshya bhed." */
   headline: string;
-  /** Under it: "of deep work". */
+  /** Under it, one quiet line. */
   sub: string;
   /** At the foot of the card: where this sits in the run. */
   footer: string;
@@ -331,12 +330,8 @@ export function RewardCard({
               <Animated.Text style={[styles.eyebrow, softInkStyle]}>
                 {eyebrow}
               </Animated.Text>
-              <Animated.Text
-                style={[styles.headline, inkStyle]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                {sansDigits(headline)}
+              <Animated.Text style={[styles.headline, inkStyle]}>
+                {headline}
               </Animated.Text>
               <Animated.Text style={[styles.sub, softInkStyle]}>
                 {sub}
@@ -430,13 +425,13 @@ const styles = StyleSheet.create({
   },
   headline: {
     marginTop: 18,
-    fontFamily: fonts.sansMedium,
-    fontSize: 48,
-    lineHeight: 56,
-    letterSpacing: -1.5,
+    fontFamily: fonts.serif,
+    fontSize: 40,
+    lineHeight: 46,
+    letterSpacing: -0.8,
   },
   sub: {
-    marginTop: -6,
+    marginTop: 2,
     fontFamily: fonts.sans,
     fontSize: 15,
     lineHeight: 20,
@@ -456,7 +451,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 110,
+    paddingTop: 150,
   },
   target: {
     width: 88,
