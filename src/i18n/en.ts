@@ -104,8 +104,10 @@ export const en = {
     eyebrow: 'Values sheet',
     title: 'What do you want your final thoughts to be on your deathbed?',
     sub: 'Write it in past tense.',
-    hint: 'Keep what is true for you. Change the rest.',
+    hint: 'Add your own, or pick the ones true for you.',
     add: 'Add line',
+    addOwn: 'Add your own',
+    orChoose: 'or choose',
     template: [
       'I gave my parents a good life.',
       'I kept my word.',

@@ -45,8 +45,11 @@ describe('setup', () => {
     await press(tree, 'begin');
     expect(useProfile.getState().name).toBe('Rohan');
 
-    // 03 Values: the course's lines are already there
-    expect(useBook.getState().values.length).toBeGreaterThanOrEqual(3);
+    // 03 Values: choose three of the course's lines
+    for (const i of [0, 1, 2]) {
+      await press(tree, `value-pick-${i}`);
+    }
+    expect(useBook.getState().values.length).toBe(3);
     await press(tree, 'next-button');
 
     // 04 Goals: one goal is circled for you, so 05 is skipped

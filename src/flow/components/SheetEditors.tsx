@@ -4,6 +4,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { AppText } from '../../components/AppText';
 import { BottomSheet } from '../../components/BottomSheet';
 import { ListField } from '../../components/ListField';
+import { OptionCard } from '../../components/OptionCard';
 import { circledGoal, tasksForWeek, useBook } from '../../core/store';
 import { activeMilestones } from '../../core/home';
 import { Chip, ChipRow } from '../../components/Chip';
@@ -22,29 +23,72 @@ import { monthLabel } from '../../i18n/format';
 import { colors, motion, radii, spacing } from '../../theme';
 import type { ISODate } from '../../types/models';
 import { haptics } from '../../utils/haptics';
+import { createId } from '../../utils/id';
 import { MonthPickerSheet } from './MonthPickerSheet';
 import { SheetTitle } from './SheetTitle';
 
 /** How the lists draw: fields during setup, cards on the Action Book. */
 export const EditorAppearance = createContext<'field' | 'card'>('field');
 
-/** The values sheet: the course's lines, every one editable. */
+/**
+ * The values sheet: your own lines first, then the course's lines to choose
+ * from. Chosen lines are kept as written; only your own can be edited.
+ */
 export function ValuesEditor() {
   const appearance = useContext(EditorAppearance);
   const t = useT();
   const values = useBook(s => s.values);
   const setValues = useBook(s => s.setValues);
+  const template = t.values.template;
+  const own = values.filter(v => !template.includes(v.text));
+  const save = (nextOwn: typeof values, picked: string[]) => {
+    const chosen = template
+      .filter(text => picked.includes(text))
+      .map(
+        text =>
+          values.find(v => v.text === text) ?? { id: createId('value'), text },
+      );
+    setValues([...nextOwn, ...chosen]);
+  };
+  const picked = values.map(v => v.text).filter(x => template.includes(x));
   return (
-    <ListField
-      appearance={appearance}
-      testID="values-list"
-      items={values}
-      onChange={setValues}
-      max={15}
-      min={LIMITS.values.min}
-      addLabel={t.values.add}
-      idPrefix="value"
-    />
+    <View style={styles.gap}>
+      <ListField
+        appearance={appearance}
+        testID="values-list"
+        items={own}
+        onChange={next => save(next, picked)}
+        max={15}
+        addLabel={t.values.addOwn}
+        idPrefix="value"
+      />
+      <View style={styles.divider}>
+        <View style={styles.rule} />
+        <AppText variant="label" style={styles.muted}>
+          {t.values.orChoose}
+        </AppText>
+        <View style={styles.rule} />
+      </View>
+      <View style={styles.options}>
+        {template.map((text, i) => {
+          const on = picked.includes(text);
+          return (
+            <OptionCard
+              key={text}
+              testID={`value-pick-${i}`}
+              title={text}
+              selected={on}
+              onPress={() =>
+                save(
+                  own,
+                  on ? picked.filter(x => x !== text) : [...picked, text],
+                )
+              }
+            />
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -401,6 +445,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.hairline,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  rule: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
   },
   optionOn: {
     borderColor: colors.saffron,

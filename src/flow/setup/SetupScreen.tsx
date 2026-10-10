@@ -14,7 +14,6 @@ import { circledGoal, useBook, type BookState } from '../../core/store';
 import { useT, type Strings } from '../../i18n';
 import type { RootScreenProps } from '../../navigation/types';
 import { colors, spacing } from '../../theme';
-import { createId } from '../../utils/id';
 import { haptics } from '../../utils/haptics';
 import { RhythmEditor } from '../components/RhythmEditor';
 import {
@@ -94,17 +93,6 @@ export function SetupScreen({ navigation, route }: RootScreenProps<'Setup'>) {
   const [index, setIndex] = useState(startAt);
   const [direction, setDirection] = useState<FlowDirection>('forward');
   const step = steps[index];
-
-  // First visit: the course's twelve values, ready to edit.
-  useEffect(() => {
-    if (step === 'values' && !useBook.getState().values.length) {
-      useBook
-        .getState()
-        .setValues(
-          t.values.template.map(text => ({ id: createId('value'), text })),
-        );
-    }
-  }, [step, t]);
 
   // Remember the sheet, so Home brings an unfinished setup back here.
   useEffect(() => {
